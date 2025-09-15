@@ -9,6 +9,7 @@ import { getCategoryIcon } from "@/lib/categories";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { type ExpenseWithCategory } from "@shared/schema";
+import { EditExpenseModal } from "@/components/edit-expense-modal";
 
 export function RecentExpenses() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -179,14 +180,16 @@ export function RecentExpenses() {
                       -{formatCurrency(expense.amount)}
                     </p>
                     <div className="flex space-x-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="p-1 h-8 w-8"
-                        data-testid={`button-edit-expense-${expense.id}`}
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </Button>
+                      <EditExpenseModal expense={expense}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="p-1 h-8 w-8"
+                          data-testid={`button-edit-expense-${expense.id}`}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                      </EditExpenseModal>
                       <Button
                         size="sm"
                         variant="ghost"
