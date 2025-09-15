@@ -15,7 +15,7 @@ export function RecentExpenses() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: expenses, isLoading } = useQuery({
+  const { data: expenses, isLoading } = useQuery<ExpenseWithCategory[]>({
     queryKey: ["/api/expenses"],
   });
 
@@ -78,7 +78,7 @@ export function RecentExpenses() {
     }).format(parseFloat(amount));
   };
 
-  const filteredExpenses = expenses?.filter((expense) =>
+  const filteredExpenses = expenses?.filter((expense: ExpenseWithCategory) =>
     expense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
     expense.category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -138,7 +138,7 @@ export function RecentExpenses() {
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredExpenses.slice(0, 10).map((expense) => {
+            {filteredExpenses.slice(0, 10).map((expense: ExpenseWithCategory) => {
               const Icon = getCategoryIcon(expense.category.icon);
               return (
                 <div

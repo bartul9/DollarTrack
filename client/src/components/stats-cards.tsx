@@ -1,15 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingDown, Calendar, CalendarDays, Tag } from "lucide-react";
+import { type Category } from "@shared/schema";
 
 interface StatsCardsProps {}
 
 export function StatsCards({}: StatsCardsProps) {
-  const { data: summary, isLoading } = useQuery({
+  const { data: summary, isLoading } = useQuery<{
+    total: number;
+    monthly: number;
+    weekly: number;
+  }>({
     queryKey: ["/api/analytics/summary"],
   });
 
-  const { data: categories } = useQuery({
+  const { data: categories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
 

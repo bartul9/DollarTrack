@@ -1,9 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCategoryIcon } from "@/lib/categories";
+import { type Category } from "@shared/schema";
 
 export function CategoryBreakdown() {
-  const { data: breakdown, isLoading } = useQuery({
+  const { data: breakdown, isLoading } = useQuery<Array<{
+    category: Category;
+    amount: number;
+    percentage: number;
+  }>>({
     queryKey: ["/api/analytics/categories"],
   });
 
@@ -48,7 +53,7 @@ export function CategoryBreakdown() {
           </div>
         ) : (
           <div className="space-y-4">
-            {breakdown.slice(0, 5).map((item) => {
+            {breakdown.slice(0, 5).map((item: { category: Category; amount: number; percentage: number }) => {
               const Icon = getCategoryIcon(item.category.icon);
               return (
                 <div

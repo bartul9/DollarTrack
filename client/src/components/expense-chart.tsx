@@ -2,9 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart3 } from "lucide-react";
+import { type ExpenseWithCategory } from "@shared/schema";
 
 export function ExpenseChart() {
-  const { data: expenses, isLoading } = useQuery({
+  const { data: expenses, isLoading } = useQuery<ExpenseWithCategory[]>({
     queryKey: ["/api/expenses"],
   });
 

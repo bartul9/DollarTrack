@@ -7,16 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { AddExpenseModal } from "@/components/add-expense-modal";
 import { Search, Plus, Filter } from "lucide-react";
 import { getCategoryIcon } from "@/lib/categories";
-import { type ExpenseWithCategory } from "@shared/schema";
+import { type ExpenseWithCategory, type Category } from "@shared/schema";
 
 export default function Expenses() {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: expenses, isLoading } = useQuery({
+  const { data: expenses, isLoading } = useQuery<ExpenseWithCategory[]>({
     queryKey: ["/api/expenses"],
   });
 
-  const { data: categories } = useQuery({
+  const { data: categories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
 
@@ -36,13 +36,13 @@ export default function Expenses() {
     }).format(parseFloat(amount));
   };
 
-  const filteredExpenses = expenses?.filter((expense) =>
+  const filteredExpenses = expenses?.filter((expense: ExpenseWithCategory) =>
     expense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
     expense.category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const totalAmount = filteredExpenses?.reduce(
-    (sum, expense) => sum + parseFloat(expense.amount),
+    (sum: number, expense: ExpenseWithCategory) => sum + parseFloat(expense.amount),
     0
   ) || 0;
 
@@ -143,7 +143,7 @@ export default function Expenses() {
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredExpenses.map((expense) => {
+              {filteredExpenses.map((expense: ExpenseWithCategory) => {
                 const Icon = getCategoryIcon(expense.category.icon);
                 return (
                   <div

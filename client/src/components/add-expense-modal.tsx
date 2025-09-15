@@ -27,7 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
-import { insertExpenseSchema, type InsertExpense } from "@shared/schema";
+import { insertExpenseSchema, type InsertExpense, type Category } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -40,7 +40,7 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: categories } = useQuery({
+  const { data: categories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
 
@@ -50,7 +50,7 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
       amount: "",
       description: "",
       categoryId: "",
-      date: new Date().toISOString().split("T")[0],
+      date: new Date().toISOString().split("T")[0] as any,
     },
   });
 
@@ -144,7 +144,7 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories?.map((category) => (
+                      {categories?.map((category: Category) => (
                         <SelectItem
                           key={category.id}
                           value={category.id}
@@ -189,6 +189,7 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
                       type="date"
                       data-testid="input-date"
                       {...field}
+                      value={typeof field.value === 'string' ? field.value : field.value?.toISOString?.()?.split('T')[0] || ''}
                     />
                   </FormControl>
                   <FormMessage />
