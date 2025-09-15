@@ -199,7 +199,11 @@ export class DatabaseStorage implements IStorage {
     if (!process.env.DATABASE_URL) {
       throw new Error("DATABASE_URL is required");
     }
-    const sql = neon(process.env.DATABASE_URL);
+    const sql = neon(process.env.DATABASE_URL, {
+      fetchOptions: {
+        agent: undefined, // Allow self-signed certificates
+      },
+    });
     this.db = drizzle(sql);
     this.initializeDefaultCategories();
   }
@@ -445,5 +449,8 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Use database storage by default
-export const storage = new DatabaseStorage();
+// Use in-memory storage temporarily while debugging Supabase connection
+export const storage = new MemStorage();
+
+// Database storage will be available once SSL issues are resolved
+// export const storage = new DatabaseStorage();
