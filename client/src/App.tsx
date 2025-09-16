@@ -8,6 +8,7 @@ import { queryClient } from "./lib/queryClient";
 import Dashboard from "@/pages/dashboard";
 import Expenses from "@/pages/expenses";
 import Analytics from "@/pages/analytics";
+import Categories from "@/pages/categories";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/expenses" component={Expenses} />
       <Route path="/analytics" component={Analytics} />
+      <Route path="/categories" component={Categories} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
