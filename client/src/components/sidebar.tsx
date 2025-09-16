@@ -12,7 +12,6 @@ import {
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import { extractErrorMessage } from "@/lib/errors";
 import { useCurrentUser, currentUserQueryKey } from "@/hooks/use-current-user";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -29,9 +28,7 @@ export function Sidebar() {
   const { toast } = useToast();
 
   const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("POST", "/api/auth/logout");
-    },
+    mutationFn: async () => {},
     onSuccess: () => {
       queryClient.setQueryData(currentUserQueryKey, null);
       queryClient.clear();
@@ -103,7 +100,7 @@ export function Sidebar() {
           </div>
         </div>
         <p className="text-center text-xs text-muted-foreground">
-          {"\u00A9"} {currentYear} DollarTrack
+          {"\u00A9"} {new Date().getFullYear()} DollarTrack
         </p>
       </div>
 
@@ -118,10 +115,9 @@ export function Sidebar() {
             size="sm"
             className="w-full justify-center gap-2"
             onClick={() => logoutMutation.mutate()}
-            disabled={logoutMutation.isLoading}
           >
             <LogOut className="h-4 w-4" />
-            {logoutMutation.isLoading ? "Logging out..." : "Logout"}
+            {"Logout"}
           </Button>
         </div>
       ) : null}

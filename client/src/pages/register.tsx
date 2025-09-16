@@ -7,10 +7,16 @@ import { Link, useLocation } from "wouter";
 import { AlertCircle, Lock, Mail, User as UserIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import { extractErrorMessage } from "@/lib/errors";
 import { currentUserQueryKey } from "@/hooks/use-current-user";
 import { registerUserSchema, type PublicUser } from "@shared/schema";
@@ -19,7 +25,7 @@ const formSchema = registerUserSchema
   .extend({
     confirmPassword: z.string().min(8, "Please confirm your password"),
   })
-  .refine(values => values.password === values.confirmPassword, {
+  .refine((values) => values.password === values.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
@@ -46,16 +52,19 @@ export default function Register() {
 
   const mutation = useMutation({
     mutationFn: async (values: RegisterPayload) => {
-      const res = await apiRequest("POST", "/api/auth/register", values);
-      return (await res.json()) as PublicUser;
+      /*     const res = await apiRequest("POST", "/api/auth/register", values);
+      return (await res.json()) as PublicUser; */
     },
-    onSuccess: user => {
+    onSuccess: (user) => {
       queryClient.setQueryData(currentUserQueryKey, user);
-      toast({ title: "Account created", description: `Welcome to DollarTrack, ${user.name}!` });
+      toast({
+        title: "Account created",
+        description: `Welcome to DollarTrack, ${user.name}!`,
+      });
       setFormError(null);
       setLocation("/app");
     },
-    onError: error => {
+    onError: (error) => {
       setFormError(extractErrorMessage(error));
     },
   });
@@ -70,13 +79,24 @@ export default function Register() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-16">
       <Card className="w-full max-w-lg shadow-xl">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
-          <CardDescription>Get started with smarter money tracking in minutes.</CardDescription>
+          <CardTitle className="text-2xl font-bold">
+            Create your account
+          </CardTitle>
+          <CardDescription>
+            Get started with smarter money tracking in minutes.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)} noValidate>
+          <form
+            className="space-y-4"
+            onSubmit={form.handleSubmit(onSubmit)}
+            noValidate
+          >
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground" htmlFor="name">
+              <label
+                className="text-sm font-medium text-muted-foreground"
+                htmlFor="name"
+              >
                 Full name
               </label>
               <div className="relative">
@@ -90,12 +110,17 @@ export default function Register() {
                 />
               </div>
               {form.formState.errors.name ? (
-                <p className="text-sm font-medium text-destructive">{form.formState.errors.name.message}</p>
+                <p className="text-sm font-medium text-destructive">
+                  {form.formState.errors.name.message}
+                </p>
               ) : null}
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground" htmlFor="email">
+              <label
+                className="text-sm font-medium text-muted-foreground"
+                htmlFor="email"
+              >
                 Email address
               </label>
               <div className="relative">
@@ -110,12 +135,17 @@ export default function Register() {
                 />
               </div>
               {form.formState.errors.email ? (
-                <p className="text-sm font-medium text-destructive">{form.formState.errors.email.message}</p>
+                <p className="text-sm font-medium text-destructive">
+                  {form.formState.errors.email.message}
+                </p>
               ) : null}
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground" htmlFor="password">
+              <label
+                className="text-sm font-medium text-muted-foreground"
+                htmlFor="password"
+              >
                 Password
               </label>
               <div className="relative">
@@ -130,14 +160,21 @@ export default function Register() {
                 />
               </div>
               {form.formState.errors.password ? (
-                <p className="text-sm font-medium text-destructive">{form.formState.errors.password.message}</p>
+                <p className="text-sm font-medium text-destructive">
+                  {form.formState.errors.password.message}
+                </p>
               ) : (
-                <p className="text-xs text-muted-foreground">Use at least 8 characters, mixing letters and numbers.</p>
+                <p className="text-xs text-muted-foreground">
+                  Use at least 8 characters, mixing letters and numbers.
+                </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground" htmlFor="confirmPassword">
+              <label
+                className="text-sm font-medium text-muted-foreground"
+                htmlFor="confirmPassword"
+              >
                 Confirm password
               </label>
               <div className="relative">
@@ -152,7 +189,9 @@ export default function Register() {
                 />
               </div>
               {form.formState.errors.confirmPassword ? (
-                <p className="text-sm font-medium text-destructive">{form.formState.errors.confirmPassword.message}</p>
+                <p className="text-sm font-medium text-destructive">
+                  {form.formState.errors.confirmPassword.message}
+                </p>
               ) : null}
             </div>
 
@@ -163,7 +202,11 @@ export default function Register() {
               </div>
             ) : null}
 
-            <Button type="submit" className="w-full" disabled={mutation.isLoading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={mutation.isLoading}
+            >
               {mutation.isLoading ? "Creating account..." : "Create account"}
             </Button>
           </form>
@@ -172,11 +215,14 @@ export default function Register() {
           <div className="flex w-full items-center justify-between gap-2">
             <span>Already have an account?</span>
             <Link href="/login">
-              <a className="font-medium text-primary hover:underline">Sign in</a>
+              <a className="font-medium text-primary hover:underline">
+                Sign in
+              </a>
             </Link>
           </div>
           <p className="text-xs text-muted-foreground">
-            By creating an account you agree to our imaginary terms and promise to stay awesome.
+            By creating an account you agree to our imaginary terms and promise
+            to stay awesome.
           </p>
         </CardFooter>
       </Card>

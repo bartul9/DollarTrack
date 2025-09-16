@@ -7,10 +7,16 @@ import { AlertCircle, Lock, Mail } from "lucide-react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import { extractErrorMessage } from "@/lib/errors";
 import { currentUserQueryKey } from "@/hooks/use-current-user";
 import { loginSchema, type PublicUser } from "@shared/schema";
@@ -34,16 +40,19 @@ export default function Login() {
 
   const mutation = useMutation({
     mutationFn: async (values: LoginFormValues) => {
-      const res = await apiRequest("POST", "/api/auth/login", values);
-      return (await res.json()) as PublicUser;
+      /*   const res = await apiRequest("POST", "/api/auth/login", values);
+      return (await res.json()) as PublicUser; */
     },
-    onSuccess: user => {
+    onSuccess: (user) => {
       queryClient.setQueryData(currentUserQueryKey, user);
-      toast({ title: "Welcome back", description: `Good to see you, ${user.name}!` });
+      toast({
+        title: "Welcome back",
+        description: `Good to see you, ${user.name}!`,
+      });
       setFormError(null);
       setLocation("/app");
     },
-    onError: error => {
+    onError: (error) => {
       setFormError(extractErrorMessage(error));
     },
   });
@@ -58,12 +67,21 @@ export default function Login() {
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>Sign in to access your finance dashboard.</CardDescription>
+          <CardDescription>
+            Sign in to access your finance dashboard.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)} noValidate>
+          <form
+            className="space-y-4"
+            onSubmit={form.handleSubmit(onSubmit)}
+            noValidate
+          >
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground" htmlFor="email">
+              <label
+                className="text-sm font-medium text-muted-foreground"
+                htmlFor="email"
+              >
                 Email address
               </label>
               <div className="relative">
@@ -78,12 +96,17 @@ export default function Login() {
                 />
               </div>
               {form.formState.errors.email ? (
-                <p className="text-sm font-medium text-destructive">{form.formState.errors.email.message}</p>
+                <p className="text-sm font-medium text-destructive">
+                  {form.formState.errors.email.message}
+                </p>
               ) : null}
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground" htmlFor="password">
+              <label
+                className="text-sm font-medium text-muted-foreground"
+                htmlFor="password"
+              >
                 Password
               </label>
               <div className="relative">
@@ -98,7 +121,9 @@ export default function Login() {
                 />
               </div>
               {form.formState.errors.password ? (
-                <p className="text-sm font-medium text-destructive">{form.formState.errors.password.message}</p>
+                <p className="text-sm font-medium text-destructive">
+                  {form.formState.errors.password.message}
+                </p>
               ) : null}
             </div>
 
@@ -109,7 +134,11 @@ export default function Login() {
               </div>
             ) : null}
 
-            <Button type="submit" className="w-full" disabled={mutation.isLoading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={mutation.isLoading}
+            >
               {mutation.isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
@@ -118,12 +147,17 @@ export default function Login() {
           <div className="flex w-full items-center justify-between gap-2">
             <span>New to DollarTrack?</span>
             <Link href="/register">
-              <a className="font-medium text-primary hover:underline">Create an account</a>
+              <a className="font-medium text-primary hover:underline">
+                Create an account
+              </a>
             </Link>
           </div>
           <p className="text-xs text-muted-foreground">
-            Demo account: <span className="font-medium text-foreground">demo@dollartrack.app</span> / {" "}
-            <span className="font-medium text-foreground">Password123!</span>
+            Demo account:{" "}
+            <span className="font-medium text-foreground">
+              demo@dollartrack.app
+            </span>{" "}
+            / <span className="font-medium text-foreground">Password123!</span>
           </p>
         </CardFooter>
       </Card>
