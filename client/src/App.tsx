@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/sidebar";
 import { queryClient } from "./lib/queryClient";
 import Dashboard from "@/pages/dashboard";
 import Expenses from "@/pages/expenses";
+import Analytics from "@/pages/analytics";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -14,6 +15,8 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/expenses" component={Expenses} />
+      <Route path="/analytics" component={Analytics} />
+      {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
   );
@@ -22,7 +25,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
         <TooltipProvider>
           <div className="relative min-h-screen bg-gradient-to-br from-slate-100 via-white to-purple-100 text-foreground transition-colors duration-500 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
             <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
