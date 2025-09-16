@@ -28,7 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import { insertExpenseSchema, type InsertExpense, type Category } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import { fetchCategories, createExpense } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddExpenseModalProps {
@@ -41,7 +41,8 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
   const { toast } = useToast();
 
   const { data: categories } = useQuery<Category[]>({
-    queryKey: ["/api/categories"],
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
   });
 
   const form = useForm<InsertExpense>({
@@ -56,12 +57,12 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
 
   const addExpenseMutation = useMutation({
     mutationFn: async (data: InsertExpense) => {
-      const response = await apiRequest("POST", "/api/expenses", data);
-      return response.json();
+      return await createExpense(data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/expenses"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics-categories"] });
       form.reset();
       setOpen(false);
       toast({
@@ -86,18 +87,17 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {children || (
-          <Button
-            className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center space-x-2 font-medium"
-            data-testid="button-add-expense"
-          >
-            <Plus className="w-5 h-5" />
+          <Button className="gap-2" data-testid="button-add-expense">
+            <Plus className="h-5 w-5" />
             <span>Add Expense</span>
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg rounded-3xl border border-white/40 bg-gradient-to-br from-white/95 to-white/80 p-8 shadow-xl backdrop-blur-2xl dark:border-white/10 dark:from-slate-900/95 dark:to-slate-900/80">
         <DialogHeader>
-          <DialogTitle>Add New Expense</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold">
+            Add New Expense
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -110,14 +110,14 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
                   <FormLabel>Amount</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <span className="absolute left-3 top-3 text-muted-foreground">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                         $
                       </span>
                       <Input
                         type="number"
                         step="0.01"
                         placeholder="0.00"
-                        className="pl-8"
+                        className="rounded-2xl border border-white/60 bg-white/85 pl-9 pr-4 dark:border-white/10 dark:bg-slate-900/70"
                         data-testid="input-amount"
                         {...field}
                       />
@@ -134,12 +134,9 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger data-testid="select-category">
+                      <SelectTrigger className="rounded-2xl border-white/60 bg-white/85 dark:border-white/10 dark:bg-slate-900/70" data-testid="select-category">
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                     </FormControl>
@@ -148,7 +145,9 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
                         <SelectItem
                           key={category.id}
                           value={category.id}
-                          data-testid={`option-category-${category.name.toLowerCase().replace(/\s+/g, '-')}`}
+                          data-testid={`option-category-${category.name
+                            .toLowerCase()
+                            .replace(/\s+/g, '-')}`}
                         >
                           {category.name}
                         </SelectItem>
@@ -169,6 +168,7 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
                   <FormControl>
                     <Input
                       placeholder="Enter expense description"
+                      className="rounded-2xl border border-white/60 bg-white/85 dark:border-white/10 dark:bg-slate-900/70"
                       data-testid="input-description"
                       {...field}
                     />
@@ -187,9 +187,14 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
                   <FormControl>
                     <Input
                       type="date"
+                      className="rounded-2xl border border-white/60 bg-white/85 dark:border-white/10 dark:bg-slate-900/70"
                       data-testid="input-date"
                       {...field}
-                      value={typeof field.value === 'string' ? field.value : field.value?.toISOString?.()?.split('T')[0] || ''}
+                      value={
+                        typeof field.value === "string"
+                          ? field.value
+                          : field.value?.toISOString?.()?.split("T")[0] || ""
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -197,7 +202,7 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
               )}
             />
 
-            <div className="flex space-x-4 pt-4">
+            <div className="flex gap-4 pt-4">
               <Button
                 type="button"
                 variant="outline"
@@ -210,7 +215,7 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
               <Button
                 type="submit"
                 disabled={addExpenseMutation.isPending}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:shadow-lg transition-all duration-200 font-medium"
+                className="flex-1"
                 data-testid="button-submit-expense"
               >
                 {addExpenseMutation.isPending ? "Adding..." : "Add Expense"}

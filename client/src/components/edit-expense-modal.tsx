@@ -26,8 +26,13 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { updateExpenseSchema, type UpdateExpense, type ExpenseWithCategory, type Category } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import {
+  updateExpenseSchema,
+  type UpdateExpense,
+  type ExpenseWithCategory,
+  type Category,
+} from "@shared/schema";
+import { fetchCategories, updateExpense } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 interface EditExpenseModalProps {
@@ -41,7 +46,8 @@ export function EditExpenseModal({ expense, children }: EditExpenseModalProps) {
   const { toast } = useToast();
 
   const { data: categories } = useQuery<Category[]>({
-    queryKey: ["/api/categories"],
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
   });
 
   const form = useForm<UpdateExpense>({
@@ -51,20 +57,21 @@ export function EditExpenseModal({ expense, children }: EditExpenseModalProps) {
       amount: expense.amount,
       description: expense.description,
       categoryId: expense.categoryId,
-      date: expense.date instanceof Date 
-        ? expense.date.toISOString().split("T")[0] as any
-        : new Date(expense.date).toISOString().split("T")[0] as any,
+      date:
+        expense.date instanceof Date
+          ? (expense.date.toISOString().split("T")[0] as any)
+          : (new Date(expense.date).toISOString().split("T")[0] as any),
     },
   });
 
   const updateExpenseMutation = useMutation({
     mutationFn: async (data: UpdateExpense) => {
-      const response = await apiRequest("PATCH", `/api/expenses/${expense.id}`, data);
-      return response.json();
+      return await updateExpense(data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/expenses"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics-categories"] });
       setOpen(false);
       toast({
         title: "Success",
@@ -86,12 +93,10 @@ export function EditExpenseModal({ expense, children }: EditExpenseModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="sm:max-w-lg rounded-3xl border border-white/40 bg-gradient-to-br from-white/95 to-white/80 p-8 shadow-xl backdrop-blur-2xl dark:border-white/10 dark:from-slate-900/95 dark:to-slate-900/80">
         <DialogHeader>
-          <DialogTitle>Edit Expense</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold">Edit Expense</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -104,14 +109,14 @@ export function EditExpenseModal({ expense, children }: EditExpenseModalProps) {
                   <FormLabel>Amount</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <span className="absolute left-3 top-3 text-muted-foreground">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                         $
                       </span>
                       <Input
                         type="number"
                         step="0.01"
                         placeholder="0.00"
-                        className="pl-8"
+                        className="rounded-2xl border border-white/60 bg-white/85 pl-9 pr-4 dark:border-white/10 dark:bg-slate-900/70"
                         data-testid="input-edit-amount"
                         {...field}
                       />
@@ -128,12 +133,9 @@ export function EditExpenseModal({ expense, children }: EditExpenseModalProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger data-testid="select-edit-category">
+                      <SelectTrigger className="rounded-2xl border-white/60 bg-white/85 dark:border-white/10 dark:bg-slate-900/70" data-testid="select-edit-category">
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                     </FormControl>
@@ -142,7 +144,9 @@ export function EditExpenseModal({ expense, children }: EditExpenseModalProps) {
                         <SelectItem
                           key={category.id}
                           value={category.id}
-                          data-testid={`option-edit-category-${category.name.toLowerCase().replace(/\s+/g, '-')}`}
+                          data-testid={`option-edit-category-${category.name
+                            .toLowerCase()
+                            .replace(/\s+/g, '-')}`}
                         >
                           {category.name}
                         </SelectItem>
@@ -163,6 +167,7 @@ export function EditExpenseModal({ expense, children }: EditExpenseModalProps) {
                   <FormControl>
                     <Input
                       placeholder="Enter expense description"
+                      className="rounded-2xl border border-white/60 bg-white/85 dark:border-white/10 dark:bg-slate-900/70"
                       data-testid="input-edit-description"
                       {...field}
                     />
@@ -181,9 +186,14 @@ export function EditExpenseModal({ expense, children }: EditExpenseModalProps) {
                   <FormControl>
                     <Input
                       type="date"
+                      className="rounded-2xl border border-white/60 bg-white/85 dark:border-white/10 dark:bg-slate-900/70"
                       data-testid="input-edit-date"
                       {...field}
-                      value={typeof field.value === 'string' ? field.value : field.value?.toISOString?.()?.split('T')[0] || ''}
+                      value={
+                        typeof field.value === "string"
+                          ? field.value
+                          : field.value?.toISOString?.()?.split("T")[0] || ""
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -191,7 +201,7 @@ export function EditExpenseModal({ expense, children }: EditExpenseModalProps) {
               )}
             />
 
-            <div className="flex space-x-4 pt-4">
+            <div className="flex gap-4 pt-4">
               <Button
                 type="button"
                 variant="outline"
@@ -204,7 +214,7 @@ export function EditExpenseModal({ expense, children }: EditExpenseModalProps) {
               <Button
                 type="submit"
                 disabled={updateExpenseMutation.isPending}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:shadow-lg transition-all duration-200 font-medium"
+                className="flex-1"
                 data-testid="button-submit-edit-expense"
               >
                 {updateExpenseMutation.isPending ? "Updating..." : "Update Expense"}

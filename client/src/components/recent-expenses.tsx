@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Edit2, Trash2 } from "lucide-react";
 import { getCategoryIcon } from "@/lib/categories";
-import { apiRequest } from "@/lib/queryClient";
+import { fetchExpenses, deleteExpense as deleteExpenseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { type ExpenseWithCategory } from "@shared/schema";
 import { EditExpenseModal } from "@/components/edit-expense-modal";
@@ -17,16 +17,18 @@ export function RecentExpenses() {
   const { toast } = useToast();
 
   const { data: expenses, isLoading } = useQuery<ExpenseWithCategory[]>({
-    queryKey: ["/api/expenses"],
+    queryKey: ["expenses"],
+    queryFn: fetchExpenses,
   });
 
   const deleteExpenseMutation = useMutation({
     mutationFn: async (expenseId: string) => {
-      await apiRequest("DELETE", `/api/expenses/${expenseId}`);
+      await deleteExpenseApi(expenseId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/expenses"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics-categories"] });
       toast({
         title: "Success",
         description: "Expense deleted successfully",
@@ -55,27 +57,30 @@ export function RecentExpenses() {
         minute: "2-digit",
         hour12: true,
       })}`;
-    } else if (isYesterday) {
+    }
+
+    if (isYesterday) {
       return `Yesterday, ${d.toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
         hour12: true,
       })}`;
-    } else {
-      return d.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      });
     }
+
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
   };
 
   const formatCurrency = (amount: string) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
+      minimumFractionDigits: 2,
     }).format(parseFloat(amount));
   };
 
@@ -92,43 +97,48 @@ export function RecentExpenses() {
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
+      <CardHeader className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div>
           <CardTitle>Recent Expenses</CardTitle>
-          <div className="flex space-x-2">
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Search expenses..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 w-64"
-                data-testid="input-search-expenses"
-              />
-              <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-3" />
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              data-testid="button-view-all-expenses"
-            >
-              View All
-            </Button>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Stay on top of your latest transactions
+          </p>
+        </div>
+        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+          <div className="relative w-full sm:w-72">
+            <Input
+              type="text"
+              placeholder="Search expenses..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-11"
+              data-testid="input-search-expenses"
+            />
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="rounded-full px-4"
+            data-testid="button-view-all-expenses"
+          >
+            View All
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="h-16 bg-muted rounded-lg"></div>
-              </div>
+              <div
+                key={i}
+                className="h-20 w-full animate-pulse rounded-2xl bg-white/50 backdrop-blur dark:bg-slate-900/60"
+              />
             ))}
           </div>
         ) : !filteredExpenses || filteredExpenses.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">
+          <div className="space-y-3 py-12 text-center">
+            <p className="text-base font-semibold text-foreground">
               {searchQuery ? "No expenses match your search" : "No expenses found"}
             </p>
             <p className="text-sm text-muted-foreground">
@@ -144,61 +154,59 @@ export function RecentExpenses() {
               return (
                 <div
                   key={expense.id}
-                  className="expense-card flex items-center justify-between p-4 border border-border rounded-lg hover:shadow-md transition-all"
+                  className="expense-card flex items-center justify-between rounded-2xl border border-white/50 bg-white/75 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60"
                   data-testid={`expense-item-${expense.id}`}
                 >
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center gap-4">
                     <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: `${expense.category.color}20` }}
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl"
+                      style={{
+                        backgroundColor: `${expense.category.color}1a`,
+                        color: expense.category.color,
+                      }}
                     >
-                      <Icon
-                        className="w-5 h-5"
-                        style={{ color: expense.category.color }}
-                      />
+                      <Icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">
+                      <p className="text-base font-semibold text-foreground">
                         {expense.description}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                         {formatDate(expense.date)}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center gap-4">
                     <Badge
                       variant="secondary"
-                      style={{
-                        backgroundColor: `${expense.category.color}20`,
-                        color: expense.category.color,
-                      }}
+                      className="rounded-full border border-white/50 bg-white/70 px-3 py-1 text-xs font-semibold text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
+                      style={{ color: expense.category.color }}
                     >
                       {expense.category.name}
                     </Badge>
-                    <p className="font-semibold text-foreground">
+                    <p className="text-lg font-semibold text-foreground">
                       -{formatCurrency(expense.amount)}
                     </p>
-                    <div className="flex space-x-1">
+                    <div className="flex gap-1">
                       <EditExpenseModal expense={expense}>
                         <Button
-                          size="sm"
+                          size="icon"
                           variant="ghost"
-                          className="p-1 h-8 w-8"
+                          className="h-9 w-9 rounded-full"
                           data-testid={`button-edit-expense-${expense.id}`}
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <Edit2 className="h-4 w-4" />
                         </Button>
                       </EditExpenseModal>
                       <Button
-                        size="sm"
+                        size="icon"
                         variant="ghost"
-                        className="p-1 h-8 w-8 text-muted-foreground hover:text-destructive"
+                        className="h-9 w-9 rounded-full text-muted-foreground hover:text-destructive"
                         onClick={() => handleDeleteExpense(expense.id)}
                         disabled={deleteExpenseMutation.isPending}
                         data-testid={`button-delete-expense-${expense.id}`}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
