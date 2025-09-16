@@ -2,6 +2,7 @@ import { supabase } from "./supabase";
 import {
   type Category,
   type ExpenseWithCategory,
+  type InsertCategory,
   type InsertExpense,
   type UpdateExpense,
 } from "@shared/schema";
@@ -59,6 +60,45 @@ export async function fetchCategories(): Promise<Category[]> {
 
   if (error) throw error;
   return data ?? [];
+}
+
+export async function createCategory(data: InsertCategory): Promise<Category> {
+  const { data: inserted, error } = await supabase
+    .from("categories")
+    .insert({
+      name: data.name,
+      color: data.color,
+      icon: data.icon,
+    })
+    .select("id, name, color, icon")
+    .single();
+
+  if (error) throw error;
+  return inserted as Category;
+}
+
+export async function updateCategory(
+  id: string,
+  data: InsertCategory
+): Promise<Category> {
+  const { data: updated, error } = await supabase
+    .from("categories")
+    .update({
+      name: data.name,
+      color: data.color,
+      icon: data.icon,
+    })
+    .eq("id", id)
+    .select("id, name, color, icon")
+    .single();
+
+  if (error) throw error;
+  return updated as Category;
+}
+
+export async function deleteCategory(id: string): Promise<void> {
+  const { error } = await supabase.from("categories").delete().eq("id", id);
+  if (error) throw error;
 }
 
 export async function fetchExpenses(): Promise<ExpenseWithCategory[]> {
