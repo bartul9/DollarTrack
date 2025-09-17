@@ -11,6 +11,11 @@ import { useEffect } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { Sidebar } from "@/components/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { queryClient } from "./lib/queryClient";
 
 import Dashboard from "@/pages/dashboard";
@@ -27,6 +32,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { ExpenseFiltersProvider } from "@/hooks/use-expense-filters";
 import { ArrowRight } from "lucide-react";
 import { Button } from "./components/ui/button";
+import { ThemeToggle } from "./components/theme-toggle";
 
 /* ----------------- UI ----------------- */
 function LoadingScreen() {
@@ -76,19 +82,25 @@ function RedirectIfAuthed({ children }) {
 function ProtectedLayout() {
   // Shell for /app/*
   return (
-    <div className="relative min-h-screen overflow-hidden bg-transparent text-foreground transition-colors duration-500">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.16),_transparent_62%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.08),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.35),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.75),_transparent_70%)]" />
-      <div className="pointer-events-none absolute -left-36 top-24 h-[22rem] w-[22rem] rounded-full bg-primary/10 blur-3xl dark:bg-primary/25" />
-      <div className="pointer-events-none absolute right-[-18%] top-36 h-[26rem] w-[26rem] rounded-full bg-purple-200/40 blur-3xl dark:bg-purple-500/20" />
-      <div className="pointer-events-none absolute left-1/2 top-[70%] h-96 w-[36rem] -translate-x-1/2 rounded-[10rem] bg-gradient-to-r from-sky-200/30 via-primary/15 to-purple-200/30 blur-3xl dark:from-sky-500/20 dark:via-primary/20 dark:to-purple-500/25" />
-
+    <SidebarProvider>
       <Sidebar />
-      <main className="relative z-10 ml-0 flex min-h-screen flex-col px-6 pb-16 pt-5 transition-[margin] md:ml-72 md:px-10 lg:px-16">
-        <div className="mx-auto w-full max-w-7xl">
-          <Outlet />
+      <SidebarInset className="relative flex min-h-screen flex-1 overflow-hidden bg-transparent text-foreground transition-colors duration-500">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.16),_transparent_62%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.08),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.35),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.75),_transparent_70%)]" />
+        <div className="pointer-events-none absolute -left-36 top-24 h-[22rem] w-[22rem] rounded-full bg-primary/10 blur-3xl dark:bg-primary/25" />
+        <div className="pointer-events-none absolute right-[-18%] top-36 h-[26rem] w-[26rem] rounded-full bg-purple-200/40 blur-3xl dark:bg-purple-500/20" />
+        <div className="pointer-events-none absolute left-1/2 top-[70%] h-96 w-[36rem] -translate-x-1/2 rounded-[10rem] bg-gradient-to-r from-sky-200/30 via-primary/15 to-purple-200/30 blur-3xl dark:from-sky-500/20 dark:via-primary/20 dark:to-purple-500/25" />
+
+        <div className="relative z-10 flex min-h-screen w-full flex-col px-6 pb-16 pt-5 transition-[padding] md:px-10 lg:px-16">
+          <div className="flex items-center justify-between pb-6 md:hidden">
+            <SidebarTrigger className="h-11 w-11 rounded-2xl border border-white/60 bg-white/85 text-foreground shadow-sm hover:bg-white/95 dark:border-white/10 dark:bg-slate-900/70 dark:hover:bg-slate-900/60" />
+            <ThemeToggle className="h-11 w-11 border-white/70 bg-white/80 text-foreground shadow-none hover:bg-white/90 dark:border-white/20 dark:bg-slate-900/70 dark:hover:bg-slate-900/60" />
+          </div>
+          <div className="mx-auto w-full max-w-7xl flex-1">
+            <Outlet />
+          </div>
         </div>
-      </main>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 

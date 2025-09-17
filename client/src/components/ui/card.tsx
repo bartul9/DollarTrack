@@ -1,20 +1,44 @@
 import * as React from "react";
+import { HTMLMotionProps, motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-3xl border border-white/40 bg-card text-card-foreground shadow-lg shadow-black/5 transition-colors supports-[backdrop-filter:blur(0px)]:backdrop-blur-xl dark:border-white/10",
-      className
-    )}
-    {...props}
-  />
-));
+type CardProps = HTMLMotionProps<"div"> & {
+  disableAnimation?: boolean;
+};
+
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  (
+    {
+      className,
+      disableAnimation = false,
+      initial,
+      animate,
+      exit,
+      transition,
+      ...props
+    },
+    ref
+  ) => (
+    <motion.div
+      ref={ref}
+      layout
+      initial={disableAnimation ? false : initial ?? { opacity: 0, y: 20, scale: 0.98 }}
+      animate={disableAnimation ? animate : animate ?? { opacity: 1, y: 0, scale: 1 }}
+      exit={disableAnimation ? exit : exit ?? { opacity: 0, y: -12, scale: 0.98 }}
+      transition={
+        disableAnimation
+          ? transition
+          : transition ?? { duration: 0.45, ease: [0.16, 1, 0.3, 1] }
+      }
+      className={cn(
+        "will-change-auto rounded-3xl border border-white/40 bg-card text-card-foreground shadow-lg shadow-black/5 transition-colors supports-[backdrop-filter:blur(0px)]:backdrop-blur-xl dark:border-white/10",
+        className
+      )}
+      {...props}
+    />
+  )
+);
 Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<
