@@ -31,6 +31,7 @@ import {
   Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { fetchCategoryBreakdown, fetchExpenses, fetchExpensesSummary, type ExpensesSummary } from "@/lib/api";
 import { type ExpenseWithCategory } from "@shared/schema";
 
 type CategoryBreakdownItem = {
@@ -54,24 +55,23 @@ const formatCurrency = (amount: number) =>
   }).format(amount ?? 0);
 
 export default function Analytics() {
-  const { data: summary, isLoading: isSummaryLoading } = useQuery<{
-    total: number;
-    monthly: number;
-    weekly: number;
-  }>({
-    queryKey: ["/api/analytics/summary"],
+  const { data: summary, isLoading: isSummaryLoading } = useQuery<ExpensesSummary>({
+    queryKey: ["expenses", "summary"],
+    queryFn: fetchExpensesSummary,
   });
 
   const { data: expenses, isLoading: isExpensesLoading } = useQuery<
     ExpenseWithCategory[]
   >({
-    queryKey: ["/api/expenses"],
+    queryKey: ["expenses", "list"],
+    queryFn: fetchExpenses,
   });
 
   const { data: categoryBreakdown, isLoading: isBreakdownLoading } = useQuery<
     CategoryBreakdownItem[]
   >({
-    queryKey: ["/api/analytics/categories"],
+    queryKey: ["expenses", "categories"],
+    queryFn: fetchCategoryBreakdown,
   });
 
   const isLoading = isSummaryLoading || isExpensesLoading || isBreakdownLoading;
