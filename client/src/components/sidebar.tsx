@@ -7,7 +7,6 @@ import {
   LogOut,
   Settings,
   Sparkles,
-  BarChart3,
   AlbumIcon,
   ChevronLeft,
   ChevronRight,
@@ -79,24 +78,26 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     >
       <span className="pointer-events-none absolute inset-x-4 top-6 h-32 rounded-3xl bg-gradient-to-b from-primary/25 via-transparent to-transparent blur-3xl dark:from-primary/20" />
       <span className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-primary/10 via-transparent to-transparent blur-3xl dark:from-primary/20" />
-      <div className="relative flex h-full flex-col px-6 pb-6 pt-8">
+      <div
+        className={cn(
+          "relative flex h-full flex-col pb-6 pt-8 transition-all",
+          collapsed ? "px-4" : "px-6"
+        )}
+      >
         <div className="flex items-start justify-between gap-3">
-          <div className={cn("flex items-center gap-3", collapsed && "gap-0")}>
-            <div className={cn("transition-all", collapsed ? "text-center" : "text-left")}>
-              <h1
-                className={cn(
-                  "text-lg font-semibold text-foreground transition-all",
-                  collapsed && "text-base"
-                )}
-              >
-                DollarTrack
-              </h1>
-              {!collapsed ? (
+          <div className="flex items-center gap-3">
+            {collapsed ? (
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/60 bg-white/80 text-primary shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-900/70">
+                <Sparkles className="h-5 w-5" />
+              </div>
+            ) : (
+              <div className="transition-all">
+                <h1 className="text-lg font-semibold text-foreground">DollarTrack</h1>
                 <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
                   Smart finance
                 </p>
-              ) : null}
-            </div>
+              </div>
+            )}
           </div>
           <div className="hidden items-center gap-2 md:flex">
             <Tooltip disableHoverableContent>
@@ -146,8 +147,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     data-testid={`nav-link-${item.name.toLowerCase()}`}
                     aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "group flex items-center rounded-2xl px-4 py-3 text-sm font-medium transition-all",
-                      collapsed ? "justify-center gap-0" : "gap-3",
+                      "group flex items-center rounded-2xl text-sm font-medium transition-all",
+                      collapsed ? "justify-center gap-0 px-2 py-3" : "gap-3 px-4 py-3",
                       isActive
                         ? "bg-gradient-to-r from-primary via-primary/80 to-primary/60 text-white shadow-lg shadow-primary/30"
                         : "text-muted-foreground hover:bg-white/70 hover:text-foreground dark:hover:bg-white/10"
@@ -155,7 +156,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   >
                     <span
                       className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-xl border border-white/60 bg-white/80 text-primary shadow-sm backdrop-blur transition-all dark:border-white/10 dark:bg-slate-900/70",
+                        "flex h-11 w-11 items-center justify-center rounded-2xl border border-white/60 bg-white/80 text-primary shadow-sm backdrop-blur transition-all dark:border-white/10 dark:bg-slate-900/70",
                         isActive &&
                           "border-transparent bg-white/20 text-white shadow-none dark:bg-white/10"
                       )}
