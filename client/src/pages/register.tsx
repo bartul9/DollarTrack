@@ -106,31 +106,30 @@ export default function Register() {
       <div className="pointer-events-none absolute right-[-14rem] bottom-[-8rem] h-[24rem] w-[24rem] rounded-full bg-purple-200/45 blur-3xl animate-float-slower dark:bg-purple-600/25" />
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-12">
-        <header className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-              DollarTrack
-            </p>
-            <p className="text-sm text-muted-foreground/80">
-              Build a calmer relationship with money.
-            </p>
-          </div>
-          <ThemeToggle className="h-10 w-10 rounded-full border border-primary/20 bg-white/80 text-foreground shadow-sm backdrop-blur transition hover:border-primary/40 hover:shadow-md dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-100 dark:hover:bg-slate-900/70" />
-        </header>
-
         <div className="relative flex flex-1 items-center justify-center">
           <div className="pointer-events-none absolute -left-10 top-16 h-56 w-56 rounded-full bg-primary/10 blur-3xl dark:bg-primary/22" />
           <div className="pointer-events-none absolute right-2 bottom-0 h-64 w-64 rounded-full bg-purple-300/25 blur-3xl dark:bg-purple-500/20" />
           <Card className="relative w-full max-w-xl overflow-hidden border border-white/70 bg-white/85 shadow-[0_40px_125px_rgba(124,58,237,0.16)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/75">
             <span className="pointer-events-none absolute -top-24 right-[-6rem] h-40 w-40 rounded-full bg-primary/20 blur-3xl dark:bg-primary/25" />
             <CardHeader className="relative z-10 space-y-1">
-              <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
-              <CardDescription>Get started with smarter money tracking in minutes.</CardDescription>
+              <CardTitle className="text-2xl font-bold">
+                Create your account
+              </CardTitle>
+              <CardDescription>
+                Get started with smarter money tracking in minutes.
+              </CardDescription>
             </CardHeader>
             <CardContent className="relative z-10">
-              <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)} noValidate>
+              <form
+                className="space-y-4"
+                onSubmit={form.handleSubmit(onSubmit)}
+                noValidate
+              >
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground" htmlFor="name">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="name"
+                  >
                     Full name
                   </label>
                   <div className="relative">
@@ -144,12 +143,17 @@ export default function Register() {
                     />
                   </div>
                   {form.formState.errors.name ? (
-                    <p className="text-sm font-medium text-destructive">{form.formState.errors.name.message}</p>
+                    <p className="text-sm font-medium text-destructive">
+                      {form.formState.errors.name.message}
+                    </p>
                   ) : null}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground" htmlFor="email">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="email"
+                  >
                     Email address
                   </label>
                   <div className="relative">
@@ -164,12 +168,17 @@ export default function Register() {
                     />
                   </div>
                   {form.formState.errors.email ? (
-                    <p className="text-sm font-medium text-destructive">{form.formState.errors.email.message}</p>
+                    <p className="text-sm font-medium text-destructive">
+                      {form.formState.errors.email.message}
+                    </p>
                   ) : null}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground" htmlFor="password">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="password"
+                  >
                     Password
                   </label>
                   <div className="relative">
@@ -184,14 +193,21 @@ export default function Register() {
                     />
                   </div>
                   {form.formState.errors.password ? (
-                    <p className="text-sm font-medium text-destructive">{form.formState.errors.password.message}</p>
+                    <p className="text-sm font-medium text-destructive">
+                      {form.formState.errors.password.message}
+                    </p>
                   ) : (
-                    <p className="text-xs text-muted-foreground">Use at least 8 characters, mixing letters and numbers.</p>
+                    <p className="text-xs text-muted-foreground">
+                      Use at least 8 characters, mixing letters and numbers.
+                    </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground" htmlFor="confirmPassword">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="confirmPassword"
+                  >
                     Confirm password
                   </label>
                   <div className="relative">
@@ -206,7 +222,9 @@ export default function Register() {
                     />
                   </div>
                   {form.formState.errors.confirmPassword ? (
-                    <p className="text-sm font-medium text-destructive">{form.formState.errors.confirmPassword.message}</p>
+                    <p className="text-sm font-medium text-destructive">
+                      {form.formState.errors.confirmPassword.message}
+                    </p>
                   ) : null}
                 </div>
 
@@ -217,8 +235,14 @@ export default function Register() {
                   </div>
                 ) : null}
 
-                <Button type="submit" className="w-full rounded-full shadow-md shadow-primary/20" disabled={mutation.isLoading}>
-                  {mutation.isLoading ? "Creating account..." : "Create account"}
+                <Button
+                  type="submit"
+                  className="w-full rounded-full shadow-md shadow-primary/20"
+                  disabled={mutation.isLoading}
+                >
+                  {mutation.isLoading
+                    ? "Creating account..."
+                    : "Create account"}
                 </Button>
               </form>
             </CardContent>
@@ -226,11 +250,14 @@ export default function Register() {
               <div className="flex w-full items-center justify-between gap-2">
                 <span>Already have an account?</span>
                 <Link href="/login">
-                  <a className="font-medium text-primary hover:underline">Sign in</a>
+                  <a className="font-medium text-primary hover:underline">
+                    Sign in
+                  </a>
                 </Link>
               </div>
               <p className="text-xs text-muted-foreground">
-                By creating an account you agree to our imaginary terms and promise to stay awesome.
+                By creating an account you agree to our imaginary terms and
+                promise to stay awesome.
               </p>
             </CardFooter>
           </Card>
@@ -238,5 +265,4 @@ export default function Register() {
       </div>
     </div>
   );
-
 }

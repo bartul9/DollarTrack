@@ -83,18 +83,6 @@ export default function Login() {
       <div className="pointer-events-none absolute right-[-12rem] bottom-[-8rem] h-[22rem] w-[22rem] rounded-full bg-purple-200/45 blur-3xl animate-float-slower dark:bg-purple-600/25" />
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-12">
-        <header className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-              DollarTrack
-            </p>
-            <p className="text-sm text-muted-foreground/80">
-              Smart finance for everyday life.
-            </p>
-          </div>
-          <ThemeToggle className="h-10 w-10 rounded-full border border-primary/20 bg-white/80 text-foreground shadow-sm backdrop-blur transition hover:border-primary/40 hover:shadow-md dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-100 dark:hover:bg-slate-900/70" />
-        </header>
-
         <div className="relative flex flex-1 items-center justify-center">
           <div className="pointer-events-none absolute -left-6 top-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl dark:bg-primary/20" />
           <div className="pointer-events-none absolute right-0 bottom-4 h-60 w-60 rounded-full bg-purple-300/20 blur-3xl dark:bg-purple-500/20" />
@@ -102,12 +90,21 @@ export default function Login() {
             <span className="pointer-events-none absolute -top-20 right-[-4rem] h-36 w-36 rounded-full bg-primary/20 blur-3xl dark:bg-primary/25" />
             <CardHeader className="relative z-10 space-y-1">
               <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-              <CardDescription>Sign in to access your finance dashboard.</CardDescription>
+              <CardDescription>
+                Sign in to access your finance dashboard.
+              </CardDescription>
             </CardHeader>
             <CardContent className="relative z-10">
-              <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)} noValidate>
+              <form
+                className="space-y-4"
+                onSubmit={form.handleSubmit(onSubmit)}
+                noValidate
+              >
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground" htmlFor="email">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="email"
+                  >
                     Email address
                   </label>
                   <div className="relative">
@@ -129,7 +126,10 @@ export default function Login() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground" htmlFor="password">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="password"
+                  >
                     Password
                   </label>
                   <div className="relative">
@@ -170,12 +170,21 @@ export default function Login() {
               <div className="flex w-full items-center justify-between gap-2">
                 <span>New to DollarTrack?</span>
                 <Link href="/register">
-                  <a className="font-medium text-primary hover:underline">Create an account</a>
+                  <a className="font-medium text-primary hover:underline">
+                    Create an account
+                  </a>
                 </Link>
               </div>
               <p className="text-xs text-muted-foreground">
-                Demo account: <span className="font-medium text-foreground">demo@dollartrack.app</span> /
-                <span className="font-medium text-foreground"> Password123!</span>
+                Demo account:{" "}
+                <span className="font-medium text-foreground">
+                  demo@dollartrack.app
+                </span>{" "}
+                /
+                <span className="font-medium text-foreground">
+                  {" "}
+                  Password123!
+                </span>
               </p>
             </CardFooter>
           </Card>
@@ -183,5 +192,4 @@ export default function Login() {
       </div>
     </div>
   );
-
 }
