@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,7 +19,10 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { extractErrorMessage } from "@/lib/errors";
 import { supabase } from "@/lib/supabase";
-import { currentUserQueryKey, supabaseUserToPublicUser } from "@/hooks/use-current-user";
+import {
+  currentUserQueryKey,
+  supabaseUserToPublicUser,
+} from "@/hooks/use-current-user";
 import { registerUserSchema } from "@shared/schema";
 
 const formSchema = registerUserSchema
@@ -68,7 +71,9 @@ export default function Register() {
       }
 
       if (!data.user || !data.session) {
-        throw new Error("Registration successful. Please confirm your email address before signing in.");
+        throw new Error(
+          "Registration successful. Please confirm your email address before signing in."
+        );
       }
 
       return supabaseUserToPublicUser(data.user);
@@ -94,157 +99,174 @@ export default function Register() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-16">
-      <Card className="w-full max-w-lg shadow-xl">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">
-            Create your account
-          </CardTitle>
-          <CardDescription>
-            Get started with smarter money tracking in minutes.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            className="space-y-4"
-            onSubmit={form.handleSubmit(onSubmit)}
-            noValidate
-          >
-            <div className="space-y-2">
-              <label
-                className="text-sm font-medium text-muted-foreground"
-                htmlFor="name"
-              >
-                Full name
-              </label>
-              <div className="relative">
-                <UserIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="name"
-                  placeholder="Alex Johnson"
-                  autoComplete="name"
-                  className="pl-10"
-                  {...form.register("name")}
-                />
-              </div>
-              {form.formState.errors.name ? (
-                <p className="text-sm font-medium text-destructive">
-                  {form.formState.errors.name.message}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="space-y-2">
-              <label
-                className="text-sm font-medium text-muted-foreground"
-                htmlFor="email"
-              >
-                Email address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@email.com"
-                  autoComplete="email"
-                  className="pl-10"
-                  {...form.register("email")}
-                />
-              </div>
-              {form.formState.errors.email ? (
-                <p className="text-sm font-medium text-destructive">
-                  {form.formState.errors.email.message}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="space-y-2">
-              <label
-                className="text-sm font-medium text-muted-foreground"
-                htmlFor="password"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="At least 8 characters"
-                  autoComplete="new-password"
-                  className="pl-10"
-                  {...form.register("password")}
-                />
-              </div>
-              {form.formState.errors.password ? (
-                <p className="text-sm font-medium text-destructive">
-                  {form.formState.errors.password.message}
-                </p>
-              ) : (
-                <p className="text-xs text-muted-foreground">
-                  Use at least 8 characters, mixing letters and numbers.
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <label
-                className="text-sm font-medium text-muted-foreground"
-                htmlFor="confirmPassword"
-              >
-                Confirm password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Repeat your password"
-                  autoComplete="new-password"
-                  className="pl-10"
-                  {...form.register("confirmPassword")}
-                />
-              </div>
-              {form.formState.errors.confirmPassword ? (
-                <p className="text-sm font-medium text-destructive">
-                  {form.formState.errors.confirmPassword.message}
-                </p>
-              ) : null}
-            </div>
-
-            {formError ? (
-              <div className="flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                <AlertCircle className="h-4 w-4" />
-                <span>{formError}</span>
-              </div>
-            ) : null}
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={mutation.isLoading}
-            >
-              {mutation.isLoading ? "Creating account..." : "Create account"}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col items-start gap-4 text-sm text-muted-foreground">
-          <div className="flex w-full items-center justify-between gap-2">
-            <span>Already have an account?</span>
-            <Link href="/login">
-              <a className="font-medium text-primary hover:underline">
-                Sign in
-              </a>
-            </Link>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 text-foreground transition-colors duration-500 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-12">
+        <header className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+              DollarTrack
+            </p>
+            <p className="text-sm text-muted-foreground/80">
+              Build a calmer relationship with money.
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground">
-            By creating an account you agree to our imaginary terms and promise
-            to stay awesome.
-          </p>
-        </CardFooter>
-      </Card>
+          <ThemeToggle className="h-10 w-10 border border-white/70 bg-white/85 text-foreground shadow-none hover:bg-white dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-100 dark:hover:bg-slate-900/70" />
+        </header>
+
+        <div className="flex flex-1 items-center justify-center">
+          <Card className="w-full max-w-lg border border-white/60 bg-white/85 shadow-xl backdrop-blur-lg dark:border-white/10 dark:bg-slate-900/70">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl font-bold">
+                Create your account
+              </CardTitle>
+              <CardDescription>
+                Get started with smarter money tracking in minutes.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form
+                className="space-y-4"
+                onSubmit={form.handleSubmit(onSubmit)}
+                noValidate
+              >
+                <div className="space-y-2">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="name"
+                  >
+                    Full name
+                  </label>
+                  <div className="relative">
+                    <UserIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="name"
+                      placeholder="Alex Johnson"
+                      autoComplete="name"
+                      className="pl-10"
+                      {...form.register("name")}
+                    />
+                  </div>
+                  {form.formState.errors.name ? (
+                    <p className="text-sm font-medium text-destructive">
+                      {form.formState.errors.name.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="space-y-2">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="email"
+                  >
+                    Email address
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@email.com"
+                      autoComplete="email"
+                      className="pl-10"
+                      {...form.register("email")}
+                    />
+                  </div>
+                  {form.formState.errors.email ? (
+                    <p className="text-sm font-medium text-destructive">
+                      {form.formState.errors.email.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="space-y-2">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="password"
+                  >
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="At least 8 characters"
+                      autoComplete="new-password"
+                      className="pl-10"
+                      {...form.register("password")}
+                    />
+                  </div>
+                  {form.formState.errors.password ? (
+                    <p className="text-sm font-medium text-destructive">
+                      {form.formState.errors.password.message}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Use at least 8 characters, mixing letters and numbers.
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="confirmPassword"
+                  >
+                    Confirm password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Repeat your password"
+                      autoComplete="new-password"
+                      className="pl-10"
+                      {...form.register("confirmPassword")}
+                    />
+                  </div>
+                  {form.formState.errors.confirmPassword ? (
+                    <p className="text-sm font-medium text-destructive">
+                      {form.formState.errors.confirmPassword.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                {formError ? (
+                  <div className="flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{formError}</span>
+                  </div>
+                ) : null}
+
+                <Button
+                  type="submit"
+                  className="w-full rounded-full"
+                  disabled={mutation.isLoading}
+                >
+                  {mutation.isLoading
+                    ? "Creating account..."
+                    : "Create account"}
+                </Button>
+              </form>
+            </CardContent>
+            <CardFooter className="flex flex-col items-start gap-4 text-sm text-muted-foreground">
+              <div className="flex w-full items-center justify-between gap-2">
+                <span>Already have an account?</span>
+                <Link href="/login">
+                  <a className="font-medium text-primary hover:underline">
+                    Sign in
+                  </a>
+                </Link>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                By creating an account you agree to our imaginary terms and
+                promise to stay awesome.
+              </p>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
-

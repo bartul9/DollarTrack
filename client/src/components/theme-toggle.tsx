@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { MoonStar, SunMedium } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-export function ThemeToggle() {
+interface ThemeToggleProps {
+  className?: string;
+}
+
+export function ThemeToggle({ className }: ThemeToggleProps) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -18,7 +23,7 @@ export function ThemeToggle() {
       type="button"
       variant="ghost"
       size="icon"
-      className="relative h-10 w-10 rounded-full border border-border/60 bg-white/60 text-foreground shadow-lg backdrop-blur-sm transition hover:scale-105 hover:bg-white/80 dark:bg-slate-900/60 dark:text-slate-100"
+      className={cn("relative h-10 w-10 rounded-full border border-border/60 bg-white/60 text-foreground shadow-lg backdrop-blur-sm transition hover:scale-105 hover:bg-white/80 dark:bg-slate-900/60 dark:text-slate-100", className)}
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label="Toggle theme"
       data-testid="button-toggle-theme"
@@ -28,3 +33,4 @@ export function ThemeToggle() {
     </Button>
   );
 }
+

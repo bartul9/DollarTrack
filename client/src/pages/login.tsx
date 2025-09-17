@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -19,8 +19,12 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { extractErrorMessage } from "@/lib/errors";
 import { supabase } from "@/lib/supabase";
-import { currentUserQueryKey, supabaseUserToPublicUser } from "@/hooks/use-current-user";
+import {
+  currentUserQueryKey,
+  supabaseUserToPublicUser,
+} from "@/hooks/use-current-user";
 import { loginSchema } from "@shared/schema";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const formSchema = loginSchema;
 type LoginFormValues = z.infer<typeof formSchema>;
@@ -73,105 +77,124 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-16">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>
-            Sign in to access your finance dashboard.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            className="space-y-4"
-            onSubmit={form.handleSubmit(onSubmit)}
-            noValidate
-          >
-            <div className="space-y-2">
-              <label
-                className="text-sm font-medium text-muted-foreground"
-                htmlFor="email"
-              >
-                Email address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@email.com"
-                  autoComplete="email"
-                  className="pl-10"
-                  {...form.register("email")}
-                />
-              </div>
-              {form.formState.errors.email ? (
-                <p className="text-sm font-medium text-destructive">
-                  {form.formState.errors.email.message}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="space-y-2">
-              <label
-                className="text-sm font-medium text-muted-foreground"
-                htmlFor="password"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  className="pl-10"
-                  {...form.register("password")}
-                />
-              </div>
-              {form.formState.errors.password ? (
-                <p className="text-sm font-medium text-destructive">
-                  {form.formState.errors.password.message}
-                </p>
-              ) : null}
-            </div>
-
-            {formError ? (
-              <div className="flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                <AlertCircle className="h-4 w-4" />
-                <span>{formError}</span>
-              </div>
-            ) : null}
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={mutation.isLoading}
-            >
-              {mutation.isLoading ? "Signing in..." : "Sign in"}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col items-start gap-4 text-sm text-muted-foreground">
-          <div className="flex w-full items-center justify-between gap-2">
-            <span>New to DollarTrack?</span>
-            <Link href="/register">
-              <a className="font-medium text-primary hover:underline">
-                Create an account
-              </a>
-            </Link>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 text-foreground transition-colors duration-500 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-12">
+        <header className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+              DollarTrack
+            </p>
+            <p className="text-sm text-muted-foreground/80">
+              Smart finance for everyday life.
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Demo account:{" "}
-            <span className="font-medium text-foreground">
-              demo@dollartrack.app
-            </span>{" "}
-            / <span className="font-medium text-foreground">Password123!</span>
-          </p>
-        </CardFooter>
-      </Card>
+          <ThemeToggle className="h-10 w-10 border border-white/70 bg-white/85 text-foreground shadow-none hover:bg-white dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-100 dark:hover:bg-slate-900/70" />
+        </header>
+
+        <div className="flex flex-1 items-center justify-center">
+          <Card className="w-full max-w-md border border-white/60 bg-white/85 shadow-xl backdrop-blur-lg dark:border-white/10 dark:bg-slate-900/70">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+              <CardDescription>
+                Sign in to access your finance dashboard.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form
+                className="space-y-4"
+                onSubmit={form.handleSubmit(onSubmit)}
+                noValidate
+              >
+                <div className="space-y-2">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="email"
+                  >
+                    Email address
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@email.com"
+                      autoComplete="email"
+                      className="pl-10"
+                      {...form.register("email")}
+                    />
+                  </div>
+                  {form.formState.errors.email ? (
+                    <p className="text-sm font-medium text-destructive">
+                      {form.formState.errors.email.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="space-y-2">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="password"
+                  >
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="At least 8 characters"
+                      autoComplete="current-password"
+                      className="pl-10"
+                      {...form.register("password")}
+                    />
+                  </div>
+                  {form.formState.errors.password ? (
+                    <p className="text-sm font-medium text-destructive">
+                      {form.formState.errors.password.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                {formError ? (
+                  <div className="flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{formError}</span>
+                  </div>
+                ) : null}
+
+                <Button
+                  type="submit"
+                  className="w-full rounded-full"
+                  disabled={mutation.isLoading}
+                >
+                  {mutation.isLoading ? "Signing in..." : "Sign in"}
+                </Button>
+              </form>
+            </CardContent>
+            <CardFooter className="flex flex-col items-start gap-4 text-sm text-muted-foreground">
+              <div className="flex w-full items-center justify-between gap-2">
+                <span>New to DollarTrack?</span>
+                <Link href="/register">
+                  <a className="font-medium text-primary hover:underline">
+                    Create an account
+                  </a>
+                </Link>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Demo account:{" "}
+                <span className="font-medium text-foreground">
+                  demo@dollartrack.app
+                </span>{" "}
+                /
+                <span className="font-medium text-foreground">
+                  {" "}
+                  Password123!
+                </span>
+              </p>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -30,6 +30,7 @@ import {
   CalendarRange,
   Activity,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { type ExpenseWithCategory } from "@shared/schema";
 
 type CategoryBreakdownItem = {
@@ -122,7 +123,8 @@ export default function Analytics() {
   const monthOverMonthChange = useMemo(() => {
     if (monthlyTrendData.length < 2) return null;
     const latest = monthlyTrendData[monthlyTrendData.length - 1]?.amount ?? 0;
-    const previous = monthlyTrendData[monthlyTrendData.length - 2]?.amount ?? 0;
+    const previous =
+      monthlyTrendData[monthlyTrendData.length - 2]?.amount ?? 0;
     if (previous === 0) return latest === 0 ? 0 : null;
     return ((latest - previous) / previous) * 100;
   }, [monthlyTrendData]);
@@ -156,9 +158,7 @@ export default function Analytics() {
 
     if (topCategory && topCategory.amount > 0) {
       items.push(
-        `${
-          topCategory.category.name
-        } accounts for ${topCategory.percentage.toFixed(
+        `${topCategory.category.name} accounts for ${topCategory.percentage.toFixed(
           1
         )}% of your total spending.`
       );
@@ -185,7 +185,7 @@ export default function Analytics() {
 
     if (monthlyExpenses > 0) {
       items.push(
-        `You're averaging ${formatCurrency(
+        `You are averaging ${formatCurrency(
           averagePerDayThisMonth
         )} per day this month.`
       );
@@ -193,7 +193,7 @@ export default function Analytics() {
 
     if (weeklyExpenses > 0) {
       items.push(
-        `In the last 7 days you've spent ${formatCurrency(weeklyExpenses)}.`
+        `In the last 7 days you have spent ${formatCurrency(weeklyExpenses)}.`
       );
     }
 
@@ -211,114 +211,243 @@ export default function Analytics() {
     weeklyExpenses,
   ]);
 
+  const latestMonthlyAmount =
+    monthlyTrendData[monthlyTrendData.length - 1]?.amount ?? 0;
+
+  const previousMonthlyAmount =
+    monthlyTrendData.length > 1
+      ? monthlyTrendData[monthlyTrendData.length - 2]?.amount ?? 0
+      : 0;
+
   const statsCards = [
     {
       title: "Total Spending",
       value: formatCurrency(totalExpenses),
-      subtext: `${totalTransactions} ${
+      meta: `${totalTransactions} ${
         totalTransactions === 1 ? "transaction" : "transactions"
       } recorded`,
       icon: Wallet,
-      trend:
+      accent: "from-rose-500/25 via-rose-400/10 to-transparent",
+      iconAccent: "text-rose-500 dark:text-rose-400",
+      pillValue:
         monthOverMonthChange !== null && monthOverMonthChange !== 0
-          ? `${
-              monthOverMonthChange > 0 ? "+" : ""
-            }${monthOverMonthChange.toFixed(1)}% vs last month`
-          : "Tracking overall spend",
-      trendColor:
+          ? `${monthOverMonthChange > 0 ? "+" : ""}${monthOverMonthChange.toFixed(
+              1
+            )}%`
+          : "N/A",
+      pillTone:
         monthOverMonthChange !== null
           ? monthOverMonthChange > 0
-            ? "text-red-600"
+            ? "text-rose-500 dark:text-rose-400"
             : monthOverMonthChange < 0
-            ? "text-emerald-600"
+            ? "text-emerald-500 dark:text-emerald-400"
             : "text-muted-foreground"
           : "text-muted-foreground",
+      pillDescription:
+        monthOverMonthChange !== null && monthOverMonthChange !== 0
+          ? "vs last month"
+          : "Tracking overall spend",
+      footnote:
+        latestMonthlyAmount > 0
+          ? `${formatCurrency(latestMonthlyAmount)} in the latest month`
+          : undefined,
     },
     {
       title: "Monthly Spend",
       value: formatCurrency(monthlyExpenses),
-      subtext: `Week-to-date: ${formatCurrency(weeklyExpenses)}`,
+      meta: `Week-to-date: ${formatCurrency(weeklyExpenses)}`,
       icon: CalendarRange,
-      trend: "Current month performance",
-      trendColor: "text-muted-foreground",
+      accent: "from-sky-500/25 via-sky-400/10 to-transparent",
+      iconAccent: "text-sky-500 dark:text-sky-400",
+      pillValue: formatCurrency(averagePerDayThisMonth),
+      pillTone: "text-sky-600 dark:text-sky-300",
+      pillDescription: "Average per day this month",
+      footnote:
+        previousMonthlyAmount > 0
+          ? `Previous month: ${formatCurrency(previousMonthlyAmount)}`
+          : undefined,
     },
     {
       title: "Average Transaction",
       value: formatCurrency(averageTransaction),
-      subtext:
+      meta:
         totalTransactions > 0
-          ? `Across ${totalTransactions} records`
+          ? `Across ${totalTransactions} ${
+              totalTransactions === 1 ? "record" : "records"
+            }`
           : "No transactions yet",
       icon: Activity,
-      trend:
-        totalTransactions > 0 ? "Healthy spending cadence" : "Waiting for data",
-      trendColor: "text-muted-foreground",
+      accent: "from-violet-500/25 via-violet-400/10 to-transparent",
+      iconAccent: "text-violet-500 dark:text-violet-400",
+      pillValue: highestExpense
+        ? formatCurrency(parseFloat(highestExpense.amount))
+        : "N/A",
+      pillTone: highestExpense
+        ? "text-violet-500 dark:text-violet-300"
+        : "text-muted-foreground",
+      pillDescription: highestExpense
+        ? "Largest purchase"
+        : "No large purchases yet",
+      footnote: highestExpense
+        ? `For ${highestExpense.description}`
+        : undefined,
     },
     {
       title: "Top Category",
       value: topCategory
         ? formatCurrency(topCategory.amount)
         : formatCurrency(0),
-      subtext: topCategory
-        ? `${topCategory.category.name} · ${topCategory.percentage.toFixed(1)}%`
+      meta: topCategory
+        ? `Top category: ${topCategory.category.name}`
         : "No category insights yet",
       icon: PieChart,
-      trend: topCategory ? "Leading category" : "Track spending to compare",
-      trendColor: "text-muted-foreground",
+      accent: "from-emerald-500/25 via-emerald-400/10 to-transparent",
+      iconAccent: "text-emerald-500 dark:text-emerald-400",
+      pillValue: topCategory ? `${topCategory.percentage.toFixed(1)}%` : "N/A",
+      pillTone: topCategory
+        ? "text-emerald-500 dark:text-emerald-300"
+        : "text-muted-foreground",
+      pillDescription: topCategory
+        ? "of total spend"
+        : "Track spending to compare",
+      categoryColor: topCategory?.category.color,
+      categoryLabel: topCategory
+        ? `${topCategory.category.name} is leading`
+        : undefined,
+      footnote:
+        totalExpenses > 0
+          ? `${formatCurrency(totalExpenses)} total across categories`
+          : undefined,
     },
   ];
 
   return (
-    <div className="p-8 space-y-8 animate-fade-in">
-      <header className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-foreground">Analytics</h2>
-          <p className="text-muted-foreground mt-1">
-            Dive deeper into your spending patterns and identify opportunities
-            to save.
-          </p>
+    <div className="relative space-y-10 pb-16">
+      <div className="pointer-events-none absolute inset-x-0 -top-32 h-72 bg-gradient-to-b from-primary/12 via-transparent to-transparent dark:from-primary/20" />
+      <div className="pointer-events-none absolute inset-x-16 bottom-0 h-72 rounded-[6rem] bg-gradient-to-r from-sky-300/15 via-primary/10 to-purple-300/15 blur-3xl dark:from-sky-500/20 dark:via-primary/15 dark:to-purple-500/20" />
+
+      <section className="relative overflow-hidden rounded-[2.25rem] border border-white/50 bg-gradient-to-br from-white/90 via-white/60 to-white/30 px-8 py-10 shadow-2xl shadow-primary/10 backdrop-blur-3xl transition-colors dark:border-white/10 dark:from-slate-900/90 dark:via-slate-900/60 dark:to-slate-900/30">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(14,116,144,0.18),_transparent_65%)] dark:bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.22),_transparent_70%)]" />
+        <div className="relative flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-5">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/70">
+              Insights overview
+            </span>
+            <div className="space-y-3">
+              <h2 className="text-4xl font-semibold text-foreground md:text-5xl">
+                Analytics
+              </h2>
+              <p className="max-w-xl text-sm text-muted-foreground">
+                Dive deeper into your spending patterns, compare periods, and uncover the habits shaping your budget.
+              </p>
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-white/60 bg-white/75 px-5 py-4 text-sm shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-900/65">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                This month
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-foreground">
+                {formatCurrency(monthlyExpenses)}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Averaging {formatCurrency(averagePerDayThisMonth)} per day
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/60 bg-white/75 px-5 py-4 text-sm shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-900/65">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                Largest purchase
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-foreground">
+                {highestExpense
+                  ? formatCurrency(parseFloat(highestExpense.amount))
+                  : formatCurrency(0)}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {highestExpense ? highestExpense.description : "No high-value expenses yet"}
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="text-sm text-muted-foreground">
-          Updated {format(new Date(), "MMM d, yyyy 'at' h:mma")}
+
+        <div className="relative mt-6 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
+            Updated {format(new Date(), "MMM d, yyyy 'at' h:mma")}
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
+            {totalTransactions} {totalTransactions === 1 ? "transaction" : "transactions"} tracked
+          </span>
         </div>
-      </header>
+      </section>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
-            <Card key={index} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="h-20 rounded-lg bg-muted" />
-              </CardContent>
-            </Card>
+            <Card
+              key={index}
+              className="h-40 animate-pulse rounded-[2rem] border-transparent bg-gradient-to-br from-white/80 via-white/50 to-white/30 dark:from-slate-900/70 dark:via-slate-900/45 dark:to-slate-900/30"
+            />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           {statsCards.map((stat) => {
             const Icon = stat.icon;
             return (
-              <Card key={stat.title} className="card-hover">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+              <Card
+                key={stat.title}
+                className={cn(
+                  "relative overflow-hidden border-transparent bg-gradient-to-br from-white/85 via-white/50 to-white/25 shadow-[0_28px_55px_rgba(14,116,144,0.12)] transition-all hover:-translate-y-0.5 hover:shadow-[0_32px_65px_rgba(14,116,144,0.16)] dark:from-slate-900/80 dark:via-slate-900/55 dark:to-slate-900/30",
+                  "card-hover"
+                )}
+              >
+                <span
+                  className={cn(
+                    "pointer-events-none absolute inset-0 bg-gradient-to-br opacity-80",
+                    stat.accent
+                  )}
+                />
+                <span className="pointer-events-none absolute inset-x-6 -top-6 h-24 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
+                <span className="pointer-events-none absolute inset-x-8 bottom-0 h-24 rounded-full bg-white/30 blur-3xl dark:bg-white/10" />
+                <CardContent className="relative z-10 space-y-6 px-6 py-6 sm:px-8">
+                  <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">
+                      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                         {stat.title}
                       </p>
-                      <p className="mt-2 text-3xl font-bold text-foreground">
-                        {stat.value}
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {stat.subtext}
-                      </p>
+                      <p className="mt-3 text-4xl font-semibold text-foreground">{stat.value}</p>
+                      {stat.meta ? (
+                        <p className="mt-2 text-xs text-muted-foreground">{stat.meta}</p>
+                      ) : null}
                     </div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                      <Icon className="h-6 w-6 text-primary" />
+                    <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/60 bg-white/80 shadow-inner shadow-primary/5 dark:border-white/10 dark:bg-slate-900/70">
+                      <span
+                        className={cn(
+                          "absolute inset-0 rounded-2xl bg-gradient-to-br opacity-80",
+                          stat.accent
+                        )}
+                      />
+                      <Icon className={cn("relative z-10 h-6 w-6", stat.iconAccent)} />
                     </div>
                   </div>
-                  <p className={`mt-4 text-sm font-medium ${stat.trendColor}`}>
-                    {stat.trend}
-                  </p>
+                  <div className="space-y-3 text-sm">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/75 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
+                      <span className={cn("font-semibold", stat.pillTone)}>{stat.pillValue}</span>
+                      <span>{stat.pillDescription}</span>
+                    </div>
+                    {stat.footnote ? (
+                      <p className="text-xs text-muted-foreground">{stat.footnote}</p>
+                    ) : null}
+                  </div>
+                  {stat.categoryColor ? (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span
+                        className="inline-flex h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: stat.categoryColor }}
+                      />
+                      <span>{stat.categoryLabel}</span>
+                    </div>
+                  ) : null}
                 </CardContent>
               </Card>
             );
@@ -326,38 +455,39 @@ export default function Analytics() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <Card className="xl:col-span-2">
-          <CardHeader>
-            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+      <div className="grid grid-cols-1 gap-8 xl:grid-cols-[1.65fr,1fr]">
+        <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/88 via-white/60 to-white/35 shadow-[0_24px_60px_rgba(14,116,144,0.14)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
+          <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
+          <CardHeader className="relative z-10">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <CardTitle>Spending Trend</CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Tracking the last 6 months of expenses
                 </p>
               </div>
-              {monthOverMonthChange !== null && (
+              {monthOverMonthChange !== null ? (
                 <div
-                  className={`text-sm font-medium ${
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 text-xs font-medium backdrop-blur dark:border-white/10 dark:bg-slate-900/60",
                     monthOverMonthChange > 0
-                      ? "text-red-600"
+                      ? "text-rose-500 dark:text-rose-400"
                       : monthOverMonthChange < 0
-                      ? "text-emerald-600"
+                      ? "text-emerald-500 dark:text-emerald-400"
                       : "text-muted-foreground"
-                  }`}
+                  )}
                 >
-                  {monthOverMonthChange > 0 && "↑"}
-                  {monthOverMonthChange < 0 && "↓"}
-                  {monthOverMonthChange === 0 && "→"}{" "}
-                  {monthOverMonthChange
-                    ? Math.abs(monthOverMonthChange).toFixed(1)
-                    : 0}
-                  % vs previous month
+                  <span>
+                    {`${monthOverMonthChange > 0 ? "+" : ""}${Math.abs(
+                      monthOverMonthChange
+                    ).toFixed(1)}%`}
+                  </span>
+                  <span className="text-muted-foreground">vs previous month</span>
                 </div>
-              )}
+              ) : null}
             </div>
           </CardHeader>
-          <CardContent className="h-[360px]">
+          <CardContent className="relative z-10 h-[360px]">
             {expenses && expenses.length > 0 ? (
               <ChartContainer
                 config={{
@@ -373,32 +503,13 @@ export default function Analytics() {
                   margin={{ top: 20, right: 24, left: 12, bottom: 0 }}
                 >
                   <defs>
-                    <linearGradient
-                      id="fillSpending"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="5%"
-                        stopColor="var(--color-amount)"
-                        stopOpacity={0.28}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor="var(--color-amount)"
-                        stopOpacity={0}
-                      />
+                    <linearGradient id="fillSpending" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--color-amount)" stopOpacity={0.28} />
+                      <stop offset="95%" stopColor="var(--color-amount)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    tickLine={false}
-                    axisLine={false}
-                    dy={8}
-                  />
+                  <XAxis dataKey="month" tickLine={false} axisLine={false} dy={8} />
                   <YAxis
                     tickLine={false}
                     axisLine={false}
@@ -406,11 +517,12 @@ export default function Analytics() {
                     width={80}
                   />
                   <ChartTooltip
-                    cursor={{ strokeDasharray: "4 4" }}
+                    cursor={{ fill: "rgba(148, 163, 184, 0.12)" }}
                     content={
                       <ChartTooltipContent
                         formatter={(value) => formatCurrency(Number(value))}
                         labelFormatter={(label) => `${label} spending`}
+                        indicator="dot"
                       />
                     }
                   />
@@ -432,48 +544,49 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/88 via-white/60 to-white/35 shadow-[0_24px_60px_rgba(14,116,144,0.12)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
+          <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
+          <CardHeader className="relative z-10 pb-3">
             <CardTitle>Performance Snapshot</CardTitle>
             <p className="text-sm text-muted-foreground">
               Key highlights from your current activity
             </p>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
+          <CardContent className="relative z-10 space-y-5 text-sm">
+            <div className="flex items-center justify-between rounded-2xl border border-white/60 bg-white/75 px-4 py-3 backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
               <div>
-                <p className="text-sm text-muted-foreground">Month to date</p>
-                <p className="text-2xl font-semibold text-foreground">
+                <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
+                  Month to date
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-foreground">
                   {formatCurrency(monthlyExpenses)}
                 </p>
               </div>
               <TrendingDown className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                Daily average this month
+              <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
+                Daily average
               </p>
-              <p className="text-lg font-medium text-foreground">
+              <p className="mt-2 text-lg font-medium text-foreground">
                 {formatCurrency(averagePerDayThisMonth)}
               </p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
                 Highest transaction
               </p>
-              <p className="text-lg font-medium text-foreground">
+              <p className="mt-2 text-lg font-medium text-foreground">
                 {highestExpense
-                  ? `${formatCurrency(parseFloat(highestExpense.amount))} · ${
-                      highestExpense.category.name
-                    }`
+                  ? `${formatCurrency(parseFloat(highestExpense.amount))} - ${highestExpense.category.name}`
                   : "No transactions yet"}
               </p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                Active categories tracked
+              <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
+                Active categories
               </p>
-              <p className="text-lg font-medium text-foreground">
+              <p className="mt-2 text-lg font-medium text-foreground">
                 {categoryBreakdown?.length ?? 0}
               </p>
             </div>
@@ -481,15 +594,16 @@ export default function Analytics() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <Card className="xl:col-span-2">
-          <CardHeader>
+      <div className="grid grid-cols-1 gap-8 xl:grid-cols-[2fr,1fr]">
+        <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/88 via-white/60 to-white/35 shadow-[0_24px_60px_rgba(14,116,144,0.12)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
+          <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
+          <CardHeader className="relative z-10">
             <CardTitle>Spending by Weekday</CardTitle>
             <p className="text-sm text-muted-foreground">
               Identify the days you spend the most
             </p>
           </CardHeader>
-          <CardContent className="h-[320px]">
+          <CardContent className="relative z-10 h-[320px]">
             {expenses && expenses.length > 0 ? (
               <ChartContainer
                 config={{
@@ -500,10 +614,7 @@ export default function Analytics() {
                 }}
                 className="h-full"
               >
-                <BarChart
-                  data={weekdaySpendingData}
-                  margin={{ top: 10, left: 12, right: 24 }}
-                >
+                <BarChart data={weekdaySpendingData} margin={{ top: 10, left: 12, right: 24 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="day" axisLine={false} tickLine={false} />
                   <YAxis
@@ -538,14 +649,15 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/88 via-white/60 to-white/35 shadow-[0_24px_60px_rgba(14,116,144,0.12)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
+          <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
+          <CardHeader className="relative z-10">
             <CardTitle>Category Distribution</CardTitle>
             <p className="text-sm text-muted-foreground">
               Top spending categories this month
             </p>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="relative z-10 space-y-4">
             {categoryBreakdown && categoryBreakdown.length > 0 ? (
               categoryBreakdown.slice(0, 5).map((item) => (
                 <div key={item.category.id} className="space-y-2">
@@ -578,14 +690,15 @@ export default function Analytics() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/88 via-white/60 to-white/35 shadow-[0_24px_60px_rgba(14,116,144,0.12)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
+        <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
+        <CardHeader className="relative z-10">
           <CardTitle>Insights</CardTitle>
           <p className="text-sm text-muted-foreground">
             Automatically generated tips based on your activity
           </p>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative z-10">
           <ul className="space-y-3">
             {insights.map((insight, index) => (
               <li key={index} className="flex items-start gap-3 text-sm">
