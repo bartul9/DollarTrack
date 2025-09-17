@@ -76,15 +76,17 @@ function ProtectedApp() {
         <Sidebar />
         <main className="relative z-10 ml-0 flex min-h-screen flex-col px-6 pb-16 pt-20 transition-[margin] md:ml-72 md:px-10 lg:px-16">
           <div className="mx-auto w-full max-w-7xl">
-            <Route path="/expenses" component={Expenses} />
-            <Route path="/" component={Dashboard} />
-            <Route path="/analytics" component={Analytics} />
-            <Route path="/categories" component={Categories} />
-            <Route path="/settings" component={Settings} />
-            <Route component={NotFound} />
+            <Switch>
+              <Route path="/expenses" component={Expenses} />
+              <Route path="/" component={Dashboard} />
+              <Route path="/analytics" component={Analytics} />
+              <Route path="/categories" component={Categories} />
+              <Route path="/settings" component={Settings} />
+              <Route component={NotFound} />
+            </Switch>
           </div>
         </main>
-      </div>{" "}
+      </div>
     </Router>
   );
 }
