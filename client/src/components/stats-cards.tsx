@@ -87,7 +87,7 @@ export function StatsCards({}: StatsCardsProps) {
         {Array.from({ length: 4 }).map((_, i) => (
           <Card
             key={i}
-            className="h-40 animate-pulse rounded-[2rem] border-transparent bg-gradient-to-br from-white/80 via-white/50 to-white/30 dark:from-slate-900/70 dark:via-slate-900/45 dark:to-slate-900/30"
+            className="h-44 animate-pulse rounded-[2.5rem] border-transparent bg-gradient-to-br from-white/75 via-white/45 to-white/20 dark:from-slate-900/75 dark:via-slate-900/45 dark:to-slate-900/25"
           />
         ))}
       </div>
@@ -172,7 +172,7 @@ export function StatsCards({}: StatsCardsProps) {
           <Card
             key={stat.title}
             className={cn(
-              "relative overflow-hidden border-transparent bg-gradient-to-br from-white/85 via-white/50 to-white/25 shadow-[0_28px_55px_rgba(124,58,237,0.14)] transition-all hover:translate-y-[-2px] hover:shadow-[0_32px_65px_rgba(124,58,237,0.18)] dark:from-slate-900/80 dark:via-slate-900/55 dark:to-slate-900/30",
+              "group relative overflow-hidden rounded-[2.75rem] border border-white/50 bg-gradient-to-br from-white/85 via-white/55 to-white/25 shadow-[0_35px_90px_rgba(124,58,237,0.16)] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_45px_120px_rgba(124,58,237,0.22)] dark:border-white/10 dark:from-slate-900/80 dark:via-slate-900/55 dark:to-slate-900/30",
               "card-hover"
             )}
           >
@@ -182,45 +182,45 @@ export function StatsCards({}: StatsCardsProps) {
                 stat.accent
               )}
             />
-            <span className="pointer-events-none absolute inset-x-6 -top-6 h-24 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
-            <span className="pointer-events-none absolute inset-x-8 bottom-0 h-24 rounded-full bg-white/30 blur-3xl dark:bg-white/10" />
-            <CardContent className="relative z-10 space-y-6 px-6 py-6 sm:px-8">
+            <span className="pointer-events-none absolute inset-x-6 -top-10 h-28 rounded-full bg-white/50 blur-3xl dark:bg-white/15" />
+            <span className="pointer-events-none absolute inset-x-10 bottom-0 h-28 rounded-full bg-white/35 blur-3xl dark:bg-white/15" />
+            <CardContent className="relative z-10 flex flex-col gap-8 px-8 py-8">
               <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
                     {stat.title}
                   </p>
                   <p
-                    className="mt-3 text-4xl font-semibold text-foreground"
+                    className="text-4xl font-semibold text-foreground md:text-[2.6rem] md:leading-none"
                     data-testid={stat.testId}
                   >
                     {stat.value}
                   </p>
                 </div>
-                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/60 bg-white/80 shadow-inner shadow-primary/10 dark:border-white/10 dark:bg-slate-900/70">
+                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.75rem] border border-white/60 bg-white/80 shadow-inner shadow-primary/10 transition-transform duration-300 ease-out group-hover:-translate-y-1 dark:border-white/10 dark:bg-slate-900/65">
                   <span
                     className={cn(
-                      "absolute inset-0 rounded-2xl bg-gradient-to-br opacity-80",
+                      "pointer-events-none absolute inset-0 rounded-[1.75rem] bg-gradient-to-br opacity-80",
                       stat.accent
                     )}
                   />
                   <Icon
                     className={cn(
-                      "relative z-10 h-6 w-6 shrink-0",
+                      "relative z-10 h-7 w-7 shrink-0",
                       stat.iconColor
                     )}
                   />
                 </div>
               </div>
               <div className="space-y-3 text-sm">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/75 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/75 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/55">
                   <span className={cn("font-semibold", stat.trendColor)}>
                     {stat.trendValue}
                   </span>
                   <span>{stat.trendDescriptor}</span>
                 </div>
                 {stat.meta ? (
-                  <p className="text-xs text-muted-foreground">{stat.meta}</p>
+                  <p className="text-xs text-muted-foreground/90">{stat.meta}</p>
                 ) : null}
               </div>
             </CardContent>

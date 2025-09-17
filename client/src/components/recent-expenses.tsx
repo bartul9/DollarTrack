@@ -144,7 +144,7 @@ export function RecentExpenses() {
   };
 
   return (
-    <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/90 via-white/55 to-white/30 shadow-[0_28px_60px_rgba(15,23,42,0.08)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
+    <Card className="relative flex h-full flex-col overflow-hidden border-transparent bg-gradient-to-br from-white/90 via-white/55 to-white/30 shadow-[0_28px_60px_rgba(15,23,42,0.08)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
       <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
       <span className="pointer-events-none absolute inset-x-12 bottom-0 h-32 rounded-full bg-white/30 blur-3xl dark:bg-white/10" />
       <CardHeader className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -176,7 +176,7 @@ export function RecentExpenses() {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="relative z-10">
+      <CardContent className="relative z-10 flex-1 space-y-4">
         {isLoading ? (
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
