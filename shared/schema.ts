@@ -1,5 +1,13 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, decimal, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  varchar,
+  decimal,
+  timestamp,
+  boolean,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -50,6 +58,26 @@ export const updateExpenseSchema = insertExpenseSchema.partial().extend({
   id: z.string(),
 });
 
+export const settings = pgTable("settings", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").notNull(),
+  currency: text("currency").notNull().default("USD"),
+  monthlyBudget: decimal("monthly_budget", { precision: 12, scale: 2 }),
+  notificationsEnabled: boolean("notifications_enabled").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+});
+
+export const insertSettingSchema = createInsertSchema(settings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateSettingSchema = insertSettingSchema.partial().extend({
+  id: z.string().optional(),
+});
+
 export const registerUserSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
@@ -77,3 +105,7 @@ export type Expense = typeof expenses.$inferSelect;
 export type ExpenseWithCategory = Expense & {
   category: Category;
 };
+
+export type InsertSetting = z.infer<typeof insertSettingSchema>;
+export type UpdateSetting = z.infer<typeof updateSettingSchema>;
+export type Setting = typeof settings.$inferSelect;

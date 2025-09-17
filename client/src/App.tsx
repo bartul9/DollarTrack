@@ -10,6 +10,7 @@ import Dashboard from "@/pages/dashboard";
 import Expenses from "@/pages/expenses";
 import Analytics from "@/pages/analytics";
 import Categories from "@/pages/categories";
+import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Login from "@/pages/login";
@@ -71,6 +72,7 @@ function ProtectedApp() {
             <Route path="/" component={Dashboard} />
             <Route path="/analytics" component={Analytics} />
             <Route path="/categories" component={Categories} />
+            <Route path="/settings" component={Settings} />
             <Route component={NotFound} />
           </Switch>
         </div>
