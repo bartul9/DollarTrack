@@ -30,21 +30,13 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { fetchSettings, saveSettings } from "@/lib/api";
 import { extractErrorMessage } from "@/lib/errors";
 import { PageLayout } from "@/components/page-layout";
 
-const currencyOptions = [
-  "USD",
-  "EUR",
-  "GBP",
-  "JPY",
-  "CAD",
-  "AUD",
-];
+const currencyOptions = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD"];
 
 const settingsFormSchema = z.object({
   currency: z.string().min(1, "Please select a currency"),
@@ -52,7 +44,8 @@ const settingsFormSchema = z.object({
     .string()
     .trim()
     .refine(
-      (value) => value === "" || (!Number.isNaN(Number(value)) && Number(value) >= 0),
+      (value) =>
+        value === "" || (!Number.isNaN(Number(value)) && Number(value) >= 0),
       "Monthly budget must be a positive number"
     ),
   notificationsEnabled: z.boolean(),
@@ -154,10 +147,7 @@ export default function Settings() {
       eyebrow="Personalize"
       title="Settings"
       description="Manage your account preferences and personalize your experience."
-      breadcrumbs={[
-        { label: "Dashboard", href: "/" },
-        { label: "Settings" },
-      ]}
+      breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: "Settings" }]}
       headerContent={
         settingsSummary ? (
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
@@ -166,7 +156,9 @@ export default function Settings() {
                 key={item.label}
                 className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
               >
-                <span className="font-semibold text-foreground">{item.label}:</span>
+                <span className="font-semibold text-foreground">
+                  {item.label}:
+                </span>
                 <span>{item.value}</span>
               </span>
             ))}
@@ -181,13 +173,16 @@ export default function Settings() {
               Preferences
             </CardTitle>
             <CardDescription>
-              Configure your default currency, budget goals, and notification settings.
+              Configure your default currency, budget goals, and notification
+              settings.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
+                onSubmit={form.handleSubmit((values) =>
+                  mutation.mutate(values)
+                )}
                 className="space-y-8"
               >
                 <FormField
@@ -240,7 +235,8 @@ export default function Settings() {
                         />
                       </FormControl>
                       <FormDescription>
-                        Leave blank if you do not want to track a monthly spending limit.
+                        Leave blank if you do not want to track a monthly
+                        spending limit.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -253,9 +249,12 @@ export default function Settings() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-2xl border border-white/60 bg-white/85 p-4 shadow-sm transition-colors dark:border-white/10 dark:bg-slate-900/70">
                       <div className="space-y-0.5 pr-4">
-                        <FormLabel className="text-base">Email notifications</FormLabel>
+                        <FormLabel className="text-base">
+                          Email notifications
+                        </FormLabel>
                         <FormDescription>
-                          Receive summaries and reminders to stay on top of your spending.
+                          Receive summaries and reminders to stay on top of your
+                          spending.
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -314,7 +313,6 @@ export default function Settings() {
                   Details from your profile and the latest preferences.
                 </CardDescription>
               </div>
-              <ThemeToggle className="h-10 w-10 border-white/60 bg-white/80 text-foreground shadow-none hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60" />
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -327,7 +325,10 @@ export default function Settings() {
               <Separator className="border-white/60 dark:border-white/10" />
               <div className="space-y-3">
                 {settingsSummary?.map((item) => (
-                  <div key={item.label} className="rounded-2xl border border-white/50 bg-white/70 p-3 dark:border-white/10 dark:bg-slate-900/60">
+                  <div
+                    key={item.label}
+                    className="rounded-2xl border border-white/50 bg-white/70 p-3 dark:border-white/10 dark:bg-slate-900/60"
+                  >
                     <p className="text-xs uppercase tracking-wide text-muted-foreground">
                       {item.label}
                     </p>
@@ -346,17 +347,18 @@ export default function Settings() {
                 Need help?
               </CardTitle>
               <CardDescription>
-                Adjusting your settings helps DollarTrack tailor insights for you.
+                Adjusting your settings helps DollarTrack tailor insights for
+                you.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-muted-foreground">
               <p>
-                Update your currency to match the accounts you monitor, and set a monthly
-                budget to keep spending aligned with your goals.
+                Update your currency to match the accounts you monitor, and set
+                a monthly budget to keep spending aligned with your goals.
               </p>
               <p>
-                Notifications keep you informed about spending spikes and summaries so you never
-                miss important trends.
+                Notifications keep you informed about spending spikes and
+                summaries so you never miss important trends.
               </p>
             </CardContent>
           </Card>

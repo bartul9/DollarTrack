@@ -1,4 +1,7 @@
-﻿import { useMemo } from "react";
+﻿// src/pages/analytics.jsx
+"use client";
+
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -7,15 +10,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   startOfMonth,
   endOfMonth,
@@ -32,87 +27,83 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PageLayout } from "@/components/page-layout";
-import { fetchCategoryBreakdown, fetchExpenses, fetchExpensesSummary, type ExpensesSummary } from "@/lib/api";
-import { type ExpenseWithCategory } from "@shared/schema";
+import {
+  fetchCategoryBreakdown,
+  fetchExpenses,
+  fetchExpensesSummary,
+} from "@/lib/api";
 
-type CategoryBreakdownItem = {
-  category: {
-    id: string;
-    name: string;
-    color: string;
-    icon: string;
-  };
-  amount: number;
-  percentage: number;
-};
+// ---- helpers ----------------------------------------------------------------
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const formatCurrency = (amount: number) =>
+const fmtMoney = (n) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 2,
-  }).format(amount ?? 0);
+  }).format(Number.isFinite(n) ? n : 0);
+
+// ---- page -------------------------------------------------------------------
 
 export default function Analytics() {
-  const { data: summary, isLoading: isSummaryLoading } = useQuery<ExpensesSummary>({
+  const { data: summary, isLoading: loadingSummary } = useQuery({
     queryKey: ["expenses", "summary"],
     queryFn: fetchExpensesSummary,
   });
 
-  const { data: expenses, isLoading: isExpensesLoading } = useQuery<
-    ExpenseWithCategory[]
-  >({
+  const { data: expenses, isLoading: loadingExpenses } = useQuery({
     queryKey: ["expenses", "list"],
     queryFn: fetchExpenses,
   });
 
-  const { data: categoryBreakdown, isLoading: isBreakdownLoading } = useQuery<
-    CategoryBreakdownItem[]
-  >({
+  const { data: categoryBreakdown, isLoading: loadingBreakdown } = useQuery({
     queryKey: ["expenses", "categories"],
     queryFn: fetchCategoryBreakdown,
   });
 
-  const isLoading = isSummaryLoading || isExpensesLoading || isBreakdownLoading;
+  const isLoading = loadingSummary || loadingExpenses || loadingBreakdown;
 
   const totalExpenses = summary?.total ?? 0;
   const monthlyExpenses = summary?.monthly ?? 0;
   const weeklyExpenses = summary?.weekly ?? 0;
   const totalTransactions = expenses?.length ?? 0;
 
-  const averageTransaction = useMemo(() => {
-    if (!expenses || expenses.length === 0) return 0;
-    return totalExpenses / expenses.length;
-  }, [expenses, totalExpenses]);
-
+  // highest expense
   const highestExpense = useMemo(() => {
-    if (!expenses || expenses.length === 0) return null;
-    return expenses.reduce((max, expense) =>
-      parseFloat(expense.amount) > parseFloat(max.amount) ? expense : max
+    if (!expenses?.length) return null;
+    return expenses.reduce((max, e) =>
+      parseFloat(e.amount) > parseFloat(max.amount) ? e : max
     );
   }, [expenses]);
 
-  const topCategory = categoryBreakdown?.[0] ?? null;
+  const averageTransaction = useMemo(() => {
+    if (!expenses?.length) return 0;
+    return totalExpenses / expenses.length;
+  }, [expenses, totalExpenses]);
 
+  // top category (ensure sorted)
+  const topCategory = useMemo(() => {
+    if (!categoryBreakdown?.length) return null;
+    const sorted = [...categoryBreakdown].sort((a, b) => b.amount - a.amount);
+    return sorted[0];
+  }, [categoryBreakdown]);
+
+  // last 6 months trend (for MoM calc)
   const monthlyTrendData = useMemo(() => {
     const now = new Date();
-    const months = Array.from({ length: 6 }, (_, index) =>
-      subMonths(now, 5 - index)
-    );
+    const months = Array.from({ length: 6 }, (_, i) => subMonths(now, 5 - i));
 
     return months.map((monthDate) => {
       const start = startOfMonth(monthDate);
       const end = endOfMonth(monthDate);
-
       const totalForMonth =
         expenses
-          ?.filter((expense) => {
-            const expenseDate = new Date(expense.date);
-            return expenseDate >= start && expenseDate <= end;
+          ?.filter((exp) => {
+            const d = new Date(exp.date);
+            return d >= start && d <= end;
           })
-          .reduce((sum, expense) => sum + parseFloat(expense.amount), 0) ?? 0;
+          .reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0) ?? 0;
 
       return {
         month: format(monthDate, "MMM"),
@@ -123,107 +114,96 @@ export default function Analytics() {
 
   const monthOverMonthChange = useMemo(() => {
     if (monthlyTrendData.length < 2) return null;
-    const latest = monthlyTrendData[monthlyTrendData.length - 1]?.amount ?? 0;
-    const previous =
-      monthlyTrendData[monthlyTrendData.length - 2]?.amount ?? 0;
-    if (previous === 0) return latest === 0 ? 0 : null;
-    return ((latest - previous) / previous) * 100;
+    const latest = monthlyTrendData.at(-1)?.amount ?? 0;
+    const prev = monthlyTrendData.at(-2)?.amount ?? 0;
+    if (prev === 0) return latest === 0 ? 0 : null; // avoid div by 0
+    return ((latest - prev) / prev) * 100;
   }, [monthlyTrendData]);
 
+  // weekday spending bars
   const weekdaySpendingData = useMemo(() => {
-    return weekdayLabels.map((label, index) => {
-      const totalForDay =
+    return weekdayLabels.map((label, idx) => {
+      const total =
         expenses
-          ?.filter((expense) => new Date(expense.date).getDay() === index)
-          .reduce((sum, expense) => sum + parseFloat(expense.amount), 0) ?? 0;
+          ?.filter((e) => new Date(e.date).getDay() === idx)
+          .reduce((s, e) => s + parseFloat(e.amount || 0), 0) ?? 0;
 
-      return {
-        day: label,
-        amount: Number(totalForDay.toFixed(2)),
-      };
+      return { day: label, amount: Number(total.toFixed(2)) };
     });
   }, [expenses]);
 
+  // month progress
   const daysElapsedThisMonth = useMemo(() => {
     const start = startOfMonth(new Date());
     return differenceInCalendarDays(new Date(), start) + 1;
   }, []);
 
-  const averagePerDayThisMonth = useMemo(() => {
+  const avgPerDayThisMonth = useMemo(() => {
     if (!monthlyExpenses) return 0;
     return monthlyExpenses / Math.max(daysElapsedThisMonth, 1);
   }, [monthlyExpenses, daysElapsedThisMonth]);
 
+  // textual insights
   const insights = useMemo(() => {
-    const items: string[] = [];
+    const out = [];
 
     if (topCategory && topCategory.amount > 0) {
-      items.push(
-        `${topCategory.category.name} accounts for ${topCategory.percentage.toFixed(
+      out.push(
+        `${
+          topCategory.category.name
+        } accounts for ${topCategory.percentage.toFixed(
           1
         )}% of your total spending.`
       );
     }
 
     if (highestExpense) {
-      items.push(
-        `Your largest purchase was ${formatCurrency(
-          parseFloat(highestExpense.amount)
-        )} for ${highestExpense.description}.`
-      );
+      const n = fmtMoney(parseFloat(highestExpense.amount));
+      const d = highestExpense.description || "an item";
+      out.push(`Your largest purchase was ${n} for ${d}.`);
     }
 
     if (monthOverMonthChange !== null) {
-      const changeValue = Math.abs(monthOverMonthChange).toFixed(1);
-      if (monthOverMonthChange > 0) {
-        items.push(`Spending is up ${changeValue}% compared to last month.`);
-      } else if (monthOverMonthChange < 0) {
-        items.push(`Spending is down ${changeValue}% compared to last month.`);
-      } else {
-        items.push("Spending is in line with last month.");
-      }
+      const delta = Math.abs(monthOverMonthChange).toFixed(1);
+      if (monthOverMonthChange > 0)
+        out.push(`Spending is up ${delta}% vs last month.`);
+      else if (monthOverMonthChange < 0)
+        out.push(`Spending is down ${delta}% vs last month.`);
+      else out.push("Spending is in line with last month.");
     }
 
     if (monthlyExpenses > 0) {
-      items.push(
-        `You are averaging ${formatCurrency(
-          averagePerDayThisMonth
-        )} per day this month.`
+      out.push(
+        `You are averaging ${fmtMoney(avgPerDayThisMonth)} per day this month.`
       );
     }
 
     if (weeklyExpenses > 0) {
-      items.push(
-        `In the last 7 days you have spent ${formatCurrency(weeklyExpenses)}.`
-      );
+      out.push(`Last 7 days total: ${fmtMoney(weeklyExpenses)}.`);
     }
 
-    if (items.length === 0) {
-      items.push("Add expenses to generate personalized insights.");
-    }
-
-    return items;
+    if (out.length === 0)
+      out.push("Add expenses to generate personalized insights.");
+    return out;
   }, [
     topCategory,
     highestExpense,
     monthOverMonthChange,
     monthlyExpenses,
-    averagePerDayThisMonth,
+    avgPerDayThisMonth,
     weeklyExpenses,
   ]);
 
-  const latestMonthlyAmount =
-    monthlyTrendData[monthlyTrendData.length - 1]?.amount ?? 0;
-
+  const latestMonthlyAmount = monthlyTrendData.at(-1)?.amount ?? 0;
   const previousMonthlyAmount =
-    monthlyTrendData.length > 1
-      ? monthlyTrendData[monthlyTrendData.length - 2]?.amount ?? 0
-      : 0;
+    monthlyTrendData.length > 1 ? monthlyTrendData.at(-2)?.amount ?? 0 : 0;
+
+  // ---- stat cards config -----------------------------------------------------
 
   const statsCards = [
     {
       title: "Total Spending",
-      value: formatCurrency(totalExpenses),
+      value: fmtMoney(totalExpenses),
       meta: `${totalTransactions} ${
         totalTransactions === 1 ? "transaction" : "transactions"
       } recorded`,
@@ -232,9 +212,9 @@ export default function Analytics() {
       iconAccent: "text-rose-500 dark:text-rose-400",
       pillValue:
         monthOverMonthChange !== null && monthOverMonthChange !== 0
-          ? `${monthOverMonthChange > 0 ? "+" : ""}${monthOverMonthChange.toFixed(
-              1
-            )}%`
+          ? `${
+              monthOverMonthChange > 0 ? "+" : ""
+            }${monthOverMonthChange.toFixed(1)}%`
           : "N/A",
       pillTone:
         monthOverMonthChange !== null
@@ -250,27 +230,27 @@ export default function Analytics() {
           : "Tracking overall spend",
       footnote:
         latestMonthlyAmount > 0
-          ? `${formatCurrency(latestMonthlyAmount)} in the latest month`
+          ? `${fmtMoney(latestMonthlyAmount)} in the latest month`
           : undefined,
     },
     {
       title: "Monthly Spend",
-      value: formatCurrency(monthlyExpenses),
-      meta: `Week-to-date: ${formatCurrency(weeklyExpenses)}`,
+      value: fmtMoney(monthlyExpenses),
+      meta: `Week-to-date: ${fmtMoney(weeklyExpenses)}`,
       icon: CalendarRange,
       accent: "from-sky-500/25 via-sky-400/10 to-transparent",
       iconAccent: "text-sky-500 dark:text-sky-400",
-      pillValue: formatCurrency(averagePerDayThisMonth),
+      pillValue: fmtMoney(avgPerDayThisMonth),
       pillTone: "text-sky-600 dark:text-sky-300",
       pillDescription: "Average per day this month",
       footnote:
         previousMonthlyAmount > 0
-          ? `Previous month: ${formatCurrency(previousMonthlyAmount)}`
+          ? `Previous month: ${fmtMoney(previousMonthlyAmount)}`
           : undefined,
     },
     {
       title: "Average Transaction",
-      value: formatCurrency(averageTransaction),
+      value: fmtMoney(averageTransaction),
       meta:
         totalTransactions > 0
           ? `Across ${totalTransactions} ${
@@ -281,7 +261,7 @@ export default function Analytics() {
       accent: "from-violet-500/25 via-violet-400/10 to-transparent",
       iconAccent: "text-violet-500 dark:text-violet-400",
       pillValue: highestExpense
-        ? formatCurrency(parseFloat(highestExpense.amount))
+        ? fmtMoney(parseFloat(highestExpense.amount))
         : "N/A",
       pillTone: highestExpense
         ? "text-violet-500 dark:text-violet-300"
@@ -289,15 +269,13 @@ export default function Analytics() {
       pillDescription: highestExpense
         ? "Largest purchase"
         : "No large purchases yet",
-      footnote: highestExpense
+      footnote: highestExpense?.description
         ? `For ${highestExpense.description}`
         : undefined,
     },
     {
       title: "Top Category",
-      value: topCategory
-        ? formatCurrency(topCategory.amount)
-        : formatCurrency(0),
+      value: topCategory ? fmtMoney(topCategory.amount) : fmtMoney(0),
       meta: topCategory
         ? `Top category: ${topCategory.category.name}`
         : "No category insights yet",
@@ -311,26 +289,25 @@ export default function Analytics() {
       pillDescription: topCategory
         ? "of total spend"
         : "Track spending to compare",
-      categoryColor: topCategory?.category.color,
+      categoryColor: topCategory?.category?.color,
       categoryLabel: topCategory
         ? `${topCategory.category.name} is leading`
         : undefined,
       footnote:
         totalExpenses > 0
-          ? `${formatCurrency(totalExpenses)} total across categories`
+          ? `${fmtMoney(totalExpenses)} total across categories`
           : undefined,
     },
   ];
+
+  // ---- render ----------------------------------------------------------------
 
   return (
     <PageLayout
       eyebrow="Insights overview"
       title="Analytics"
       description="Dive deeper into your spending patterns, compare periods, and uncover the habits shaping your budget."
-      breadcrumbs={[
-        { label: "Dashboard", href: "/" },
-        { label: "Analytics" },
-      ]}
+      breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: "Analytics" }]}
       headerContent={
         <div className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -339,10 +316,10 @@ export default function Analytics() {
                 This month
               </p>
               <p className="mt-2 text-2xl font-semibold text-foreground">
-                {formatCurrency(monthlyExpenses)}
+                {fmtMoney(monthlyExpenses)}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Averaging {formatCurrency(averagePerDayThisMonth)} per day
+                Averaging {fmtMoney(avgPerDayThisMonth)} per day
               </p>
             </div>
             <div className="rounded-2xl border border-white/60 bg-white/75 px-5 py-4 text-sm shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-900/65">
@@ -351,11 +328,11 @@ export default function Analytics() {
               </p>
               <p className="mt-2 text-2xl font-semibold text-foreground">
                 {highestExpense
-                  ? formatCurrency(parseFloat(highestExpense.amount))
-                  : formatCurrency(0)}
+                  ? fmtMoney(parseFloat(highestExpense.amount))
+                  : fmtMoney(0)}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {highestExpense ? highestExpense.description : "No high-value expenses yet"}
+                {highestExpense?.description || "No high-value expenses yet"}
               </p>
             </div>
           </div>
@@ -365,17 +342,19 @@ export default function Analytics() {
               Updated {format(new Date(), "MMM d, yyyy 'at' h:mma")}
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
-              {totalTransactions} {totalTransactions === 1 ? "transaction" : "transactions"} tracked
+              {totalTransactions}{" "}
+              {totalTransactions === 1 ? "transaction" : "transactions"} tracked
             </span>
           </div>
         </div>
       }
     >
+      {/* Stat cards */}
       {isLoading ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
+          {Array.from({ length: 4 }).map((_, i) => (
             <Card
-              key={index}
+              key={i}
               className="h-40 animate-pulse rounded-[2rem] border-transparent bg-gradient-to-br from-white/80 via-white/50 to-white/30 dark:from-slate-900/70 dark:via-slate-900/45 dark:to-slate-900/30"
             />
           ))}
@@ -406,9 +385,13 @@ export default function Analytics() {
                       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                         {stat.title}
                       </p>
-                      <p className="mt-3 text-4xl font-semibold text-foreground">{stat.value}</p>
+                      <p className="mt-3 text-4xl font-semibold text-foreground">
+                        {stat.value}
+                      </p>
                       {stat.meta ? (
-                        <p className="mt-2 text-xs text-muted-foreground">{stat.meta}</p>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {stat.meta}
+                        </p>
                       ) : null}
                     </div>
                     <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/60 bg-white/80 shadow-inner shadow-primary/5 dark:border-white/10 dark:bg-slate-900/70">
@@ -418,18 +401,26 @@ export default function Analytics() {
                           stat.accent
                         )}
                       />
-                      <Icon className={cn("relative z-10 h-6 w-6", stat.iconAccent)} />
+                      <Icon
+                        className={cn("relative z-10 h-6 w-6", stat.iconAccent)}
+                      />
                     </div>
                   </div>
+
                   <div className="space-y-3 text-sm">
                     <div className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/75 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
-                      <span className={cn("font-semibold", stat.pillTone)}>{stat.pillValue}</span>
+                      <span className={cn("font-semibold", stat.pillTone)}>
+                        {stat.pillValue}
+                      </span>
                       <span>{stat.pillDescription}</span>
                     </div>
                     {stat.footnote ? (
-                      <p className="text-xs text-muted-foreground">{stat.footnote}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {stat.footnote}
+                      </p>
                     ) : null}
                   </div>
+
                   {stat.categoryColor ? (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <span
@@ -446,6 +437,7 @@ export default function Analytics() {
         </div>
       )}
 
+      {/* Trend + Snapshot */}
       <div className="grid grid-cols-1 gap-8 xl:grid-cols-[1.65fr,1fr]">
         <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/88 via-white/60 to-white/35 shadow-[0_24px_60px_rgba(14,116,144,0.14)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
           <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
@@ -468,64 +460,61 @@ export default function Analytics() {
                       : "text-muted-foreground"
                   )}
                 >
-                  <span>
-                    {`${monthOverMonthChange > 0 ? "+" : ""}${Math.abs(
-                      monthOverMonthChange
-                    ).toFixed(1)}%`}
+                  <span>{`${monthOverMonthChange > 0 ? "+" : ""}${Math.abs(
+                    monthOverMonthChange
+                  ).toFixed(1)}%`}</span>
+                  <span className="text-muted-foreground">
+                    vs previous month
                   </span>
-                  <span className="text-muted-foreground">vs previous month</span>
                 </div>
               ) : null}
             </div>
           </CardHeader>
+
           <CardContent className="relative z-10 h-[360px]">
-            {expenses && expenses.length > 0 ? (
+            {expenses?.length ? (
               <ChartContainer
                 config={{
                   amount: {
                     label: "Spending",
-                    color: "hsl(var(--primary))",
+                    color: "hsl(var(--chart-2, var(--primary)))",
                   },
                 }}
                 className="h-full"
+                style={{
+                  ["--color-amount"]: "hsl(var(--chart-2, var(--primary)))",
+                }}
               >
-                <AreaChart
+                <BarChart
                   data={monthlyTrendData}
-                  margin={{ top: 20, right: 24, left: 12, bottom: 0 }}
+                  margin={{ top: 10, left: 12, right: 24 }}
                 >
-                  <defs>
-                    <linearGradient id="fillSpending" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-amount)" stopOpacity={0.28} />
-                      <stop offset="95%" stopColor="var(--color-amount)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="month" tickLine={false} axisLine={false} dy={8} />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} />
                   <YAxis
-                    tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) => `$${Math.round(value)}`}
+                    tickLine={false}
                     width={80}
+                    tickFormatter={(v) => `$${Math.round(v)}`}
+                    domain={[0, "auto"]}
                   />
                   <ChartTooltip
                     cursor={{ fill: "rgba(148, 163, 184, 0.12)" }}
                     content={
                       <ChartTooltipContent
-                        formatter={(value) => formatCurrency(Number(value))}
-                        labelFormatter={(label) => `${label} spending`}
+                        formatter={(v) => fmtMoney(Number(v))}
+                        labelFormatter={(label) => `${label} total`}
                         indicator="dot"
                       />
                     }
                   />
-                  <Area
-                    type="monotone"
+                  <Bar
                     dataKey="amount"
-                    stroke="var(--color-amount)"
-                    fill="url(#fillSpending)"
-                    strokeWidth={2}
                     name="Spending"
+                    fill="var(--color-amount)"
+                    radius={[8, 8, 0, 0]}
                   />
-                </AreaChart>
+                </BarChart>
               </ChartContainer>
             ) : (
               <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
@@ -550,7 +539,7 @@ export default function Analytics() {
                   Month to date
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-foreground">
-                  {formatCurrency(monthlyExpenses)}
+                  {fmtMoney(monthlyExpenses)}
                 </p>
               </div>
               <TrendingDown className="h-5 w-5 text-primary" />
@@ -560,7 +549,7 @@ export default function Analytics() {
                 Daily average
               </p>
               <p className="mt-2 text-lg font-medium text-foreground">
-                {formatCurrency(averagePerDayThisMonth)}
+                {fmtMoney(avgPerDayThisMonth)}
               </p>
             </div>
             <div>
@@ -569,7 +558,11 @@ export default function Analytics() {
               </p>
               <p className="mt-2 text-lg font-medium text-foreground">
                 {highestExpense
-                  ? `${formatCurrency(parseFloat(highestExpense.amount))} - ${highestExpense.category.name}`
+                  ? `${fmtMoney(parseFloat(highestExpense.amount))}${
+                      highestExpense.category?.name
+                        ? ` - ${highestExpense.category.name}`
+                        : ""
+                    }`
                   : "No transactions yet"}
               </p>
             </div>
@@ -585,6 +578,7 @@ export default function Analytics() {
         </Card>
       </div>
 
+      {/* Weekday + Categories */}
       <div className="grid grid-cols-1 gap-8 xl:grid-cols-[2fr,1fr]">
         <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/88 via-white/60 to-white/35 shadow-[0_24px_60px_rgba(14,116,144,0.12)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
           <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
@@ -595,30 +589,32 @@ export default function Analytics() {
             </p>
           </CardHeader>
           <CardContent className="relative z-10 h-[320px]">
-            {expenses && expenses.length > 0 ? (
+            {expenses?.length ? (
               <ChartContainer
                 config={{
-                  amount: {
-                    label: "Spending",
-                    color: "hsl(var(--chart-2, var(--primary)))",
-                  },
+                  amount: { label: "Spending", color: "hsl(var(--primary))" },
                 }}
                 className="h-full"
+                style={{ ["--color-amount"]: "hsl(var(--primary))" }}
               >
-                <BarChart data={weekdaySpendingData} margin={{ top: 10, left: 12, right: 24 }}>
+                <BarChart
+                  data={weekdaySpendingData}
+                  margin={{ top: 10, left: 12, right: 24 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="day" axisLine={false} tickLine={false} />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
                     width={80}
-                    tickFormatter={(value) => `$${Math.round(value)}`}
+                    tickFormatter={(v) => `$${Math.round(v)}`}
+                    domain={[0, "auto"]}
                   />
                   <ChartTooltip
                     cursor={{ fill: "rgba(148, 163, 184, 0.12)" }}
                     content={
                       <ChartTooltipContent
-                        formatter={(value) => formatCurrency(Number(value))}
+                        formatter={(v) => fmtMoney(Number(v))}
                         labelFormatter={(label) => `${label} spending`}
                         indicator="dot"
                       />
@@ -649,7 +645,7 @@ export default function Analytics() {
             </p>
           </CardHeader>
           <CardContent className="relative z-10 space-y-4">
-            {categoryBreakdown && categoryBreakdown.length > 0 ? (
+            {categoryBreakdown?.length ? (
               categoryBreakdown.slice(0, 5).map((item) => (
                 <div key={item.category.id} className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
@@ -668,7 +664,7 @@ export default function Analytics() {
                   </div>
                   <Progress value={item.percentage} className="h-2" />
                   <div className="text-xs text-muted-foreground">
-                    {formatCurrency(item.amount)} spent
+                    {fmtMoney(item.amount)} spent
                   </div>
                 </div>
               ))
@@ -681,6 +677,7 @@ export default function Analytics() {
         </Card>
       </div>
 
+      {/* Insights list */}
       <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/88 via-white/60 to-white/35 shadow-[0_24px_60px_rgba(14,116,144,0.12)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
         <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
         <CardHeader className="relative z-10">
@@ -691,10 +688,10 @@ export default function Analytics() {
         </CardHeader>
         <CardContent className="relative z-10">
           <ul className="space-y-3">
-            {insights.map((insight, index) => (
-              <li key={index} className="flex items-start gap-3 text-sm">
+            {insights.map((t, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm">
                 <span className="mt-1 inline-flex h-2 w-2 rounded-full bg-primary" />
-                <span className="text-muted-foreground">{insight}</span>
+                <span className="text-muted-foreground">{t}</span>
               </li>
             ))}
           </ul>

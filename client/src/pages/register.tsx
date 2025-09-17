@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AlertCircle, Lock, Mail, User as UserIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,6 @@ import {
   supabaseUserToPublicUser,
 } from "@/hooks/use-current-user";
 import { registerUserSchema } from "@shared/schema";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 const formSchema = registerUserSchema
   .extend({
@@ -53,7 +52,7 @@ export default function Register() {
   const [formError, setFormError] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   const mutation = useMutation({
     mutationFn: async (values: RegisterPayload) => {
@@ -86,7 +85,7 @@ export default function Register() {
         description: `Welcome to DollarTrack, ${user.name}!`,
       });
       setFormError(null);
-      setLocation("/app");
+      navigate("/app");
     },
     onError: (error) => {
       setFormError(extractErrorMessage(error));
@@ -100,12 +99,12 @@ export default function Register() {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-transparent text-foreground transition-colors duration-500">
+    <div className="mt-2">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.22),_transparent_58%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.12),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.45),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.85),_transparent_70%)]" />
       <div className="pointer-events-none absolute -left-28 top-28 h-[22rem] w-[22rem] rounded-full bg-sky-200/55 blur-3xl animate-float-slow dark:bg-sky-500/25" />
       <div className="pointer-events-none absolute right-[-14rem] bottom-[-8rem] h-[24rem] w-[24rem] rounded-full bg-purple-200/45 blur-3xl animate-float-slower dark:bg-purple-600/25" />
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-12">
+      <div className="relative z-10 mx-auto flex max-w-5xl flex-col px-6 py-6">
         <div className="relative flex flex-1 items-center justify-center">
           <div className="pointer-events-none absolute -left-10 top-16 h-56 w-56 rounded-full bg-primary/10 blur-3xl dark:bg-primary/22" />
           <div className="pointer-events-none absolute right-2 bottom-0 h-64 w-64 rounded-full bg-purple-300/25 blur-3xl dark:bg-purple-500/20" />
@@ -249,7 +248,7 @@ export default function Register() {
             <CardFooter className="relative z-10 flex flex-col items-start gap-4 text-sm text-muted-foreground">
               <div className="flex w-full items-center justify-between gap-2">
                 <span>Already have an account?</span>
-                <Link href="/login">
+                <Link to="/login">
                   <a className="font-medium text-primary hover:underline">
                     Sign in
                   </a>

@@ -1,18 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -49,22 +40,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useToast } from "@/hooks/use-toast";
-import {
-  categoryIcons,
-  getCategoryIcon,
-} from "@/lib/categories";
+import { categoryIcons, getCategoryIcon } from "@/lib/categories";
 import {
   createCategory,
   deleteCategory,
   fetchCategories,
   updateCategory,
 } from "@/lib/api";
-import {
-  insertCategorySchema,
-  type Category,
-} from "@shared/schema";
+import { insertCategorySchema, type Category } from "@shared/schema";
 import { Search, Pencil, Plus, Trash2 } from "lucide-react";
 import { PageLayout } from "@/components/page-layout";
 
@@ -139,10 +123,7 @@ function CategoryFormDialog({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -167,10 +148,7 @@ function CategoryFormDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Icon</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger className="rounded-2xl border border-white/60 bg-white/85 text-base dark:border-white/10 dark:bg-slate-900/70">
                         <SelectValue placeholder="Select an icon" />
@@ -209,16 +187,12 @@ function CategoryFormDialog({
                         name={field.name}
                         ref={field.ref}
                         value={field.value}
-                        onChange={(event) =>
-                          field.onChange(event.target.value)
-                        }
+                        onChange={(event) => field.onChange(event.target.value)}
                         className="h-11 w-16 rounded-xl border border-white/60 bg-white/90 shadow-inner dark:border-white/10 dark:bg-slate-900/70"
                       />
                       <Input
                         value={field.value}
-                        onChange={(event) =>
-                          field.onChange(event.target.value)
-                        }
+                        onChange={(event) => field.onChange(event.target.value)}
                         placeholder="#6366F1"
                         className="flex-1 rounded-2xl border border-white/60 bg-white/85 text-base dark:border-white/10 dark:bg-slate-900/70"
                       />
@@ -252,9 +226,7 @@ function CategoryFormDialog({
 export default function Categories() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(
-    null
-  );
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
     null
   );
@@ -271,9 +243,10 @@ export default function Categories() {
     if (!categories) return [];
     const query = searchQuery.trim().toLowerCase();
     if (!query) return categories;
-    return categories.filter((category) =>
-      category.name.toLowerCase().includes(query) ||
-      category.icon.toLowerCase().includes(query)
+    return categories.filter(
+      (category) =>
+        category.name.toLowerCase().includes(query) ||
+        category.icon.toLowerCase().includes(query)
     );
   }, [categories, searchQuery]);
 
@@ -310,13 +283,8 @@ export default function Categories() {
   });
 
   const updateCategoryMutation = useMutation({
-    mutationFn: ({
-      id,
-      values,
-    }: {
-      id: string;
-      values: CategoryFormValues;
-    }) => updateCategory(id, values),
+    mutationFn: ({ id, values }: { id: string; values: CategoryFormValues }) =>
+      updateCategory(id, values),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
@@ -377,10 +345,7 @@ export default function Categories() {
       eyebrow="Organize smarter"
       title="Categories"
       description="Create, update, and personalize spending categories to keep your transactions organized and insights meaningful."
-      breadcrumbs={[
-        { label: "Dashboard", href: "/" },
-        { label: "Categories" },
-      ]}
+      breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: "Categories" }]}
       actions={
         <Button
           className="gap-2 rounded-full border-white/60 bg-white/70 px-5 text-foreground shadow-sm backdrop-blur hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
@@ -450,9 +415,6 @@ export default function Categories() {
               Rename, recolor, or remove categories to match your budgeting
               style.
             </p>
-          </div>
-          <div className="hidden lg:block">
-            <ThemeToggle />
           </div>
         </CardHeader>
         <CardContent className="space-y-6">

@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -114,7 +114,7 @@ export function CategoryBreakdown() {
         )}
 
         <div className="mt-6 border-t border-border pt-4">
-          <Link href="/categories">
+          <Link to="/categories">
             <a
               className="block w-full rounded-full bg-white/70 py-2 text-center text-sm font-medium text-primary backdrop-blur transition hover:bg-white/90 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
               data-testid="button-view-all-categories"

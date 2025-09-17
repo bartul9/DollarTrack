@@ -1,7 +1,6 @@
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { type ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 type BreadcrumbItem = {
   label: string;
@@ -49,13 +48,25 @@ export function PageLayout({
                   const isLast = index === breadcrumbs.length - 1;
 
                   return (
-                    <div key={`${item.label}-${index}`} className="flex items-center gap-2">
+                    <div
+                      key={`${item.label}-${index}`}
+                      className="flex items-center gap-2"
+                    >
                       {item.href && !isLast ? (
-                        <Link href={item.href}>
-                          <a className="transition-colors hover:text-foreground">{item.label}</a>
+                        <Link to={item.href}>
+                          <a className="transition-colors hover:text-foreground">
+                            {item.label}
+                          </a>
                         </Link>
                       ) : (
-                        <span className={cn("text-muted-foreground", isLast && "text-foreground")}>{item.label}</span>
+                        <span
+                          className={cn(
+                            "text-muted-foreground",
+                            isLast && "text-foreground"
+                          )}
+                        >
+                          {item.label}
+                        </span>
                       )}
                       {!isLast ? <span className="opacity-50">/</span> : null}
                     </div>
@@ -70,27 +81,22 @@ export function PageLayout({
                 </span>
               ) : null}
               <div className="space-y-2">
-                <h1 className="text-3xl font-semibold text-foreground md:text-4xl">{title}</h1>
+                <h1 className="text-3xl font-semibold text-foreground md:text-4xl">
+                  {title}
+                </h1>
                 {description ? (
-                  <p className="max-w-2xl text-sm text-muted-foreground">{description}</p>
+                  <p className="max-w-2xl text-sm text-muted-foreground">
+                    {description}
+                  </p>
                 ) : null}
               </div>
             </div>
           </div>
-
-          {(actions || showThemeToggle) && (
-            <div className="flex flex-wrap items-center gap-3 lg:justify-end">
-              {actions}
-              {showThemeToggle ? (
-                <div className="lg:hidden">
-                  <ThemeToggle className="h-11 w-11 border-white/70 bg-white/80 text-foreground shadow-none hover:bg-white/90 dark:border-white/20 dark:bg-slate-900/70 dark:hover:bg-slate-900/60" />
-                </div>
-              ) : null}
-            </div>
-          )}
         </div>
 
-        {headerContent ? <div className="relative mt-8">{headerContent}</div> : null}
+        {headerContent ? (
+          <div className="relative mt-8">{headerContent}</div>
+        ) : null}
       </section>
 
       <div className="relative space-y-10">{children}</div>

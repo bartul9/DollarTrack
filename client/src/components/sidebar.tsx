@@ -1,4 +1,4 @@
-﻿import { Link, useLocation } from "wouter";
+﻿import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -27,11 +27,11 @@ const navigation = [
 ];
 
 export function Sidebar() {
-  const [location, setLocation] = useLocation();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { data: user } = useCurrentUser();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const currentYear = new Date().getFullYear();
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
@@ -44,7 +44,7 @@ export function Sidebar() {
       queryClient.setQueryData(currentUserQueryKey, null);
       queryClient.clear();
       toast({ title: "You have been logged out" });
-      setLocation("/", { replace: true });
+      navigate("/", { replace: true });
     },
     onError: (error: unknown) => {
       toast({
@@ -64,9 +64,6 @@ export function Sidebar() {
       <div className="relative flex h-full flex-col px-6 pb-6 pt-8">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/75 text-primary-foreground shadow-lg">
-              <BarChart3 className="h-5 w-5" />
-            </div>
             <div>
               <h1 className="text-lg font-semibold text-foreground">
                 DollarTrack
@@ -83,11 +80,13 @@ export function Sidebar() {
 
         <nav className="mt-10 flex flex-col gap-2">
           {navigation.map((item) => {
-            const isActive = location === item.href;
+            const isActive =
+              (location.pathname == "/app" && item.href == "/") ||
+              location.pathname == "/app" + item.href;
             const Icon = item.icon;
 
             return (
-              <Link key={item.name} href={item.href}>
+              <Link key={item.name} to={"/app" + item.href}>
                 <a
                   data-testid={`nav-link-${item.name.toLowerCase()}`}
                   aria-current={isActive ? "page" : undefined}

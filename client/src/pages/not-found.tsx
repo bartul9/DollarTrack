@@ -1,7 +1,6 @@
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { AlertCircle, ArrowLeft, Compass } from "lucide-react";
 
-import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -17,9 +16,10 @@ export default function NotFound() {
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
             DollarTrack
           </p>
-          <p className="text-sm text-muted-foreground/80">Smart finance for everyday life.</p>
+          <p className="text-sm text-muted-foreground/80">
+            Smart finance for everyday life.
+          </p>
         </div>
-        <ThemeToggle className="h-10 w-10 rounded-full border border-primary/20 bg-white/80 text-foreground shadow-sm backdrop-blur transition hover:border-primary/40 hover:shadow-md dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-100 dark:hover:bg-slate-900/70" />
       </header>
 
       <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 items-center justify-center px-6 pb-16">
@@ -30,13 +30,16 @@ export default function NotFound() {
               <AlertCircle className="h-7 w-7" />
             </span>
             <div className="space-y-3">
-              <h1 className="text-3xl font-semibold md:text-4xl">We can’t find that page</h1>
+              <h1 className="text-3xl font-semibold md:text-4xl">
+                We can’t find that page
+              </h1>
               <p className="text-base text-muted-foreground">
-                The link you followed may be broken, or the page may have been removed. Let’s get you back to something helpful.
+                The link you followed may be broken, or the page may have been
+                removed. Let’s get you back to something helpful.
               </p>
             </div>
             <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link href="/">
+              <Link to="/">
                 <a
                   className={cn(
                     buttonVariants({ size: "lg" }),
@@ -47,7 +50,7 @@ export default function NotFound() {
                   Go to homepage
                 </a>
               </Link>
-              <Link href="/app">
+              <Link to="/app">
                 <a
                   className={cn(
                     buttonVariants({ variant: "outline", size: "lg" }),

@@ -2,7 +2,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AlertCircle, Lock, Mail } from "lucide-react";
 import { z } from "zod";
 
@@ -24,7 +24,6 @@ import {
   supabaseUserToPublicUser,
 } from "@/hooks/use-current-user";
 import { loginSchema } from "@shared/schema";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 const formSchema = loginSchema;
 type LoginFormValues = z.infer<typeof formSchema>;
@@ -41,7 +40,7 @@ export default function Login() {
   const [formError, setFormError] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   const mutation = useMutation({
     mutationFn: async (values: LoginFormValues) => {
@@ -64,7 +63,7 @@ export default function Login() {
         description: `Good to see you, ${user.name}!`,
       });
       setFormError(null);
-      setLocation("/app");
+      navigate("/app");
     },
     onError: (error) => {
       setFormError(extractErrorMessage(error));
@@ -77,12 +76,12 @@ export default function Login() {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-transparent text-foreground transition-colors duration-500">
+    <div className="mt-20">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.2),_transparent_58%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.1),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.4),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.85),_transparent_70%)]" />
       <div className="pointer-events-none absolute -left-24 top-24 h-80 w-80 rounded-full bg-sky-200/55 blur-3xl animate-float-slow dark:bg-sky-500/25" />
       <div className="pointer-events-none absolute right-[-12rem] bottom-[-8rem] h-[22rem] w-[22rem] rounded-full bg-purple-200/45 blur-3xl animate-float-slower dark:bg-purple-600/25" />
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-12">
+      <div className="relative z-10 mx-auto flex h-full max-w-5xl flex-col px-6 py-6">
         <div className="relative flex flex-1 items-center justify-center">
           <div className="pointer-events-none absolute -left-6 top-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl dark:bg-primary/20" />
           <div className="pointer-events-none absolute right-0 bottom-4 h-60 w-60 rounded-full bg-purple-300/20 blur-3xl dark:bg-purple-500/20" />
@@ -169,7 +168,7 @@ export default function Login() {
             <CardFooter className="relative z-10 flex flex-col items-start gap-4 text-sm text-muted-foreground">
               <div className="flex w-full items-center justify-between gap-2">
                 <span>New to DollarTrack?</span>
-                <Link href="/register">
+                <Link to="/register">
                   <a className="font-medium text-primary hover:underline">
                     Create an account
                   </a>
