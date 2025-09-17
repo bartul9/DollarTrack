@@ -66,6 +66,7 @@ import {
   type Category,
 } from "@shared/schema";
 import { Search, Pencil, Plus, Trash2 } from "lucide-react";
+import { PageLayout } from "@/components/page-layout";
 
 const categoryFormSchema = insertCategorySchema.extend({
   name: insertCategorySchema.shape.name.min(1, "Name is required"),
@@ -372,40 +373,26 @@ export default function Categories() {
   };
 
   return (
-    <div className="space-y-10 pb-12">
-      <section className="relative overflow-hidden rounded-3xl border border-white/40 bg-gradient-to-br from-white/85 via-white/70 to-purple-100/50 px-8 py-10 shadow-2xl backdrop-blur-2xl transition-colors dark:border-white/10 dark:from-slate-900/80 dark:via-slate-900/50 dark:to-indigo-900/40">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.18),_transparent_60%)] animate-shimmer-soft dark:bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.28),_transparent_60%)]" />
-        <div className="pointer-events-none absolute -top-24 right-0 h-56 w-56 rounded-full bg-purple-400/25 blur-3xl animate-float-slow dark:bg-purple-600/25" />
-        <div className="pointer-events-none absolute bottom-0 left-1/3 h-56 w-56 rounded-full bg-primary/25 blur-3xl animate-float-slower dark:bg-primary/30" />
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-              Organize smarter
-            </p>
-            <h2 className="mt-3 text-4xl font-semibold text-foreground">
-              Categories
-            </h2>
-            <p className="mt-3 max-w-xl text-sm text-muted-foreground">
-              Create, update, and personalize spending categories to keep your
-              transactions organized and insights meaningful.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Button
-              className="gap-2 rounded-full border-white/60 bg-white/70 px-5 text-foreground shadow-sm backdrop-blur hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
-              onClick={() => setIsCreateOpen(true)}
-              data-testid="button-add-category"
-            >
-              <Plus className="h-5 w-5" />
-              <span>Add Category</span>
-            </Button>
-            <div className="lg:hidden">
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-
-        <div className="relative mt-10 grid gap-6 md:grid-cols-3">
+    <PageLayout
+      eyebrow="Organize smarter"
+      title="Categories"
+      description="Create, update, and personalize spending categories to keep your transactions organized and insights meaningful."
+      breadcrumbs={[
+        { label: "Dashboard", href: "/" },
+        { label: "Categories" },
+      ]}
+      actions={
+        <Button
+          className="gap-2 rounded-full border-white/60 bg-white/70 px-5 text-foreground shadow-sm backdrop-blur hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
+          onClick={() => setIsCreateOpen(true)}
+          data-testid="button-add-category"
+        >
+          <Plus className="h-5 w-5" />
+          <span>Add Category</span>
+        </Button>
+      }
+      headerContent={
+        <div className="grid gap-6 md:grid-cols-3">
           <div className="rounded-2xl border border-white/60 bg-white/75 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
             <p className="text-sm font-semibold text-muted-foreground">
               Total Categories
@@ -453,8 +440,8 @@ export default function Categories() {
             </p>
           </div>
         </div>
-      </section>
-
+      }
+    >
       <Card>
         <CardHeader className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -651,6 +638,6 @@ export default function Categories() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageLayout>
   );
 }

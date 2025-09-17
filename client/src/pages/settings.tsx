@@ -35,6 +35,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { fetchSettings, saveSettings } from "@/lib/api";
 import { extractErrorMessage } from "@/lib/errors";
+import { PageLayout } from "@/components/page-layout";
 
 const currencyOptions = [
   "USD",
@@ -149,16 +150,30 @@ export default function Settings() {
   }, [settingsQuery.data]);
 
   return (
-    <div className="space-y-10">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-          Settings
-        </h1>
-        <p className="text-muted-foreground">
-          Manage your account preferences and personalize your experience.
-        </p>
-      </div>
-
+    <PageLayout
+      eyebrow="Personalize"
+      title="Settings"
+      description="Manage your account preferences and personalize your experience."
+      breadcrumbs={[
+        { label: "Dashboard", href: "/" },
+        { label: "Settings" },
+      ]}
+      headerContent={
+        settingsSummary ? (
+          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+            {settingsSummary.map((item) => (
+              <span
+                key={item.label}
+                className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
+              >
+                <span className="font-semibold text-foreground">{item.label}:</span>
+                <span>{item.value}</span>
+              </span>
+            ))}
+          </div>
+        ) : null
+      }
+    >
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <Card className="border-white/60 bg-white/80 shadow-xl backdrop-blur dark:border-white/10 dark:bg-slate-900/70">
           <CardHeader>
@@ -347,6 +362,6 @@ export default function Settings() {
           </Card>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }
