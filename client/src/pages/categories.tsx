@@ -8,13 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Modal,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "@/components/ui/modal";
 import {
   Form,
   FormControl,
@@ -30,16 +30,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { categoryIcons, getCategoryIcon } from "@/lib/categories";
 import {
@@ -112,16 +102,12 @@ function CategoryFormDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg rounded-3xl border border-white/40 bg-gradient-to-br from-white/95 to-white/80 p-8 shadow-xl backdrop-blur-2xl dark:border-white/10 dark:from-slate-900/95 dark:to-slate-900/80">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold text-foreground">
-            {title}
-          </DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            {description}
-          </DialogDescription>
-        </DialogHeader>
+    <Modal open={open} onOpenChange={handleOpenChange}>
+      <ModalContent>
+        <ModalHeader>
+          <ModalTitle className="text-foreground">{title}</ModalTitle>
+          <ModalDescription>{description}</ModalDescription>
+        </ModalHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -203,23 +189,28 @@ function CategoryFormDialog({
               )}
             />
 
-            <DialogFooter className="pt-2">
+            <ModalFooter className="pt-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
                 disabled={isSubmitting}
+                className="rounded-full"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="rounded-full px-6"
+              >
                 {confirmLabel}
               </Button>
-            </DialogFooter>
+            </ModalFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </ModalContent>
+    </Modal>
   );
 }
 
@@ -569,37 +560,81 @@ export default function Categories() {
         isSubmitting={updateCategoryMutation.isPending}
       />
 
-      <AlertDialog
+      <Modal
         open={Boolean(categoryToDelete)}
         onOpenChange={(open) => {
-          if (!open) setCategoryToDelete(null);
+          if (!open && !deleteCategoryMutation.isPending) {
+            setCategoryToDelete(null);
+          }
         }}
       >
-        <AlertDialogContent className="rounded-3xl border border-white/40 bg-gradient-to-br from-white/95 to-white/80 p-8 shadow-xl backdrop-blur-2xl dark:border-white/10 dark:from-slate-900/95 dark:to-slate-900/80">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl font-semibold text-foreground">
-              Delete category
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-muted-foreground">
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>Delete category</ModalTitle>
+            <ModalDescription>
               {categoryToDelete
                 ? `This action will remove "${categoryToDelete.name}" from your category list. Expenses using this category will need to be reassigned.`
                 : "This action cannot be undone."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteCategoryMutation.isPending}>
+            </ModalDescription>
+          </ModalHeader>
+
+          {categoryToDelete ? (
+            <div className="rounded-2xl border border-white/40 bg-white/75 p-4 text-sm shadow-inner backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span
+                    className="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-semibold"
+                    style={{
+                      backgroundColor: `${categoryToDelete.color}1f`,
+                      color: categoryToDelete.color,
+                    }}
+                  >
+                    {categoryToDelete.name.charAt(0).toUpperCase()}
+                  </span>
+                  <div>
+                    <p className="text-base font-semibold text-foreground">
+                      {categoryToDelete.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Icon: {formatIconName(categoryToDelete.icon)}
+                    </p>
+                  </div>
+                </div>
+                <Badge
+                  variant="outline"
+                  className="rounded-full border border-white/60 bg-white/70 px-3 py-1 text-[11px] font-medium backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
+                  style={{ color: categoryToDelete.color }}
+                >
+                  {categoryToDelete.color}
+                </Badge>
+              </div>
+            </div>
+          ) : null}
+
+          <ModalFooter className="pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full"
+              onClick={() => {
+                if (deleteCategoryMutation.isPending) return;
+                setCategoryToDelete(null);
+              }}
+              disabled={deleteCategoryMutation.isPending}
+            >
               Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
+            </Button>
+            <Button
               onClick={handleDeleteCategory}
               disabled={deleteCategoryMutation.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              variant="destructive"
+              className="rounded-full px-6 shadow-lg shadow-destructive/30"
             >
               {deleteCategoryMutation.isPending ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </PageLayout>
   );
 }

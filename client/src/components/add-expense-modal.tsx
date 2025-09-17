@@ -3,12 +3,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  ModalTrigger,
+} from "@/components/ui/modal";
 import {
   Form,
   FormControl,
@@ -84,21 +84,21 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Modal open={open} onOpenChange={setOpen}>
+      <ModalTrigger asChild>
         {children || (
           <Button className="gap-2" data-testid="button-add-expense">
             <Plus className="h-5 w-5" />
             <span>Add Expense</span>
           </Button>
         )}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-lg rounded-3xl border border-white/40 bg-gradient-to-br from-white/95 to-white/80 p-8 shadow-xl backdrop-blur-2xl dark:border-white/10 dark:from-slate-900/95 dark:to-slate-900/80">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold">
+      </ModalTrigger>
+      <ModalContent>
+        <ModalHeader>
+          <ModalTitle>
             Add New Expense
-          </DialogTitle>
-        </DialogHeader>
+          </ModalTitle>
+        </ModalHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -206,7 +206,7 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
               <Button
                 type="button"
                 variant="outline"
-                className="flex-1"
+                className="flex-1 rounded-full"
                 onClick={() => setOpen(false)}
                 data-testid="button-cancel"
               >
@@ -215,7 +215,7 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
               <Button
                 type="submit"
                 disabled={addExpenseMutation.isPending}
-                className="flex-1"
+                className="flex-1 rounded-full shadow-lg shadow-primary/30"
                 data-testid="button-submit-expense"
               >
                 {addExpenseMutation.isPending ? "Adding..." : "Add Expense"}
@@ -223,7 +223,7 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
             </div>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </ModalContent>
+    </Modal>
   );
 }

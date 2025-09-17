@@ -4,6 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Modal,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "@/components/ui/modal";
 import { Search, Edit2, Trash2 } from "lucide-react";
 import { getCategoryIcon } from "@/lib/categories";
 import { fetchExpenses, deleteExpense as deleteExpenseApi } from "@/lib/api";
@@ -19,10 +27,18 @@ export function RecentExpenses() {
   const { toast } = useToast();
   const { filters } = useExpenseFilters();
 
+  const [expenseToDelete, setExpenseToDelete] = useState<
+    ExpenseWithCategory | null
+  >(null);
+
   const { data: expenses, isLoading } = useQuery<ExpenseWithCategory[]>({
     queryKey: ["expenses"],
     queryFn: fetchExpenses,
   });
+
+  const DeleteCategoryIcon = expenseToDelete
+    ? getCategoryIcon(expenseToDelete.category.icon)
+    : null;
 
   const deleteExpenseMutation = useMutation({
     mutationFn: async (expenseId: string) => {
@@ -32,6 +48,7 @@ export function RecentExpenses() {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
       queryClient.invalidateQueries({ queryKey: ["analytics-summary"] });
       queryClient.invalidateQueries({ queryKey: ["analytics-categories"] });
+      setExpenseToDelete(null);
       toast({
         title: "Success",
         description: "Expense deleted successfully",
@@ -138,10 +155,13 @@ export function RecentExpenses() {
     return result;
   }, [expenses, filters, searchQuery]);
 
-  const handleDeleteExpense = (expenseId: string) => {
-    if (confirm("Are you sure you want to delete this expense?")) {
-      deleteExpenseMutation.mutate(expenseId);
-    }
+  const handleDeleteExpense = (expense: ExpenseWithCategory) => {
+    setExpenseToDelete(expense);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!expenseToDelete) return;
+    deleteExpenseMutation.mutate(expenseToDelete.id);
   };
 
   return (
@@ -281,7 +301,7 @@ export function RecentExpenses() {
                         size="icon"
                         variant="ghost"
                         className="h-9 w-9 rounded-full border border-transparent text-muted-foreground transition hover:border-white/60 hover:text-destructive dark:hover:border-white/20"
-                        onClick={() => handleDeleteExpense(expense.id)}
+                        onClick={() => handleDeleteExpense(expense)}
                         disabled={deleteExpenseMutation.isPending}
                         data-testid={`button-delete-expense-${expense.id}`}
                       >
@@ -296,6 +316,80 @@ export function RecentExpenses() {
           </motion.div>
         )}
       </CardContent>
+
+      <Modal
+        open={Boolean(expenseToDelete)}
+        onOpenChange={(open) => {
+          if (!open && !deleteExpenseMutation.isPending) {
+            setExpenseToDelete(null);
+          }
+        }}
+      >
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>Delete expense</ModalTitle>
+            <ModalDescription>
+              {expenseToDelete
+                ? `Are you sure you want to remove "${expenseToDelete.description}"?`
+                : "Are you sure you want to delete this expense?"}
+            </ModalDescription>
+          </ModalHeader>
+
+          {expenseToDelete ? (
+            <div className="rounded-2xl border border-white/50 bg-white/75 p-5 shadow-inner backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-2xl"
+                    style={{
+                      backgroundColor: `${expenseToDelete.category.color}1a`,
+                      color: expenseToDelete.category.color,
+                    }}
+                  >
+                    {DeleteCategoryIcon ? (
+                      <DeleteCategoryIcon className="h-5 w-5" />
+                    ) : null}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-base font-semibold text-foreground">
+                      {expenseToDelete.description}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(expenseToDelete.date)}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-lg font-semibold text-destructive">
+                  -{formatCurrency(expenseToDelete.amount)}
+                </p>
+              </div>
+            </div>
+          ) : null}
+
+          <ModalFooter className="pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full"
+              onClick={() => {
+                if (deleteExpenseMutation.isPending) return;
+                setExpenseToDelete(null);
+              }}
+              disabled={deleteExpenseMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmDelete}
+              disabled={deleteExpenseMutation.isPending}
+              variant="destructive"
+              className="rounded-full px-6 shadow-lg shadow-destructive/30"
+            >
+              {deleteExpenseMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Card>
   );
 }
