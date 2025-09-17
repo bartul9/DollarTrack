@@ -8,17 +8,22 @@ import {
   LogOut,
   Settings,
   Sparkles,
+  KeyIcon,
+  SettingsIcon,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { extractErrorMessage } from "@/lib/errors";
+import { supabase } from "@/lib/supabase";
 import { useCurrentUser, currentUserQueryKey } from "@/hooks/use-current-user";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const navigation = [
-  { name: "Dashboard", href: "/app", icon: LayoutDashboard },
-  { name: "Expenses", href: "/app/expenses", icon: CreditCard },
+  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Expenses", href: "/expenses", icon: CreditCard },
+  { name: "Analytics", href: "/analytics", icon: KeyIcon },
+  { name: "Settings", href: "/settings", icon: SettingsIcon },
 ];
 
 export function Sidebar() {
@@ -28,7 +33,12 @@ export function Sidebar() {
   const { toast } = useToast();
 
   const logoutMutation = useMutation({
-    mutationFn: async () => {},
+    mutationFn: async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
+    },
     onSuccess: () => {
       queryClient.setQueryData(currentUserQueryKey, null);
       queryClient.clear();

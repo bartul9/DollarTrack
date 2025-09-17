@@ -48,16 +48,18 @@ function RequireAuth({ children }: { children: ReactNode }) {
 
 function ProtectedApp() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 text-foreground transition-colors duration-500 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
       <Sidebar />
-      <main className="min-h-screen lg:ml-64">
-        <Switch>
-          <Route path="/app/expenses" component={Expenses} />
-          <Route path="/app" component={Dashboard} />
-          <Route path="/app/analytics" component={Analytics} />
-          <Route path="/app/categories" component={Categories} />
-          <Route component={NotFound} />
-        </Switch>
+      <main className="relative ml-0 flex min-h-screen flex-col px-6 pb-16 pt-16 transition-[margin] md:ml-[19rem] md:px-12">
+        <div className="mx-auto w-full max-w-6xl">
+          <Switch>
+            <Route path="/expenses" component={Expenses} />
+            <Route path="/" component={Dashboard} />
+            <Route path="/analytics" component={Analytics} />
+            <Route path="/categories" component={Categories} />
+            <Route component={NotFound} />
+          </Switch>
+        </div>
       </main>
     </div>
   );
@@ -65,20 +67,20 @@ function ProtectedApp() {
 
 function AppRoutes() {
   return (
-    <Switch>
-      <Route path="/" component={Landing} />
-      <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
+    <Router>
+      <Switch>
+        <Route path="/" component={Landing} />
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
 
-      <Route path="/app/:rest*">
-        {() => (
+        <Router base="/app">
           <RequireAuth>
             <ProtectedApp />
           </RequireAuth>
-        )}
-      </Route>
-      <Route component={NotFound} />
-    </Switch>
+        </Router>
+        <Route component={NotFound} />
+      </Switch>
+    </Router>
   );
 }
 
@@ -92,18 +94,7 @@ function App() {
         disableTransitionOnChange
       >
         <TooltipProvider>
-          <div className="relative min-h-screen bg-gradient-to-br from-slate-100 via-white to-purple-100 text-foreground transition-colors duration-500 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
-            <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-              <div className="absolute -top-32 -right-20 h-72 w-72 rounded-full bg-primary/25 blur-3xl dark:bg-primary/30" />
-              <div className="absolute top-1/2 -left-32 h-96 w-96 -translate-y-1/2 rounded-full bg-purple-400/25 blur-3xl dark:bg-purple-500/20" />
-            </div>
-            <Sidebar />
-            <main className="relative ml-0 flex min-h-screen flex-col px-6 pb-16 pt-16 transition-[margin] md:ml-[19rem] md:px-12">
-              <div className="mx-auto w-full max-w-6xl">
-                <AppRoutes />
-              </div>
-            </main>
-          </div>
+          <AppRoutes />
           <Toaster />
         </TooltipProvider>
       </ThemeProvider>

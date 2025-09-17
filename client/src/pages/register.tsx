@@ -18,8 +18,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { extractErrorMessage } from "@/lib/errors";
-import { currentUserQueryKey } from "@/hooks/use-current-user";
-import { registerUserSchema, type PublicUser } from "@shared/schema";
+import { supabase } from "@/lib/supabase";
+import { currentUserQueryKey, supabaseUserToPublicUser } from "@/hooks/use-current-user";
+import { registerUserSchema } from "@shared/schema";
 
 const formSchema = registerUserSchema
   .extend({
@@ -52,8 +53,25 @@ export default function Register() {
 
   const mutation = useMutation({
     mutationFn: async (values: RegisterPayload) => {
-      /*     const res = await apiRequest("POST", "/api/auth/register", values);
-      return (await res.json()) as PublicUser; */
+      const { data, error } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            name: values.name,
+          },
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.user || !data.session) {
+        throw new Error("Registration successful. Please confirm your email address before signing in.");
+      }
+
+      return supabaseUserToPublicUser(data.user);
     },
     onSuccess: (user) => {
       queryClient.setQueryData(currentUserQueryKey, user);
@@ -229,3 +247,4 @@ export default function Register() {
     </div>
   );
 }
+

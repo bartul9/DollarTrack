@@ -18,8 +18,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { extractErrorMessage } from "@/lib/errors";
-import { currentUserQueryKey } from "@/hooks/use-current-user";
-import { loginSchema, type PublicUser } from "@shared/schema";
+import { supabase } from "@/lib/supabase";
+import { currentUserQueryKey, supabaseUserToPublicUser } from "@/hooks/use-current-user";
+import { loginSchema } from "@shared/schema";
 
 const formSchema = loginSchema;
 type LoginFormValues = z.infer<typeof formSchema>;
@@ -40,8 +41,17 @@ export default function Login() {
 
   const mutation = useMutation({
     mutationFn: async (values: LoginFormValues) => {
-      /*   const res = await apiRequest("POST", "/api/auth/login", values);
-      return (await res.json()) as PublicUser; */
+      const { data, error } = await supabase.auth.signInWithPassword(values);
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.user || !data.session) {
+        throw new Error("Login succeeded but no active session was returned.");
+      }
+
+      return supabaseUserToPublicUser(data.user);
     },
     onSuccess: (user) => {
       queryClient.setQueryData(currentUserQueryKey, user);
@@ -164,3 +174,4 @@ export default function Login() {
     </div>
   );
 }
+
