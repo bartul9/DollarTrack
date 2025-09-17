@@ -16,6 +16,7 @@ import Login from "@/pages/login";
 import Register from "@/pages/register";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useLocation } from "wouter";
+import { ExpenseFiltersProvider } from "@/hooks/use-expense-filters";
 
 function LoadingScreen() {
   return (
@@ -94,7 +95,10 @@ function App() {
         disableTransitionOnChange
       >
         <TooltipProvider>
-          <AppRoutes />
+          <ExpenseFiltersProvider>
+            <AppRoutes />
+          </ExpenseFiltersProvider>
+
           <Toaster />
         </TooltipProvider>
       </ThemeProvider>

@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { type ExpenseWithCategory } from "@shared/schema";
 import { fetchExpenses } from "@/lib/api";
+import { useExpenseFilters } from "@/hooks/use-expense-filters";
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("en-US", {
@@ -85,10 +86,54 @@ export function ExpenseChart() {
     queryFn: fetchExpenses,
   });
 
-  const parsedExpenses = useMemo(() => {
+  const { filters } = useExpenseFilters();
+
+  const filteredExpenses = useMemo(() => {
     if (!expenses) return [];
 
-    return expenses
+    let result = expenses;
+
+    if (filters.categories.length > 0) {
+      result = result.filter((expense) =>
+        filters.categories.includes(expense.categoryId)
+      );
+    }
+
+    if (filters.dateRange?.from || filters.dateRange?.to) {
+      const fromDate = filters.dateRange?.from
+        ? new Date(filters.dateRange.from)
+        : undefined;
+      const toDate = filters.dateRange?.to
+        ? new Date(filters.dateRange.to)
+        : undefined;
+
+      if (fromDate) {
+        fromDate.setHours(0, 0, 0, 0);
+      }
+      if (toDate) {
+        toDate.setHours(23, 59, 59, 999);
+      }
+
+      result = result.filter((expense) => {
+        const expenseDate = new Date(expense.date);
+        if (Number.isNaN(expenseDate.getTime())) return false;
+        if (fromDate && expenseDate < fromDate) {
+          return false;
+        }
+        if (toDate && expenseDate > toDate) {
+          return false;
+        }
+        return true;
+      });
+    }
+
+    return result;
+  }, [expenses, filters]);
+
+  const parsedExpenses = useMemo(() => {
+    if (!filteredExpenses) return [];
+
+    return filteredExpenses
       .map((expense) => {
         const amount = parseFloat(expense.amount);
         const date = new Date(expense.date);
@@ -99,7 +144,7 @@ export function ExpenseChart() {
         return { amount, date };
       })
       .filter((entry): entry is { amount: number; date: Date } => entry !== null);
-  }, [expenses]);
+  }, [filteredExpenses]);
 
   const totalsByDay = useMemo(() => {
     const totals = new Map<string, number>();

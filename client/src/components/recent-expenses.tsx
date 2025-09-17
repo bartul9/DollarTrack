@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,13 @@ import { fetchExpenses, deleteExpense as deleteExpenseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { type ExpenseWithCategory } from "@shared/schema";
 import { EditExpenseModal } from "@/components/edit-expense-modal";
+import { useExpenseFilters } from "@/hooks/use-expense-filters";
 
 export function RecentExpenses() {
   const [searchQuery, setSearchQuery] = useState("");
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { filters } = useExpenseFilters();
 
   const { data: expenses, isLoading } = useQuery<ExpenseWithCategory[]>({
     queryKey: ["expenses"],
@@ -84,10 +86,56 @@ export function RecentExpenses() {
     }).format(parseFloat(amount));
   };
 
-  const filteredExpenses = expenses?.filter((expense: ExpenseWithCategory) =>
-    expense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    expense.category.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredExpenses = useMemo(() => {
+    if (!expenses) return [];
+
+    let result = expenses;
+
+    if (filters.categories.length > 0) {
+      result = result.filter((expense) =>
+        filters.categories.includes(expense.categoryId)
+      );
+    }
+
+    if (filters.dateRange?.from || filters.dateRange?.to) {
+      const fromDate = filters.dateRange?.from
+        ? new Date(filters.dateRange.from)
+        : undefined;
+      const toDate = filters.dateRange?.to
+        ? new Date(filters.dateRange.to)
+        : undefined;
+
+      if (fromDate) {
+        fromDate.setHours(0, 0, 0, 0);
+      }
+      if (toDate) {
+        toDate.setHours(23, 59, 59, 999);
+      }
+
+      result = result.filter((expense) => {
+        const expenseDate = new Date(expense.date);
+        if (Number.isNaN(expenseDate.getTime())) return false;
+        if (fromDate && expenseDate < fromDate) {
+          return false;
+        }
+        if (toDate && expenseDate > toDate) {
+          return false;
+        }
+        return true;
+      });
+    }
+
+    if (searchQuery.trim().length > 0) {
+      const searchTerm = searchQuery.toLowerCase();
+      result = result.filter(
+        (expense) =>
+          expense.description.toLowerCase().includes(searchTerm) ||
+          expense.category.name.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    return result;
+  }, [expenses, filters, searchQuery]);
 
   const handleDeleteExpense = (expenseId: string) => {
     if (confirm("Are you sure you want to delete this expense?")) {
@@ -138,7 +186,7 @@ export function RecentExpenses() {
               />
             ))}
           </div>
-        ) : !filteredExpenses || filteredExpenses.length === 0 ? (
+        ) : filteredExpenses.length === 0 ? (
           <div className="space-y-3 py-12 text-center">
             <p className="text-base font-semibold text-foreground">
               {searchQuery ? "No expenses match your search" : "No expenses found"}

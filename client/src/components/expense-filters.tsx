@@ -1,0 +1,204 @@
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { fetchCategories } from "@/lib/api";
+import { useExpenseFilters } from "@/hooks/use-expense-filters";
+import type { Category } from "@shared/schema";
+
+type ExpenseFiltersSheetProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+export function ExpenseFiltersSheet({
+  open,
+  onOpenChange,
+}: ExpenseFiltersSheetProps) {
+  const { filters, setFilters, resetFilters } = useExpenseFilters();
+
+  const { data: categories, isLoading } = useQuery<Category[]>({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+  });
+
+  const selectedCategoryIds = filters.categories;
+
+  const selectedSummary = useMemo(() => {
+    const pieces: string[] = [];
+    if (selectedCategoryIds.length) {
+      pieces.push(
+        `${selectedCategoryIds.length} categor${
+          selectedCategoryIds.length === 1 ? "y" : "ies"
+        }`
+      );
+    }
+    if (filters.dateRange?.from || filters.dateRange?.to) {
+      if (filters.dateRange?.from && filters.dateRange?.to) {
+        pieces.push(
+          `${formatDate(filters.dateRange.from)} – ${formatDate(
+            filters.dateRange.to
+          )}`
+        );
+      } else if (filters.dateRange?.from) {
+        pieces.push(`From ${formatDate(filters.dateRange.from)}`);
+      } else if (filters.dateRange?.to) {
+        pieces.push(`Until ${formatDate(filters.dateRange.to)}`);
+      }
+    }
+
+    if (pieces.length === 0) return "No filters selected";
+    return pieces.join(" · ");
+  }, [filters.dateRange, selectedCategoryIds]);
+
+  const toggleCategory = (categoryId: string, checked: boolean) => {
+    setFilters((previous) => {
+      const alreadySelected = previous.categories.includes(categoryId);
+      if (checked && !alreadySelected) {
+        return {
+          ...previous,
+          categories: [...previous.categories, categoryId],
+        };
+      }
+      if (!checked && alreadySelected) {
+        return {
+          ...previous,
+          categories: previous.categories.filter((id) => id !== categoryId),
+        };
+      }
+      return previous;
+    });
+  };
+
+  const clearDateRange = () => {
+    setFilters((previous) => ({ ...previous, dateRange: undefined }));
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="flex w-full flex-col gap-6 sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle>Filter expenses</SheetTitle>
+          <SheetDescription>{selectedSummary}</SheetDescription>
+        </SheetHeader>
+
+        <div className="flex-1 space-y-6">
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium text-foreground">Categories</h3>
+              <p className="text-xs text-muted-foreground">
+                Choose one or multiple categories to narrow down results.
+              </p>
+            </div>
+            <ScrollArea className="h-48 rounded-xl border border-dashed border-muted-foreground/20 p-3">
+              <div className="space-y-3">
+                {isLoading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="h-10 animate-pulse rounded-lg bg-muted/60"
+                      />
+                    ))}
+                  </div>
+                ) : categories && categories.length > 0 ? (
+                  categories.map((category) => {
+                    const isChecked = selectedCategoryIds.includes(category.id);
+                    return (
+                      <Label
+                        key={category.id}
+                        htmlFor={`filter-category-${category.id}`}
+                        className="flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-2 text-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
+                      >
+                        <Checkbox
+                          id={`filter-category-${category.id}`}
+                          checked={isChecked}
+                          onCheckedChange={(value) =>
+                            toggleCategory(category.id, value === true)
+                          }
+                        />
+                        <span className="font-medium text-foreground">
+                          {category.name}
+                        </span>
+                      </Label>
+                    );
+                  })
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No categories available.
+                  </p>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium text-foreground">Date range</h3>
+                <p className="text-xs text-muted-foreground">
+                  Select a start and end date to filter transactions.
+                </p>
+              </div>
+              {(filters.dateRange?.from || filters.dateRange?.to) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-xs"
+                  onClick={clearDateRange}
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+            <div className="rounded-xl border border-muted-foreground/20 p-3">
+              <Calendar
+                mode="range"
+                numberOfMonths={1}
+                selected={filters.dateRange}
+                onSelect={(range) =>
+                  setFilters((previous) => ({
+                    ...previous,
+                    dateRange: range,
+                  }))
+                }
+              />
+            </div>
+          </div>
+        </div>
+
+        <SheetFooter className="pt-2">
+          <Button
+            variant="outline"
+            className="justify-center"
+            onClick={() => {
+              resetFilters();
+            }}
+          >
+            Reset filters
+          </Button>
+          <Button onClick={() => onOpenChange(false)}>Apply filters</Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+}
+

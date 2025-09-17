@@ -10,9 +10,14 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { getCategoryIcon } from "@/lib/categories";
 import { type ExpenseWithCategory, type Category } from "@shared/schema";
 import { fetchExpenses, fetchCategories } from "@/lib/api";
+import { ExpenseFiltersSheet } from "@/components/expense-filters";
+import { ActiveExpenseFilters } from "@/components/active-expense-filters";
+import { useExpenseFilters } from "@/hooks/use-expense-filters";
 
 export default function Expenses() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const { filters } = useExpenseFilters();
 
   const { data: expenses, isLoading } = useQuery<ExpenseWithCategory[]>({
     queryKey: ["expenses"],
@@ -27,11 +32,53 @@ export default function Expenses() {
   const filteredExpenses = useMemo(() => {
     if (!expenses) return [];
 
-    return expenses.filter((expense) =>
-      expense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      expense.category.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [expenses, searchQuery]);
+    let result = expenses;
+
+    if (filters.categories.length > 0) {
+      result = result.filter((expense) =>
+        filters.categories.includes(expense.categoryId)
+      );
+    }
+
+    if (filters.dateRange?.from || filters.dateRange?.to) {
+      const fromDate = filters.dateRange?.from
+        ? new Date(filters.dateRange.from)
+        : undefined;
+      const toDate = filters.dateRange?.to
+        ? new Date(filters.dateRange.to)
+        : undefined;
+
+      if (fromDate) {
+        fromDate.setHours(0, 0, 0, 0);
+      }
+      if (toDate) {
+        toDate.setHours(23, 59, 59, 999);
+      }
+
+      result = result.filter((expense) => {
+        const expenseDate = new Date(expense.date);
+        if (Number.isNaN(expenseDate.getTime())) return false;
+        if (fromDate && expenseDate < fromDate) {
+          return false;
+        }
+        if (toDate && expenseDate > toDate) {
+          return false;
+        }
+        return true;
+      });
+    }
+
+    if (searchQuery.trim().length > 0) {
+      const searchTerm = searchQuery.toLowerCase();
+      result = result.filter(
+        (expense) =>
+          expense.description.toLowerCase().includes(searchTerm) ||
+          expense.category.name.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    return result;
+  }, [expenses, filters, searchQuery]);
 
   const totalAmount = filteredExpenses.reduce(
     (sum, expense) => sum + parseFloat(expense.amount),
@@ -77,10 +124,15 @@ export default function Expenses() {
               variant="outline"
               className="gap-2"
               data-testid="button-filter-expenses"
+              onClick={() => setIsFilterSheetOpen(true)}
             >
               <Filter className="h-4 w-4" />
               Filter
             </Button>
+            <ExpenseFiltersSheet
+              open={isFilterSheetOpen}
+              onOpenChange={setIsFilterSheetOpen}
+            />
             <AddExpenseModal />
             <div className="lg:hidden">
               <ThemeToggle />
@@ -116,6 +168,7 @@ export default function Expenses() {
               />
               <Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
             </div>
+            <ActiveExpenseFilters className="mt-4" />
             <div className="mt-4 flex flex-wrap gap-2">
               {categories?.slice(0, 6).map((category) => (
                 <Badge
