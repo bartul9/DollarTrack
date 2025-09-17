@@ -8,9 +8,42 @@ import { Search, Edit2, Trash2 } from "lucide-react";
 import { getCategoryIcon } from "@/lib/categories";
 import { fetchExpenses, deleteExpense as deleteExpenseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { type ExpenseWithCategory } from "@shared/schema";
 import { EditExpenseModal } from "@/components/edit-expense-modal";
 import { useExpenseFilters } from "@/hooks/use-expense-filters";
+
+const money = (v) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+    parseFloat(v || 0)
+  );
+
+function formatDate(date) {
+  const d = new Date(date);
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const isYesterday =
+    d.toDateString() === new Date(now.getTime() - 86400000).toDateString();
+
+  if (isToday)
+    return `Today, ${d.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })}`;
+  if (isYesterday)
+    return `Yesterday, ${d.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })}`;
+
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
 
 export function RecentExpenses() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,150 +51,80 @@ export function RecentExpenses() {
   const { toast } = useToast();
   const { filters } = useExpenseFilters();
 
-  const { data: expenses, isLoading } = useQuery<ExpenseWithCategory[]>({
+  const { data: expenses, isLoading } = useQuery({
     queryKey: ["expenses"],
     queryFn: fetchExpenses,
   });
 
-  const deleteExpenseMutation = useMutation({
-    mutationFn: async (expenseId: string) => {
-      await deleteExpenseApi(expenseId);
-    },
+  const del = useMutation({
+    mutationFn: async (id) => deleteExpenseApi(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
       queryClient.invalidateQueries({ queryKey: ["analytics-summary"] });
       queryClient.invalidateQueries({ queryKey: ["analytics-categories"] });
-      toast({
-        title: "Success",
-        description: "Expense deleted successfully",
-      });
+      toast({ title: "Success", description: "Expense deleted successfully" });
     },
-    onError: () => {
+    onError: () =>
       toast({
         title: "Error",
         description: "Failed to delete expense",
         variant: "destructive",
-      });
-    },
+      }),
   });
 
-  const formatDate = (date: Date | string) => {
-    const d = new Date(date);
-    const now = new Date();
-    const isToday = d.toDateString() === now.toDateString();
-    const isYesterday =
-      d.toDateString() ===
-      new Date(now.getTime() - 24 * 60 * 60 * 1000).toDateString();
-
-    if (isToday) {
-      return `Today, ${d.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      })}`;
-    }
-
-    if (isYesterday) {
-      return `Yesterday, ${d.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      })}`;
-    }
-
-    return d.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
-
-  const formatCurrency = (amount: string) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-    }).format(parseFloat(amount));
-  };
-
-  const filteredExpenses = useMemo(() => {
+  const filtered = useMemo(() => {
     if (!expenses) return [];
+    let res = expenses;
 
-    let result = expenses;
-
-    if (filters.categories.length > 0) {
-      result = result.filter((expense) =>
-        filters.categories.includes(expense.categoryId)
-      );
+    if (filters.categories.length) {
+      res = res.filter((e) => filters.categories.includes(e.categoryId));
     }
 
     if (filters.dateRange?.from || filters.dateRange?.to) {
-      const fromDate = filters.dateRange?.from
+      const from = filters.dateRange?.from
         ? new Date(filters.dateRange.from)
-        : undefined;
-      const toDate = filters.dateRange?.to
-        ? new Date(filters.dateRange.to)
-        : undefined;
-
-      if (fromDate) {
-        fromDate.setHours(0, 0, 0, 0);
-      }
-      if (toDate) {
-        toDate.setHours(23, 59, 59, 999);
-      }
-
-      result = result.filter((expense) => {
-        const expenseDate = new Date(expense.date);
-        if (Number.isNaN(expenseDate.getTime())) return false;
-        if (fromDate && expenseDate < fromDate) {
-          return false;
-        }
-        if (toDate && expenseDate > toDate) {
-          return false;
-        }
+        : null;
+      const to = filters.dateRange?.to ? new Date(filters.dateRange.to) : null;
+      if (from) from.setHours(0, 0, 0, 0);
+      if (to) to.setHours(23, 59, 59, 999);
+      res = res.filter((e) => {
+        const d = new Date(e.date);
+        if (Number.isNaN(d)) return false;
+        if (from && d < from) return false;
+        if (to && d > to) return false;
         return true;
       });
     }
 
-    if (searchQuery.trim().length > 0) {
-      const searchTerm = searchQuery.toLowerCase();
-      result = result.filter(
-        (expense) =>
-          expense.description.toLowerCase().includes(searchTerm) ||
-          expense.category.name.toLowerCase().includes(searchTerm)
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      res = res.filter(
+        (e) =>
+          e.description.toLowerCase().includes(q) ||
+          e.category.name.toLowerCase().includes(q)
       );
     }
 
-    return result;
+    return res;
   }, [expenses, filters, searchQuery]);
 
-  const handleDeleteExpense = (expenseId: string) => {
-    if (confirm("Are you sure you want to delete this expense?")) {
-      deleteExpenseMutation.mutate(expenseId);
-    }
-  };
-
   return (
-    <Card className="relative flex h-full flex-col overflow-hidden border-transparent bg-gradient-to-br from-white/90 via-white/55 to-white/30 shadow-[0_28px_60px_rgba(15,23,42,0.08)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
-      <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
-      <span className="pointer-events-none absolute inset-x-12 bottom-0 h-32 rounded-full bg-white/30 blur-3xl dark:bg-white/10" />
+    <Card className="relative flex h-full flex-col overflow-hidden border bg-gradient-to-br from-white/90 via-white/60 to-white/30 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.08)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30 dark:border-white/10">
       <CardHeader className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <CardTitle>Recent Expenses</CardTitle>
+          <CardTitle className="leading-tight">Recent Expenses</CardTitle>
           <p className="mt-1 text-sm text-muted-foreground">
             Stay on top of your latest transactions
           </p>
         </div>
-        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative w-full sm:w-72">
             <Input
               type="text"
               placeholder="Search expenses..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="rounded-full border border-white/60 bg-white/80 pl-11 pr-4 text-sm shadow-sm backdrop-blur transition focus-visible:ring-1 dark:border-white/10 dark:bg-slate-900/60"
+              className="rounded-full border bg-white/80 pl-11 pr-4 text-sm backdrop-blur dark:bg-slate-900/60 dark:border-white/10"
               data-testid="input-search-expenses"
             />
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -169,28 +132,27 @@ export function RecentExpenses() {
           <Button
             variant="ghost"
             size="sm"
-            className="rounded-full border border-white/60 bg-white/75 px-4 text-xs font-semibold text-foreground backdrop-blur transition hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
+            className="rounded-full border bg-white/75 px-4 text-xs font-semibold backdrop-blur dark:bg-slate-900/60 dark:border-white/10"
             data-testid="button-view-all-expenses"
           >
             View All
           </Button>
         </div>
       </CardHeader>
+
       <CardContent className="relative z-10 flex-1 space-y-4">
         {isLoading ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="h-20 w-full animate-pulse rounded-2xl bg-gradient-to-r from-white/60 via-white/35 to-white/55 backdrop-blur dark:from-slate-900/60 dark:via-slate-900/40 dark:to-slate-900/50"
+                className="h-20 w-full animate-pulse rounded-2xl bg-white/60 dark:bg-slate-900/50"
               />
             ))}
           </div>
-        ) : filteredExpenses.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="space-y-3 py-12 text-center">
-            <p className="text-base font-semibold text-foreground">
-              {searchQuery ? "No expenses match your search" : "No expenses found"}
-            </p>
+            <p className="text-base font-semibold">No expenses found</p>
             <p className="text-sm text-muted-foreground">
               {searchQuery
                 ? "Try adjusting your search terms"
@@ -199,71 +161,73 @@ export function RecentExpenses() {
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredExpenses.slice(0, 10).map((expense: ExpenseWithCategory) => {
-              const Icon = getCategoryIcon(expense.category.icon);
+            {filtered.slice(0, 10).map((e) => {
+              const Icon = getCategoryIcon(e.category.icon);
               return (
                 <div
-                  key={expense.id}
-                  className="expense-card flex items-center justify-between rounded-2xl border border-white/60 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:-translate-y-1 hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
-                  data-testid={`expense-item-${expense.id}`}
+                  key={e.id}
+                  className="group grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-2xl border bg-white/80 p-4 backdrop-blur transition hover:-translate-y-0.5 dark:bg-slate-900/60 dark:border-white/10"
+                  data-testid={`expense-item-${e.id}`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className="flex h-12 w-12 items-center justify-center rounded-2xl"
-                      style={{
-                        backgroundColor: `${expense.category.color}1a`,
-                        color: expense.category.color,
-                      }}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-base font-semibold text-foreground">
-                        {expense.description}
-                      </p>
-                      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                        {formatDate(expense.date)}
-                      </p>
-                    </div>
+                  {/* icon */}
+                  <div
+                    className="flex h-11 w-11 items-center justify-center rounded-xl"
+                    style={{
+                      backgroundColor: `${e.category.color}1a`,
+                      color: e.category.color,
+                    }}
+                  >
+                    <Icon className="h-5 w-5" />
                   </div>
-                  <div className="flex items-center gap-4">
-                    <Badge
-                      variant="secondary"
-                      className="rounded-full border border-white/60 bg-white/75 px-3 py-1 text-xs font-semibold text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
-                      style={{ color: expense.category.color }}
-                    >
-                      {expense.category.name}
-                    </Badge>
-                    <div className="text-right">
-                      <p className="text-lg font-semibold text-foreground">
-                        -{formatCurrency(expense.amount)}
+
+                  {/* main */}
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-x-2">
+                      <p className="truncate text-[15px] font-semibold">
+                        {e.description}
                       </p>
-                      <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-                        {expense.category.name}
+                      <Badge
+                        variant="secondary"
+                        className="rounded-full border bg-white/80 px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground dark:bg-slate-900/55 dark:border-white/10"
+                        style={{ color: e.category.color }}
+                      >
+                        {e.category.name}
+                      </Badge>
+                    </div>
+                    <p className="mt-0.5 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                      {formatDate(e.date)}
+                    </p>
+                  </div>
+
+                  {/* amount + actions */}
+                  <div className="flex items-center gap-2">
+                    <div className="text-right mr-1">
+                      <p className="text-lg font-semibold">
+                        -{money(e.amount)}
                       </p>
                     </div>
-                    <div className="flex gap-1">
-                      <EditExpenseModal expense={expense}>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-9 w-9 rounded-full border border-transparent text-muted-foreground hover:border-white/60 hover:text-foreground dark:hover:border-white/20"
-                          data-testid={`button-edit-expense-${expense.id}`}
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                      </EditExpenseModal>
+                    <EditExpenseModal expense={e}>
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-9 w-9 rounded-full border border-transparent text-muted-foreground transition hover:border-white/60 hover:text-destructive dark:hover:border-white/20"
-                        onClick={() => handleDeleteExpense(expense.id)}
-                        disabled={deleteExpenseMutation.isPending}
-                        data-testid={`button-delete-expense-${expense.id}`}
+                        className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground"
+                        data-testid={`button-edit-expense-${e.id}`}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Edit2 className="h-4 w-4" />
                       </Button>
-                    </div>
+                    </EditExpenseModal>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-9 w-9 rounded-full text-muted-foreground hover:text-destructive"
+                      onClick={() => {
+                        if (confirm("Delete this expense?")) del.mutate(e.id);
+                      }}
+                      disabled={del.isPending}
+                      data-testid={`button-delete-expense-${e.id}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               );
