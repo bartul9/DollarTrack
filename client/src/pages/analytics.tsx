@@ -1,5 +1,10 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import {
+  fetchExpensesSummary,
+  fetchExpenses,
+  fetchCategoryBreakdown,
+} from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -24,15 +29,9 @@ import {
 } from "lucide-react";
 import { type ExpenseWithCategory } from "@shared/schema";
 
-type CategoryBreakdownItem = {
-  category: {
-    id: string;
-    name: string;
-    color: string;
-    icon: string;
-  };
-  amount: number;
-  percentage: number;
+type NormalizedExpense = ExpenseWithCategory & {
+  amountValue: number;
+  dateValue: Date;
 };
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -45,44 +44,56 @@ const formatCurrency = (amount: number) =>
   }).format(amount ?? 0);
 
 export default function Analytics() {
-  const { data: summary, isLoading: isSummaryLoading } = useQuery<{
-    total: number;
-    monthly: number;
-    weekly: number;
-  }>({
-    queryKey: ["/api/analytics/summary"],
+  const { data: summary, isLoading: isSummaryLoading } = useQuery({
+    queryKey: ["analytics-summary"],
+    queryFn: fetchExpensesSummary,
   });
 
-  const { data: expenses, isLoading: isExpensesLoading } = useQuery<
-    ExpenseWithCategory[]
-  >({
-    queryKey: ["/api/expenses"],
+  const { data: expenses, isLoading: isExpensesLoading } = useQuery({
+    queryKey: ["expenses"],
+    queryFn: fetchExpenses,
   });
 
-  const { data: categoryBreakdown, isLoading: isBreakdownLoading } = useQuery<
-    CategoryBreakdownItem[]
-  >({
-    queryKey: ["/api/analytics/categories"],
+  const { data: categoryBreakdown, isLoading: isBreakdownLoading } = useQuery({
+    queryKey: ["analytics-categories"],
+    queryFn: fetchCategoryBreakdown,
   });
 
   const isLoading = isSummaryLoading || isExpensesLoading || isBreakdownLoading;
 
-  const totalExpenses = summary?.total ?? 0;
-  const monthlyExpenses = summary?.monthly ?? 0;
-  const weeklyExpenses = summary?.weekly ?? 0;
-  const totalTransactions = expenses?.length ?? 0;
+  const normalizedExpenses = useMemo<NormalizedExpense[]>(() => {
+    if (!expenses) return [];
+
+    return expenses.map((expense) => {
+      const amountValue = Number.parseFloat(String(expense.amount));
+      const normalizedAmount = Number.isFinite(amountValue) ? amountValue : 0;
+      const parsedDate =
+        expense.date instanceof Date ? expense.date : new Date(expense.date);
+
+      return {
+        ...expense,
+        amountValue: normalizedAmount,
+        dateValue: parsedDate,
+      };
+    });
+  }, [expenses]);
+
+  const totalExpenses = Number(summary?.total ?? 0);
+  const monthlyExpenses = Number(summary?.monthly ?? 0);
+  const weeklyExpenses = Number(summary?.weekly ?? 0);
+  const totalTransactions = normalizedExpenses.length;
 
   const averageTransaction = useMemo(() => {
-    if (!expenses || expenses.length === 0) return 0;
-    return totalExpenses / expenses.length;
-  }, [expenses, totalExpenses]);
+    if (normalizedExpenses.length === 0) return 0;
+    return totalExpenses / normalizedExpenses.length;
+  }, [normalizedExpenses, totalExpenses]);
 
   const highestExpense = useMemo(() => {
-    if (!expenses || expenses.length === 0) return null;
-    return expenses.reduce((max, expense) =>
-      parseFloat(expense.amount) > parseFloat(max.amount) ? expense : max
+    if (normalizedExpenses.length === 0) return null;
+    return normalizedExpenses.reduce((max, expense) =>
+      expense.amountValue > max.amountValue ? expense : max
     );
-  }, [expenses]);
+  }, [normalizedExpenses]);
 
   const topCategory = categoryBreakdown?.[0] ?? null;
 
@@ -94,19 +105,19 @@ export default function Analytics() {
       const start = startOfMonth(monthDate);
       const end = endOfMonth(monthDate);
 
-      const totalForMonth = expenses
-        ?.filter((expense) => {
-          const expenseDate = new Date(expense.date);
+      const totalForMonth = normalizedExpenses
+        .filter((expense) => {
+          const expenseDate = expense.dateValue;
           return expenseDate >= start && expenseDate <= end;
         })
-        .reduce((sum, expense) => sum + parseFloat(expense.amount), 0) ?? 0;
+        .reduce((sum, expense) => sum + expense.amountValue, 0);
 
       return {
         month: format(monthDate, "MMM"),
         amount: Number(totalForMonth.toFixed(2)),
       };
     });
-  }, [expenses]);
+  }, [normalizedExpenses]);
 
   const monthOverMonthChange = useMemo(() => {
     if (monthlyTrendData.length < 2) return null;
@@ -118,16 +129,16 @@ export default function Analytics() {
 
   const weekdaySpendingData = useMemo(() => {
     return weekdayLabels.map((label, index) => {
-      const totalForDay = expenses
-        ?.filter((expense) => new Date(expense.date).getDay() === index)
-        .reduce((sum, expense) => sum + parseFloat(expense.amount), 0) ?? 0;
+      const totalForDay = normalizedExpenses
+        .filter((expense) => expense.dateValue.getDay() === index)
+        .reduce((sum, expense) => sum + expense.amountValue, 0);
 
       return {
         day: label,
         amount: Number(totalForDay.toFixed(2)),
       };
     });
-  }, [expenses]);
+  }, [normalizedExpenses]);
 
   const daysElapsedThisMonth = useMemo(() => {
     const start = startOfMonth(new Date());
@@ -153,7 +164,7 @@ export default function Analytics() {
     if (highestExpense) {
       items.push(
         `Your largest purchase was ${formatCurrency(
-          parseFloat(highestExpense.amount)
+          highestExpense.amountValue
         )} for ${highestExpense.description}.`
       );
     }
@@ -340,7 +351,7 @@ export default function Analytics() {
             </div>
           </CardHeader>
           <CardContent className="h-[360px]">
-            {expenses && expenses.length > 0 ? (
+            {normalizedExpenses.length > 0 ? (
               <ChartContainer
                 config={{
                   amount: {
@@ -423,7 +434,7 @@ export default function Analytics() {
               </p>
               <p className="text-lg font-medium text-foreground">
                 {highestExpense
-                  ? `${formatCurrency(parseFloat(highestExpense.amount))} · ${highestExpense.category.name}`
+                  ? `${formatCurrency(highestExpense.amountValue)} · ${highestExpense.category.name}`
                   : "No transactions yet"}
               </p>
             </div>
@@ -448,7 +459,7 @@ export default function Analytics() {
             </p>
           </CardHeader>
           <CardContent className="h-[320px]">
-            {expenses && expenses.length > 0 ? (
+            {normalizedExpenses.length > 0 ? (
               <ChartContainer
                 config={{
                   amount: {
