@@ -85,7 +85,10 @@ export function StatsCards({}: StatsCardsProps) {
     return (
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="h-36 animate-pulse rounded-3xl bg-white/60 dark:bg-slate-900/60" />
+          <Card
+            key={i}
+            className="h-40 animate-pulse rounded-[2rem] border-transparent bg-gradient-to-br from-white/80 via-white/50 to-white/30 dark:from-slate-900/70 dark:via-slate-900/45 dark:to-slate-900/30"
+          />
         ))}
       </div>
     );
@@ -166,44 +169,50 @@ export function StatsCards({}: StatsCardsProps) {
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (
-          <Card key={stat.title} className="relative overflow-hidden">
+          <Card
+            key={stat.title}
+            className={cn(
+              "relative overflow-hidden border-transparent bg-gradient-to-br from-white/85 via-white/50 to-white/25 shadow-[0_28px_55px_rgba(124,58,237,0.14)] transition-all hover:translate-y-[-2px] hover:shadow-[0_32px_65px_rgba(124,58,237,0.18)] dark:from-slate-900/80 dark:via-slate-900/55 dark:to-slate-900/30",
+              "card-hover"
+            )}
+          >
             <span
               className={cn(
                 "pointer-events-none absolute inset-0 bg-gradient-to-br opacity-80",
                 stat.accent
               )}
             />
-            <CardContent className="relative z-10 space-y-6">
+            <span className="pointer-events-none absolute inset-x-6 -top-6 h-24 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
+            <span className="pointer-events-none absolute inset-x-8 bottom-0 h-24 rounded-full bg-white/30 blur-3xl dark:bg-white/10" />
+            <CardContent className="relative z-10 space-y-6 px-6 py-6 sm:px-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                     {stat.title}
                   </p>
                   <p
-                    className="mt-3 text-3xl font-semibold text-foreground"
+                    className="mt-3 text-4xl font-semibold text-foreground"
                     data-testid={stat.testId}
                   >
                     {stat.value}
                   </p>
                 </div>
-                <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/60 bg-white/70 shadow-md shadow-black/5 dark:border-white/10 dark:bg-slate-900/70">
+                <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/60 bg-white/80 shadow-inner shadow-primary/10 dark:border-white/10 dark:bg-slate-900/70">
                   <span
                     className={cn(
-                      "absolute inset-0 rounded-2xl bg-gradient-to-br opacity-80", 
+                      "absolute inset-0 rounded-2xl bg-gradient-to-br opacity-80",
                       stat.accent
                     )}
                   />
                   <Icon className={cn("relative z-10 h-6 w-6", stat.iconColor)} />
                 </div>
               </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center space-x-2">
+              <div className="space-y-3 text-sm">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/75 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
                   <span className={cn("font-semibold", stat.trendColor)}>
                     {stat.trendValue}
                   </span>
-                  <span className="text-muted-foreground">
-                    {stat.trendDescriptor}
-                  </span>
+                  <span>{stat.trendDescriptor}</span>
                 </div>
                 {stat.meta ? (
                   <p className="text-xs text-muted-foreground">{stat.meta}</p>

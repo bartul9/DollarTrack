@@ -96,8 +96,10 @@ export function RecentExpenses() {
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+    <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/90 via-white/55 to-white/30 shadow-[0_28px_60px_rgba(15,23,42,0.08)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
+      <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
+      <span className="pointer-events-none absolute inset-x-12 bottom-0 h-32 rounded-full bg-white/30 blur-3xl dark:bg-white/10" />
+      <CardHeader className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <CardTitle>Recent Expenses</CardTitle>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -111,28 +113,28 @@ export function RecentExpenses() {
               placeholder="Search expenses..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-11"
+              className="rounded-full border border-white/60 bg-white/80 pl-11 pr-4 text-sm shadow-sm backdrop-blur transition focus-visible:ring-1 dark:border-white/10 dark:bg-slate-900/60"
               data-testid="input-search-expenses"
             />
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           </div>
           <Button
             variant="ghost"
             size="sm"
-            className="rounded-full px-4"
+            className="rounded-full border border-white/60 bg-white/75 px-4 text-xs font-semibold text-foreground backdrop-blur transition hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
             data-testid="button-view-all-expenses"
           >
             View All
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative z-10">
         {isLoading ? (
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="h-20 w-full animate-pulse rounded-2xl bg-white/50 backdrop-blur dark:bg-slate-900/60"
+                className="h-20 w-full animate-pulse rounded-2xl bg-gradient-to-r from-white/60 via-white/35 to-white/55 backdrop-blur dark:from-slate-900/60 dark:via-slate-900/40 dark:to-slate-900/50"
               />
             ))}
           </div>
@@ -154,7 +156,7 @@ export function RecentExpenses() {
               return (
                 <div
                   key={expense.id}
-                  className="expense-card flex items-center justify-between rounded-2xl border border-white/50 bg-white/75 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60"
+                  className="expense-card flex items-center justify-between rounded-2xl border border-white/60 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:-translate-y-1 hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
                   data-testid={`expense-item-${expense.id}`}
                 >
                   <div className="flex items-center gap-4">
@@ -167,7 +169,7 @@ export function RecentExpenses() {
                     >
                       <Icon className="h-5 w-5" />
                     </div>
-                    <div>
+                    <div className="space-y-1">
                       <p className="text-base font-semibold text-foreground">
                         {expense.description}
                       </p>
@@ -179,20 +181,25 @@ export function RecentExpenses() {
                   <div className="flex items-center gap-4">
                     <Badge
                       variant="secondary"
-                      className="rounded-full border border-white/50 bg-white/70 px-3 py-1 text-xs font-semibold text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
+                      className="rounded-full border border-white/60 bg-white/75 px-3 py-1 text-xs font-semibold text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
                       style={{ color: expense.category.color }}
                     >
                       {expense.category.name}
                     </Badge>
-                    <p className="text-lg font-semibold text-foreground">
-                      -{formatCurrency(expense.amount)}
-                    </p>
+                    <div className="text-right">
+                      <p className="text-lg font-semibold text-foreground">
+                        -{formatCurrency(expense.amount)}
+                      </p>
+                      <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                        {expense.category.name}
+                      </p>
+                    </div>
                     <div className="flex gap-1">
                       <EditExpenseModal expense={expense}>
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-9 w-9 rounded-full"
+                          className="h-9 w-9 rounded-full border border-transparent text-muted-foreground hover:border-white/60 hover:text-foreground dark:hover:border-white/20"
                           data-testid={`button-edit-expense-${expense.id}`}
                         >
                           <Edit2 className="h-4 w-4" />
@@ -201,7 +208,7 @@ export function RecentExpenses() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-9 w-9 rounded-full text-muted-foreground hover:text-destructive"
+                        className="h-9 w-9 rounded-full border border-transparent text-muted-foreground transition hover:border-white/60 hover:text-destructive dark:hover:border-white/20"
                         onClick={() => handleDeleteExpense(expense.id)}
                         disabled={deleteExpenseMutation.isPending}
                         data-testid={`button-delete-expense-${expense.id}`}

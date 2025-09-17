@@ -212,8 +212,10 @@ export function ExpenseChart() {
     : undefined;
 
   return (
-    <Card className="lg:col-span-2">
-      <CardHeader>
+    <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/90 via-white/55 to-white/30 shadow-[0_32px_70px_rgba(15,23,42,0.08)] transition-shadow hover:shadow-[0_36px_80px_rgba(15,23,42,0.12)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30 lg:col-span-2">
+      <span className="pointer-events-none absolute inset-x-10 -top-12 h-36 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
+      <span className="pointer-events-none absolute inset-x-16 bottom-0 h-32 rounded-full bg-white/30 blur-3xl dark:bg-white/10" />
+      <CardHeader className="relative z-10">
         <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
           <CardTitle>Spending Overview</CardTitle>
           <div className="flex space-x-2">
@@ -221,7 +223,8 @@ export function ExpenseChart() {
               size="sm"
               variant={chartRange === "month" ? "default" : "ghost"}
               onClick={() => setChartRange("month")}
-              className="rounded-full px-4" data-testid="button-chart-month"
+              className="rounded-full border border-transparent px-4 shadow-sm hover:border-white/50 dark:hover:border-white/20"
+              data-testid="button-chart-month"
             >
               Month
             </Button>
@@ -229,7 +232,8 @@ export function ExpenseChart() {
               size="sm"
               variant={chartRange === "week" ? "default" : "ghost"}
               onClick={() => setChartRange("week")}
-              className="rounded-full px-4" data-testid="button-chart-week"
+              className="rounded-full border border-transparent px-4 shadow-sm hover:border-white/50 dark:hover:border-white/20"
+              data-testid="button-chart-week"
             >
               Week
             </Button>
@@ -237,28 +241,35 @@ export function ExpenseChart() {
               size="sm"
               variant={chartRange === "year" ? "default" : "ghost"}
               onClick={() => setChartRange("year")}
-              className="rounded-full px-4" data-testid="button-chart-year"
+              className="rounded-full border border-transparent px-4 shadow-sm hover:border-white/50 dark:hover:border-white/20"
+              data-testid="button-chart-year"
             >
               Year
             </Button>
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative z-10 space-y-6">
         {isLoading ? (
-          <div className="h-80 rounded-lg border border-dashed border-muted-foreground/40 bg-muted/30 animate-pulse" />
+          <div className="h-80 animate-pulse rounded-3xl border border-dashed border-muted-foreground/30 bg-gradient-to-br from-white/60 via-white/40 to-white/20 dark:from-slate-900/60 dark:via-slate-900/40 dark:to-slate-900/30" />
         ) : !hasAnyExpenses ? (
-          <div className="h-80 flex flex-col items-center justify-center text-center space-y-2">
-            <p className="text-muted-foreground font-medium">No expenses yet</p>
+          <div className="flex h-80 flex-col items-center justify-center space-y-3 text-center">
+            <p className="text-base font-semibold text-foreground">No expenses yet</p>
             <p className="text-sm text-muted-foreground">
               Add your first expense to unlock spending insights.
             </p>
           </div>
         ) : (
           <>
-            <div className="mb-4 flex flex-col gap-2 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
-              <span>{rangeSummary}</span>
-              {averageSummary ? <span>{averageSummary}</span> : null}
+            <div className="flex flex-col gap-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/75 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
+                {rangeSummary}
+              </span>
+              {averageSummary ? (
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/75 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
+                  {averageSummary}
+                </span>
+              ) : null}
             </div>
             <div className="relative h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -269,7 +280,7 @@ export function ExpenseChart() {
                       <stop offset="95%" stopColor="#7c3aed" stopOpacity={0.05} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148, 163, 184, 0.35)" />
                   <XAxis
                     dataKey="label"
                     stroke="currentColor"
