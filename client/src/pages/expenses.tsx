@@ -105,8 +105,9 @@ export default function Expenses() {
   return (
     <div className="space-y-10 pb-12">
       <section className="relative overflow-hidden rounded-3xl border border-white/40 bg-gradient-to-br from-white/85 via-white/70 to-purple-100/50 px-8 py-10 shadow-2xl backdrop-blur-2xl transition-colors dark:border-white/10 dark:from-slate-900/80 dark:via-slate-900/50 dark:to-indigo-900/40">
-        <div className="pointer-events-none absolute -top-24 right-0 h-56 w-56 rounded-full bg-purple-400/25 blur-3xl dark:bg-purple-600/25" />
-        <div className="pointer-events-none absolute bottom-0 left-1/3 h-56 w-56 rounded-full bg-primary/25 blur-3xl dark:bg-primary/30" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.18),_transparent_60%)] animate-shimmer-soft dark:bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.28),_transparent_60%)]" />
+        <div className="pointer-events-none absolute -top-24 right-0 h-56 w-56 rounded-full bg-purple-400/25 blur-3xl animate-float-slow dark:bg-purple-600/25" />
+        <div className="pointer-events-none absolute bottom-0 left-1/3 h-56 w-56 rounded-full bg-primary/25 blur-3xl animate-float-slower dark:bg-primary/30" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
@@ -122,7 +123,7 @@ export default function Expenses() {
           <div className="flex flex-wrap items-center gap-3">
             <Button
               variant="outline"
-              className="gap-2"
+              className="gap-2 rounded-full border-white/60 bg-white/70 px-5 text-foreground shadow-sm backdrop-blur hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
               data-testid="button-filter-expenses"
               onClick={() => setIsFilterSheetOpen(true)}
             >
