@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { type ReactNode } from "react";
+import { Children, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 type BreadcrumbItem = {
   label: string;
@@ -30,12 +31,38 @@ export function PageLayout({
   className,
   showThemeToggle = true,
 }: PageLayoutProps) {
+  const childrenArray = Children.toArray(children);
+
+  const contentVariants = {
+    hidden: {},
+    show: {
+      transition: {
+        staggerChildren: 0.12,
+        delayChildren: 0.08,
+      },
+    },
+  } as const;
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 24 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+    },
+  } as const;
+
   return (
     <div className={cn("relative space-y-10 pb-16", className)}>
       <div className="pointer-events-none absolute inset-x-0 -top-32 h-72 bg-gradient-to-b from-primary/15 via-transparent to-transparent animate-float-slow dark:from-primary/20" />
       <div className="pointer-events-none absolute -bottom-32 left-1/2 h-72 w-[90%] -translate-x-1/2 rounded-[6rem] bg-gradient-to-r from-indigo-300/15 via-primary/10 to-purple-300/15 blur-3xl animate-float-slower dark:from-indigo-500/20 dark:via-primary/15 dark:to-purple-500/20" />
 
-      <section className="relative overflow-hidden rounded-[2.25rem] border border-white/50 bg-gradient-to-br from-white/90 via-white/60 to-white/30 px-8 py-10 shadow-2xl shadow-primary/10 backdrop-blur-3xl transition-colors dark:border-white/10 dark:from-slate-900/90 dark:via-slate-900/60 dark:to-slate-900/30">
+      <motion.section
+        initial={{ opacity: 0, y: 32 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="relative overflow-hidden rounded-[2.25rem] border border-white/50 bg-gradient-to-br from-white/90 via-white/60 to-white/30 px-8 py-10 shadow-2xl shadow-primary/10 backdrop-blur-3xl transition-colors dark:border-white/10 dark:from-slate-900/90 dark:via-slate-900/60 dark:to-slate-900/30"
+      >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(124,58,237,0.18),_transparent_60%)] animate-shimmer-soft dark:bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.25),_transparent_65%)]" />
         <div className="pointer-events-none absolute -top-28 -left-16 h-64 w-64 rounded-full bg-primary/25 blur-3xl animate-float-slow dark:bg-primary/40" />
         <div className="pointer-events-none absolute -bottom-32 right-0 h-72 w-72 rounded-full bg-purple-400/20 blur-3xl animate-float-slower dark:bg-purple-500/25" />
@@ -97,9 +124,24 @@ export function PageLayout({
         {headerContent ? (
           <div className="relative mt-8">{headerContent}</div>
         ) : null}
-      </section>
+      </motion.section>
 
-      <div className="relative space-y-10">{children}</div>
+      <motion.div
+        className="relative space-y-10"
+        initial="hidden"
+        animate="show"
+        variants={contentVariants}
+      >
+        {childrenArray.map((child, index) => (
+          <motion.div
+            key={(child as { key?: string })?.key ?? `page-section-${index}`}
+            variants={itemVariants}
+            layout
+          >
+            {child}
+          </motion.div>
+        ))}
+      </motion.div>
     </div>
   );
 }

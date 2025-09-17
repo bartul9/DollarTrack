@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { getCategoryIcon } from "@/lib/categories";
 import { type Category } from "@shared/schema";
 import { fetchCategoryBreakdown } from "@/lib/api";
+import { motion } from "framer-motion";
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("en-US", {
@@ -28,14 +28,21 @@ export function CategoryBreakdown() {
           <CardTitle>Category Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <motion.div
+            className="space-y-4"
+            initial={{ opacity: 0.5 }}
+            animate={{ opacity: 1 }}
+          >
             {Array.from({ length: 5 }).map((_, i) => (
-              <div
+              <motion.div
                 key={i}
                 className="h-16 w-full animate-pulse rounded-2xl bg-gradient-to-r from-white/60 via-white/30 to-white/50 dark:from-slate-900/60 dark:via-slate-900/40 dark:to-slate-900/50"
+                initial={{ opacity: 0.4 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: i * 0.08 }}
               />
             ))}
-          </div>
+          </motion.div>
         </CardContent>
       </Card>
     );
@@ -60,13 +67,32 @@ export function CategoryBreakdown() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <motion.div
+            className="space-y-4"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: {
+                transition: { staggerChildren: 0.08 },
+              },
+            }}
+          >
             {breakdown.slice(0, 5).map((item) => {
               const Icon = getCategoryIcon(item.category.icon);
               const progressWidth = Math.min(100, Math.max(0, item.percentage));
               return (
-                <div
+                <motion.div
                   key={item.category.id}
+                  layout
+                  variants={{
+                    hidden: { opacity: 0, y: 18 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+                    },
+                  }}
                   className="group rounded-2xl border border-white/60 bg-white/75 p-4 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
                   data-testid={`category-${item.category.name
                     .toLowerCase()
@@ -107,10 +133,10 @@ export function CategoryBreakdown() {
                       />
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         )}
 
         <div className="mt-6 border-t border-border pt-4">

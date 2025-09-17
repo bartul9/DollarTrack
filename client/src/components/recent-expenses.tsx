@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { type ExpenseWithCategory } from "@shared/schema";
 import { EditExpenseModal } from "@/components/edit-expense-modal";
 import { useExpenseFilters } from "@/hooks/use-expense-filters";
+import { AnimatePresence, motion } from "framer-motion";
 
 export function RecentExpenses() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -178,14 +179,21 @@ export function RecentExpenses() {
       </CardHeader>
       <CardContent className="relative z-10">
         {isLoading ? (
-          <div className="space-y-4">
+          <motion.div
+            className="space-y-4"
+            initial={{ opacity: 0.6 }}
+            animate={{ opacity: 1 }}
+          >
             {Array.from({ length: 3 }).map((_, i) => (
-              <div
+              <motion.div
                 key={i}
                 className="h-20 w-full animate-pulse rounded-2xl bg-gradient-to-r from-white/60 via-white/35 to-white/55 backdrop-blur dark:from-slate-900/60 dark:via-slate-900/40 dark:to-slate-900/50"
+                initial={{ opacity: 0.4 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: i * 0.1 }}
               />
             ))}
-          </div>
+          </motion.div>
         ) : filteredExpenses.length === 0 ? (
           <div className="space-y-3 py-12 text-center">
             <p className="text-base font-semibold text-foreground">
@@ -198,12 +206,28 @@ export function RecentExpenses() {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredExpenses.slice(0, 10).map((expense: ExpenseWithCategory) => {
+          <motion.div
+            className="space-y-3"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: {
+                transition: { staggerChildren: 0.06 },
+              },
+            }}
+          >
+            <AnimatePresence initial={false}>
+              {filteredExpenses.slice(0, 10).map((expense: ExpenseWithCategory) => {
               const Icon = getCategoryIcon(expense.category.icon);
               return (
-                <div
+                <motion.div
                   key={expense.id}
+                  layout
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 16 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                   className="expense-card flex items-center justify-between rounded-2xl border border-white/60 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:-translate-y-1 hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
                   data-testid={`expense-item-${expense.id}`}
                 >
@@ -265,10 +289,11 @@ export function RecentExpenses() {
                       </Button>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
-          </div>
+            </AnimatePresence>
+          </motion.div>
         )}
       </CardContent>
     </Card>

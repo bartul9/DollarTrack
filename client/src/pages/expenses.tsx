@@ -13,6 +13,7 @@ import { ExpenseFiltersSheet } from "@/components/expense-filters";
 import { ActiveExpenseFilters } from "@/components/active-expense-filters";
 import { useExpenseFilters } from "@/hooks/use-expense-filters";
 import { PageLayout } from "@/components/page-layout";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function Expenses() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -180,11 +181,21 @@ export default function Expenses() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="space-y-4">
+            <motion.div
+              className="space-y-4"
+              initial={{ opacity: 0.6 }}
+              animate={{ opacity: 1 }}
+            >
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-20 rounded-2xl bg-white/40 backdrop-blur dark:bg-slate-900/50" />
+                <motion.div
+                  key={i}
+                  className="h-20 rounded-2xl bg-white/40 backdrop-blur dark:bg-slate-900/50"
+                  initial={{ opacity: 0.4 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: i * 0.08 }}
+                />
               ))}
-            </div>
+            </motion.div>
           ) : filteredExpenses.length === 0 ? (
             <div className="flex flex-col items-center justify-center space-y-4 py-16 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-dashed border-muted bg-muted/50 text-muted-foreground">
@@ -205,12 +216,26 @@ export default function Expenses() {
               </AddExpenseModal>
             </div>
           ) : (
-            <div className="space-y-3">
-              {filteredExpenses.map((expense) => {
-                const Icon = getCategoryIcon(expense.category.icon);
-                return (
-                  <div
+            <motion.div
+              className="space-y-3"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.06 } },
+              }}
+            >
+              <AnimatePresence initial={false}>
+                {filteredExpenses.map((expense) => {
+                  const Icon = getCategoryIcon(expense.category.icon);
+                  return (
+                  <motion.div
                     key={expense.id}
+                    layout
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 18 }}
+                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                     className="expense-card flex items-center justify-between rounded-2xl border border-white/50 bg-white/75 p-5 shadow-md backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60"
                     data-testid={`expense-row-${expense.id}`}
                   >
@@ -245,10 +270,11 @@ export default function Expenses() {
                         -{formatCurrency(expense.amount)}
                       </p>
                     </div>
-                  </div>
+                  </motion.div>
                 );
-              })}
-            </div>
+                })}
+              </AnimatePresence>
+            </motion.div>
           )}
         </CardContent>
       </Card>

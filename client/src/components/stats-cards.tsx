@@ -8,6 +8,7 @@ import {
   fetchCategoryBreakdown,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 const money = (n) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
@@ -63,11 +64,21 @@ export function StatsCards() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <motion.div
+        className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className={cn(baseCard, "h-44 animate-pulse")} />
+          <motion.div
+            key={i}
+            className={cn(baseCard, "h-44 animate-pulse")}
+            initial={{ opacity: 0.4 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: i * 0.08 }}
+          />
         ))}
-      </div>
+      </motion.div>
     );
   }
 
@@ -136,7 +147,19 @@ export function StatsCards() {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+    <motion.div
+      className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4"
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: {},
+        visible: {
+          transition: {
+            staggerChildren: 0.08,
+          },
+        },
+      }}
+    >
       {stats.map(
         ({
           title,
@@ -150,13 +173,25 @@ export function StatsCards() {
           trendTone,
           testId,
         }) => (
-          <Card
+          <motion.div
             key={title}
-            className={cn(
-              "relative overflow-hidden rounded-3xl border bg-gradient-to-br from-white/90 via-white/60 to-white/35 backdrop-blur-xl dark:from-slate-900/85 dark:via-slate-900/60 dark:to-slate-900/35 dark:border-white/10 border-white/60 shadow-[0_18px_60px_rgba(15,23,42,0.08)]",
-              "h-48" // <- consistent height
-            )}
+            variants={{
+              hidden: { opacity: 0, y: 24, scale: 0.96 },
+              visible: {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+              },
+            }}
+            layout
           >
+            <Card
+              className={cn(
+                "relative overflow-hidden rounded-3xl border bg-gradient-to-br from-white/90 via-white/60 to-white/35 backdrop-blur-xl dark:from-slate-900/85 dark:via-slate-900/60 dark:to-slate-900/35 dark:border-white/10 border-white/60 shadow-[0_18px_60px_rgba(15,23,42,0.08)]",
+                "h-48"
+              )}
+            >
             <span
               className={cn(
                 "pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br opacity-80",
@@ -206,9 +241,10 @@ export function StatsCards() {
                 )}
               </div>
             </CardContent>
-          </Card>
+            </Card>
+          </motion.div>
         )
       )}
-    </div>
+    </motion.div>
   );
 }

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { fetchCategories } from "@/lib/api";
 import { useExpenseFilters } from "@/hooks/use-expense-filters";
 import type { Category } from "@shared/schema";
+import { AnimatePresence, motion } from "framer-motion";
 
 const formatDate = (date: Date) =>
   date.toLocaleDateString("en-US", {
@@ -70,31 +71,44 @@ export function ActiveExpenseFilters({
 
   return (
     <div className={cn("flex flex-wrap items-center gap-2", className)}>
-      {filters.categories.map((categoryId) => {
-        const category = categoryMap.get(categoryId);
-        return (
-          <button
-            key={categoryId}
-            type="button"
-            onClick={() => removeCategory(categoryId)}
-            className="inline-flex items-center gap-2 rounded-full border border-white/50 bg-white/80 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm transition hover:border-primary/40 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:border-white/10 dark:bg-slate-900/60"
-          >
-            <span>{category?.name ?? "Category"}</span>
-            <X className="h-3 w-3" aria-hidden="true" />
-          </button>
-        );
-      })}
+      <AnimatePresence initial={false}>
+        {filters.categories.map((categoryId) => {
+          const category = categoryMap.get(categoryId);
+          return (
+            <motion.button
+              key={categoryId}
+              type="button"
+              onClick={() => removeCategory(categoryId)}
+              className="inline-flex items-center gap-2 rounded-full border border-white/50 bg-white/80 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm transition hover:border-primary/40 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:border-white/10 dark:bg-slate-900/60"
+              layout
+              initial={{ opacity: 0, y: -6, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -6, scale: 0.9 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <span>{category?.name ?? "Category"}</span>
+              <X className="h-3 w-3" aria-hidden="true" />
+            </motion.button>
+          );
+        })}
 
-      {hasDateFilter && rangeLabel && (
-        <button
-          type="button"
-          onClick={clearDate}
-          className="inline-flex items-center gap-2 rounded-full border border-white/50 bg-white/80 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm transition hover:border-primary/40 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:border-white/10 dark:bg-slate-900/60"
-        >
-          <span>{rangeLabel}</span>
-          <X className="h-3 w-3" aria-hidden="true" />
-        </button>
-      )}
+        {hasDateFilter && rangeLabel && (
+          <motion.button
+            key="date-filter"
+            type="button"
+            onClick={clearDate}
+            className="inline-flex items-center gap-2 rounded-full border border-white/50 bg-white/80 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm transition hover:border-primary/40 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:border-white/10 dark:bg-slate-900/60"
+            layout
+            initial={{ opacity: 0, y: -6, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.9 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <span>{rangeLabel}</span>
+            <X className="h-3 w-3" aria-hidden="true" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       <Button
         variant="ghost"
