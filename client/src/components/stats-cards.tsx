@@ -185,7 +185,7 @@ export function StatsCards({}: StatsCardsProps) {
             <span className="pointer-events-none absolute inset-x-6 -top-6 h-24 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
             <span className="pointer-events-none absolute inset-x-8 bottom-0 h-24 rounded-full bg-white/30 blur-3xl dark:bg-white/10" />
             <CardContent className="relative z-10 space-y-6 px-6 py-6 sm:px-8">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                     {stat.title}
@@ -197,14 +197,19 @@ export function StatsCards({}: StatsCardsProps) {
                     {stat.value}
                   </p>
                 </div>
-                <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/60 bg-white/80 shadow-inner shadow-primary/10 dark:border-white/10 dark:bg-slate-900/70">
+                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/60 bg-white/80 shadow-inner shadow-primary/10 dark:border-white/10 dark:bg-slate-900/70">
                   <span
                     className={cn(
                       "absolute inset-0 rounded-2xl bg-gradient-to-br opacity-80",
                       stat.accent
                     )}
                   />
-                  <Icon className={cn("relative z-10 h-6 w-6", stat.iconColor)} />
+                  <Icon
+                    className={cn(
+                      "relative z-10 h-6 w-6 shrink-0",
+                      stat.iconColor
+                    )}
+                  />
                 </div>
               </div>
               <div className="space-y-3 text-sm">

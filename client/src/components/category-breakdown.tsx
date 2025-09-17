@@ -42,7 +42,7 @@ export function CategoryBreakdown() {
   }
 
   return (
-    <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/85 via-white/55 to-white/30 shadow-[0_24px_60px_rgba(15,23,42,0.1)] dark:from-slate-900/80 dark:via-slate-900/55 dark:to-slate-900/30">
+    <Card className="relative flex h-full flex-col overflow-hidden border-transparent bg-gradient-to-br from-white/85 via-white/55 to-white/30 shadow-[0_24px_60px_rgba(15,23,42,0.1)] dark:from-slate-900/80 dark:via-slate-900/55 dark:to-slate-900/30">
       <span className="pointer-events-none absolute inset-x-10 -top-12 h-40 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
       <span className="pointer-events-none absolute inset-x-16 bottom-0 h-32 rounded-full bg-white/30 blur-3xl dark:bg-white/10" />
       <CardHeader className="relative z-10">
@@ -51,7 +51,7 @@ export function CategoryBreakdown() {
           Where your spending is concentrated this period
         </p>
       </CardHeader>
-      <CardContent className="relative z-10 space-y-6">
+      <CardContent className="relative z-10 flex flex-1 flex-col space-y-6">
         {!breakdown || breakdown.length === 0 ? (
           <div className="py-8 text-center">
             <p className="text-muted-foreground">No expenses found</p>
@@ -113,7 +113,7 @@ export function CategoryBreakdown() {
           </div>
         )}
 
-        <div className="mt-6 border-t border-border pt-4">
+        <div className="mt-6 border-t border-border pt-4 md:mt-auto">
           <Link href="/categories">
             <a
               className="block w-full rounded-full bg-white/70 py-2 text-center text-sm font-medium text-primary backdrop-blur transition hover:bg-white/90 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"

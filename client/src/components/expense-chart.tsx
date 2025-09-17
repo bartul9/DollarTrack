@@ -257,7 +257,7 @@ export function ExpenseChart() {
     : undefined;
 
   return (
-    <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/90 via-white/55 to-white/30 shadow-[0_32px_70px_rgba(15,23,42,0.08)] transition-shadow hover:shadow-[0_36px_80px_rgba(15,23,42,0.12)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30 lg:col-span-2">
+    <Card className="relative flex h-full flex-col overflow-hidden border-transparent bg-gradient-to-br from-white/90 via-white/55 to-white/30 shadow-[0_32px_70px_rgba(15,23,42,0.08)] transition-shadow hover:shadow-[0_36px_80px_rgba(15,23,42,0.12)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30 lg:col-span-2">
       <span className="pointer-events-none absolute inset-x-10 -top-12 h-36 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
       <span className="pointer-events-none absolute inset-x-16 bottom-0 h-32 rounded-full bg-white/30 blur-3xl dark:bg-white/10" />
       <CardHeader className="relative z-10">
@@ -294,11 +294,11 @@ export function ExpenseChart() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="relative z-10 space-y-6">
+      <CardContent className="relative z-10 flex flex-1 flex-col space-y-6">
         {isLoading ? (
-          <div className="h-80 animate-pulse rounded-3xl border border-dashed border-muted-foreground/30 bg-gradient-to-br from-white/60 via-white/40 to-white/20 dark:from-slate-900/60 dark:via-slate-900/40 dark:to-slate-900/30" />
+          <div className="min-h-[18rem] flex-1 animate-pulse rounded-3xl border border-dashed border-muted-foreground/30 bg-gradient-to-br from-white/60 via-white/40 to-white/20 dark:from-slate-900/60 dark:via-slate-900/40 dark:to-slate-900/30" />
         ) : !hasAnyExpenses ? (
-          <div className="flex h-80 flex-col items-center justify-center space-y-3 text-center">
+          <div className="flex min-h-[18rem] flex-1 flex-col items-center justify-center space-y-3 text-center">
             <p className="text-base font-semibold text-foreground">No expenses yet</p>
             <p className="text-sm text-muted-foreground">
               Add your first expense to unlock spending insights.
@@ -316,12 +316,13 @@ export function ExpenseChart() {
                 </span>
               ) : null}
             </div>
-            <div className="relative h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, left: 0, right: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.7} />
+            <div className="relative flex-1">
+              <div className="relative h-[18rem] w-full flex-1 md:h-[20rem]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 10, left: 0, right: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.7} />
                       <stop offset="95%" stopColor="#7c3aed" stopOpacity={0.05} />
                     </linearGradient>
                   </defs>
@@ -354,6 +355,7 @@ export function ExpenseChart() {
                   />
                 </AreaChart>
               </ResponsiveContainer>
+              </div>
               {!hasDataInRange ? (
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                   <div className="rounded-md border border-dashed border-muted-foreground/40 bg-background/90 px-4 py-3 text-sm text-muted-foreground shadow-sm">
