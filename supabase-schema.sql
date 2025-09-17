@@ -21,6 +21,18 @@ CREATE TABLE IF NOT EXISTS expenses (
 CREATE INDEX IF NOT EXISTS expenses_date_idx ON expenses(date);
 CREATE INDEX IF NOT EXISTS expenses_category_id_idx ON expenses(category_id);
 
+CREATE TABLE IF NOT EXISTS settings (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  currency text NOT NULL DEFAULT 'USD',
+  monthly_budget numeric(12, 2),
+  notifications_enabled boolean NOT NULL DEFAULT true,
+  created_at timestamp NOT NULL DEFAULT now(),
+  updated_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS settings_user_id_idx ON settings(user_id);
+
 INSERT INTO categories (name, color, icon) VALUES
   ('Food & Dining', '#3B82F6', 'utensils'),
   ('Transport', '#10B981', 'car'),

@@ -23,6 +23,16 @@ type ExpenseRow = {
   } | null;
 };
 
+type SettingsRow = {
+  id: string;
+  user_id: string;
+  currency: string;
+  monthly_budget: string | null;
+  notifications_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type ExpensesSummary = {
   total: number;
   monthly: number;
@@ -51,6 +61,30 @@ const mapExpense = (row: ExpenseRow): ExpenseWithCategory => ({
     icon: row.categories?.icon ?? "more-horizontal",
   },
 });
+
+const mapSettings = (row: SettingsRow): UserSettings => ({
+  id: row.id,
+  userId: row.user_id,
+  currency: row.currency,
+  monthlyBudget: row.monthly_budget ?? "",
+  notificationsEnabled: row.notifications_enabled,
+});
+
+const createDefaultSettings = (userId: string): UserSettings => ({
+  id: null,
+  userId,
+  currency: "USD",
+  monthlyBudget: "",
+  notificationsEnabled: true,
+});
+
+export type UserSettings = {
+  id: string | null;
+  userId: string;
+  currency: string;
+  monthlyBudget: string;
+  notificationsEnabled: boolean;
+};
 
 export async function fetchCategories(): Promise<Category[]> {
   const { data, error } = await supabase
@@ -306,4 +340,47 @@ export async function updateExpense(
 export async function deleteExpense(id: string): Promise<void> {
   const { error } = await supabase.from("expenses").delete().eq("id", id);
   if (error) throw error;
+}
+
+export async function fetchSettings(userId: string): Promise<UserSettings> {
+  const { data, error } = await supabase
+    .from("settings")
+    .select(
+      "id, user_id, currency, monthly_budget, notifications_enabled, created_at, updated_at"
+    )
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) {
+    return createDefaultSettings(userId);
+  }
+
+  return mapSettings(data as SettingsRow);
+}
+
+export async function saveSettings(
+  userId: string,
+  settings: Omit<UserSettings, "id" | "userId">
+): Promise<UserSettings> {
+  const payload = {
+    user_id: userId,
+    currency: settings.currency,
+    monthly_budget:
+      settings.monthlyBudget.trim().length > 0
+        ? settings.monthlyBudget
+        : null,
+    notifications_enabled: settings.notificationsEnabled,
+  };
+
+  const { data, error } = await supabase
+    .from("settings")
+    .upsert(payload, { onConflict: "user_id" })
+    .select(
+      "id, user_id, currency, monthly_budget, notifications_enabled, created_at, updated_at"
+    )
+    .single();
+
+  if (error) throw error;
+  return mapSettings(data as SettingsRow);
 }
