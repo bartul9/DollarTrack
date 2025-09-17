@@ -15,7 +15,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "dist", // <- relative to client/
+    outDir: "dist",
     emptyOutDir: true,
   },
 });
