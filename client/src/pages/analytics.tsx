@@ -1,10 +1,8 @@
-﻿// src/pages/analytics.jsx
 "use client";
 
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import {
   ChartContainer,
   ChartTooltip,
@@ -17,14 +15,9 @@ import {
   subMonths,
   format,
   differenceInCalendarDays,
+  isValid as isValidDate,
 } from "date-fns";
-import {
-  TrendingDown,
-  Wallet,
-  PieChart,
-  CalendarRange,
-  Activity,
-} from "lucide-react";
+import { TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PageLayout } from "@/components/page-layout";
 import {
@@ -32,19 +25,114 @@ import {
   fetchExpenses,
   fetchExpensesSummary,
 } from "@/lib/api";
+import type { ExpenseWithCategory, Category } from "@shared/schema";
 
-// ---- helpers ----------------------------------------------------------------
+// ── helpers ───────────────────────────────────────────────────────────────────
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const fmtMoney = (n) =>
+const toNumber = (v: unknown): number => {
+  if (typeof v === "number") return Number.isFinite(v) ? v : 0;
+  if (typeof v === "string") {
+    // strip currency/commas/spaces
+    const cleaned = v.replace(/[^\d.-]/g, "");
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : 0;
+  }
+  return 0;
+};
+
+const safeDate = (v: unknown): Date | null => {
+  const d = new Date(String(v ?? ""));
+  return isValidDate(d) ? d : null;
+};
+
+const toCurrency = (n: unknown) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 2,
-  }).format(Number.isFinite(n) ? n : 0);
+  }).format(toNumber(n));
 
-// ---- page -------------------------------------------------------------------
+const fmtAxisMoney = (value: number) => {
+  const val = Number.isFinite(value) ? value : 0;
+  const abs = Math.abs(val);
+  if (abs >= 1_000_000) return `$${(val / 1_000_000).toFixed(1)}m`;
+  if (abs >= 1_000) return `$${(val / 1_000).toFixed(1)}k`;
+  if (abs >= 100) return `$${val.toFixed(0)}`;
+  return `$${val.toFixed(1)}`;
+};
+
+const withFallbackColor = (hex?: string) =>
+  typeof hex === "string" && /^#?[0-9a-f]{3,8}$/i.test(hex)
+    ? hex.startsWith("#")
+      ? hex
+      : `#${hex}`
+    : "hsl(var(--primary))";
+
+// ── small UI bits ─────────────────────────────────────────────────────────────
+
+function CardGlow({
+  topClass,
+  bottomClass,
+}: {
+  topClass?: string;
+  bottomClass?: string;
+}) {
+  return (
+    <>
+      {topClass ? <span className={topClass} /> : null}
+      {bottomClass ? <span className={bottomClass} /> : null}
+    </>
+  );
+}
+
+function HighlightCard({
+  label,
+  value,
+  description,
+}: {
+  label: string;
+  value: string;
+  description: string;
+}) {
+  return (
+    <div className="relative px-6 py-5 text-sm shadow-[0_18px_50px_rgba(14,116,144,0.1)] sm:px-7 sm:py-6">
+      <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/75 via-white/45 to-white/15 dark:from-white/10 dark:via-white/5 dark:to-transparent" />
+      <CardGlow
+        topClass="pointer-events-none absolute inset-x-6 -top-10 h-24 rounded-full bg-white/45 blur-3xl dark:bg-white/10"
+        bottomClass="pointer-events-none absolute inset-x-6 bottom-0 h-20 rounded-full bg-white/30 blur-3xl dark:bg-white/10"
+      />
+      <div className="relative z-10 space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+          {label}
+        </p>
+        <p className="text-2xl font-semibold text-foreground">{value}</p>
+        <p className="text-xs text-muted-foreground">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+function CategoryProgress({ value, color }: { value: number; color?: string }) {
+  const clamped = Math.max(
+    0,
+    Math.min(100, Number.isFinite(value) ? value : 0)
+  );
+  return (
+    <div className="relative h-2 w-full overflow-hidden rounded-full bg-white/20 dark:bg-white/10">
+      <div
+        className="h-full rounded-full transition-all duration-500 ease-out"
+        style={{
+          width: `${clamped}%`,
+          backgroundColor: withFallbackColor(color),
+        }}
+      />
+    </div>
+  );
+}
+
+// ── page ─────────────────────────────────────────────────────────────────────
 
 export default function Analytics() {
   const { data: summary, isLoading: loadingSummary } = useQuery({
@@ -52,103 +140,144 @@ export default function Analytics() {
     queryFn: fetchExpensesSummary,
   });
 
-  const { data: expenses, isLoading: loadingExpenses } = useQuery({
+  const { data: expensesRaw, isLoading: loadingExpenses } = useQuery({
     queryKey: ["expenses", "list"],
     queryFn: fetchExpenses,
   });
 
-  const { data: categoryBreakdown, isLoading: loadingBreakdown } = useQuery({
+  const { data: categoriesRaw, isLoading: loadingBreakdown } = useQuery({
     queryKey: ["expenses", "categories"],
     queryFn: fetchCategoryBreakdown,
   });
 
   const isLoading = loadingSummary || loadingExpenses || loadingBreakdown;
 
-  const totalExpenses = summary?.total ?? 0;
-  const monthlyExpenses = summary?.monthly ?? 0;
-  const weeklyExpenses = summary?.weekly ?? 0;
-  const totalTransactions = expenses?.length ?? 0;
+  // sanitize expenses
+  const expenses = useMemo(() => {
+    return (expensesRaw ?? [])
+      .map((e) => {
+        const date = safeDate(e?.date);
+        const amount = toNumber(e?.amount);
+        if (!date || amount <= 0) return null;
+        return {
+          ...e,
+          amount: String(amount),
+          date: date.toISOString(),
+          category: e?.category ?? ({} as { id?: string; name?: string }),
+          description: String(e?.description ?? "").trim(),
+        } as ExpenseWithCategory;
+      })
+      .filter(Boolean) as ExpenseWithCategory[];
+  }, [expensesRaw]);
 
-  // highest expense
+  // sanitize category breakdown
+  const categoryBreakdown = useMemo(() => {
+    const arr =
+      (categoriesRaw ?? []).map((item) => {
+        const amount = toNumber(item?.amount);
+        const percentage = Number.isFinite(item?.percentage)
+          ? Number(item.percentage)
+          : 0;
+        const category: Category = {
+          id: String(item?.category?.id ?? ""),
+          name: String(item?.category?.name ?? "Unknown"),
+          color: withFallbackColor(item?.category?.color),
+        } as any;
+        return amount > 0 ? { amount, percentage, category } : null;
+      }) || [];
+    return arr.filter(Boolean) as Array<{
+      amount: number;
+      percentage: number;
+      category: Category;
+    }>;
+  }, [categoriesRaw]);
+
+  // derive metrics
+  const totalExpenses = toNumber(summary?.total);
+  const monthlyExpenses = toNumber(summary?.monthly);
+  const weeklyExpenses = toNumber(summary?.weekly);
+
+  const totalTransactions = expenses.length;
+  const totalCategories = categoryBreakdown.length;
+  const hasExpenses = totalTransactions > 0;
+
   const highestExpense = useMemo(() => {
-    if (!expenses?.length) return null;
-    return expenses.reduce((max, e) =>
-      parseFloat(e.amount) > parseFloat(max.amount) ? e : max
+    if (!hasExpenses) return null;
+    return expenses.reduce((max, expense) =>
+      toNumber(expense.amount) > toNumber(max.amount) ? expense : max
     );
-  }, [expenses]);
+  }, [expenses, hasExpenses]);
 
   const averageTransaction = useMemo(() => {
-    if (!expenses?.length) return 0;
-    return totalExpenses / expenses.length;
-  }, [expenses, totalExpenses]);
+    if (!hasExpenses) return 0;
+    return totalExpenses / totalTransactions || 0;
+  }, [hasExpenses, totalExpenses, totalTransactions]);
 
-  // top category (ensure sorted)
   const topCategory = useMemo(() => {
-    if (!categoryBreakdown?.length) return null;
-    const sorted = [...categoryBreakdown].sort((a, b) => b.amount - a.amount);
-    return sorted[0];
-  }, [categoryBreakdown]);
+    if (!totalExpenses || !categoryBreakdown.length) return null;
+    return [...categoryBreakdown].sort((a, b) => b.amount - a.amount)[0];
+  }, [categoryBreakdown, totalExpenses]);
 
-  // last 6 months trend (for MoM calc)
-  const monthlyTrendData = useMemo(() => {
-    const now = new Date();
-    const months = Array.from({ length: 6 }, (_, i) => subMonths(now, 5 - i));
-
-    return months.map((monthDate) => {
-      const start = startOfMonth(monthDate);
-      const end = endOfMonth(monthDate);
-      const totalForMonth =
-        expenses
-          ?.filter((exp) => {
-            const d = new Date(exp.date);
-            return d >= start && d <= end;
-          })
-          .reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0) ?? 0;
-
-      return {
-        month: format(monthDate, "MMM"),
-        amount: Number(totalForMonth.toFixed(2)),
-      };
-    });
-  }, [expenses]);
+  const monthlyTrendData = useMemo(
+    () =>
+      Array.from({ length: 6 }, (_, index) => {
+        const reference = subMonths(new Date(), 5 - index);
+        const start = startOfMonth(reference);
+        const end = endOfMonth(reference);
+        const totalForMonth = expenses.reduce((sum, expense) => {
+          const d = safeDate(expense.date);
+          if (d && d >= start && d <= end) {
+            return sum + toNumber(expense.amount);
+          }
+          return sum;
+        }, 0);
+        return {
+          month: format(reference, "MMM"),
+          amount: Number(totalForMonth.toFixed(2)),
+        };
+      }),
+    [expenses]
+  );
 
   const monthOverMonthChange = useMemo(() => {
-    if (monthlyTrendData.length < 2) return null;
+    if (!hasExpenses || monthlyTrendData.length < 2) return null;
     const latest = monthlyTrendData.at(-1)?.amount ?? 0;
-    const prev = monthlyTrendData.at(-2)?.amount ?? 0;
-    if (prev === 0) return latest === 0 ? 0 : null; // avoid div by 0
-    return ((latest - prev) / prev) * 100;
-  }, [monthlyTrendData]);
+    const previous = monthlyTrendData.at(-2)?.amount ?? 0;
+    if (previous === 0) return latest === 0 ? 0 : null;
+    return ((latest - previous) / previous) * 100;
+  }, [monthlyTrendData, hasExpenses]);
 
-  // weekday spending bars
-  const weekdaySpendingData = useMemo(() => {
-    return weekdayLabels.map((label, idx) => {
-      const total =
-        expenses
-          ?.filter((e) => new Date(e.date).getDay() === idx)
-          .reduce((s, e) => s + parseFloat(e.amount || 0), 0) ?? 0;
+  const weekdaySpendingData = useMemo(
+    () =>
+      weekdayLabels.map((label, index) => {
+        const total = expenses.reduce((sum, expense) => {
+          const d = safeDate(expense.date);
+          if (d && d.getDay() === index) {
+            return sum + toNumber(expense.amount);
+          }
+          return sum;
+        }, 0);
+        return { day: label, amount: Number(total.toFixed(2)) };
+      }),
+    [expenses]
+  );
 
-      return { day: label, amount: Number(total.toFixed(2)) };
-    });
-  }, [expenses]);
-
-  // month progress
   const daysElapsedThisMonth = useMemo(() => {
     const start = startOfMonth(new Date());
-    return differenceInCalendarDays(new Date(), start) + 1;
+    return Math.max(1, differenceInCalendarDays(new Date(), start) + 1);
   }, []);
 
   const avgPerDayThisMonth = useMemo(() => {
-    if (!monthlyExpenses) return 0;
-    return monthlyExpenses / Math.max(daysElapsedThisMonth, 1);
+    const m = monthlyExpenses;
+    if (!Number.isFinite(m) || m <= 0) return 0;
+    return m / daysElapsedThisMonth;
   }, [monthlyExpenses, daysElapsedThisMonth]);
 
-  // textual insights
   const insights = useMemo(() => {
-    const out = [];
+    const messages: string[] = [];
 
     if (topCategory && topCategory.amount > 0) {
-      out.push(
+      messages.push(
         `${
           topCategory.category.name
         } accounts for ${topCategory.percentage.toFixed(
@@ -158,33 +287,38 @@ export default function Analytics() {
     }
 
     if (highestExpense) {
-      const n = fmtMoney(parseFloat(highestExpense.amount));
-      const d = highestExpense.description || "an item";
-      out.push(`Your largest purchase was ${n} for ${d}.`);
+      const value = toCurrency(toNumber(highestExpense.amount));
+      const descriptor =
+        highestExpense.description?.trim() ||
+        highestExpense.category?.name ||
+        "an item";
+      messages.push(`Your largest purchase was ${value} for ${descriptor}.`);
     }
 
     if (monthOverMonthChange !== null) {
       const delta = Math.abs(monthOverMonthChange).toFixed(1);
-      if (monthOverMonthChange > 0)
-        out.push(`Spending is up ${delta}% vs last month.`);
-      else if (monthOverMonthChange < 0)
-        out.push(`Spending is down ${delta}% vs last month.`);
-      else out.push("Spending is in line with last month.");
+      if (monthOverMonthChange > 0) {
+        messages.push(`Spending is up ${delta}% vs last month.`);
+      } else if (monthOverMonthChange < 0) {
+        messages.push(`Spending is down ${delta}% vs last month.`);
+      } else {
+        messages.push("Spending is in line with last month.");
+      }
     }
 
     if (monthlyExpenses > 0) {
-      out.push(
-        `You are averaging ${fmtMoney(avgPerDayThisMonth)} per day this month.`
+      messages.push(
+        `You are averaging ${toCurrency(
+          avgPerDayThisMonth
+        )} per day this month.`
       );
     }
 
     if (weeklyExpenses > 0) {
-      out.push(`Last 7 days total: ${fmtMoney(weeklyExpenses)}.`);
+      messages.push(`Last 7 days total: ${toCurrency(weeklyExpenses)}.`);
     }
 
-    if (out.length === 0)
-      out.push("Add expenses to generate personalized insights.");
-    return out;
+    return messages;
   }, [
     topCategory,
     highestExpense,
@@ -198,109 +332,38 @@ export default function Analytics() {
   const previousMonthlyAmount =
     monthlyTrendData.length > 1 ? monthlyTrendData.at(-2)?.amount ?? 0 : 0;
 
-  // ---- stat cards config -----------------------------------------------------
+  const updatedAtLabel = useMemo(
+    () => format(new Date(), "MMM d, yyyy 'at' h:mma"),
+    []
+  );
 
-  const statsCards = [
-    {
-      title: "Total Spending",
-      value: fmtMoney(totalExpenses),
-      meta: `${totalTransactions} ${
-        totalTransactions === 1 ? "transaction" : "transactions"
-      } recorded`,
-      icon: Wallet,
-      accent: "from-rose-500/25 via-rose-400/10 to-transparent",
-      iconAccent: "text-rose-500 dark:text-rose-400",
-      pillValue:
-        monthOverMonthChange !== null && monthOverMonthChange !== 0
-          ? `${
-              monthOverMonthChange > 0 ? "+" : ""
-            }${monthOverMonthChange.toFixed(1)}%`
-          : "N/A",
-      pillTone:
-        monthOverMonthChange !== null
-          ? monthOverMonthChange > 0
-            ? "text-rose-500 dark:text-rose-400"
-            : monthOverMonthChange < 0
-            ? "text-emerald-500 dark:text-emerald-400"
-            : "text-muted-foreground"
-          : "text-muted-foreground",
-      pillDescription:
-        monthOverMonthChange !== null && monthOverMonthChange !== 0
-          ? "vs last month"
-          : "Tracking overall spend",
-      footnote:
-        latestMonthlyAmount > 0
-          ? `${fmtMoney(latestMonthlyAmount)} in the latest month`
-          : undefined,
-    },
-    {
-      title: "Monthly Spend",
-      value: fmtMoney(monthlyExpenses),
-      meta: `Week-to-date: ${fmtMoney(weeklyExpenses)}`,
-      icon: CalendarRange,
-      accent: "from-sky-500/25 via-sky-400/10 to-transparent",
-      iconAccent: "text-sky-500 dark:text-sky-400",
-      pillValue: fmtMoney(avgPerDayThisMonth),
-      pillTone: "text-sky-600 dark:text-sky-300",
-      pillDescription: "Average per day this month",
-      footnote:
-        previousMonthlyAmount > 0
-          ? `Previous month: ${fmtMoney(previousMonthlyAmount)}`
-          : undefined,
-    },
-    {
-      title: "Average Transaction",
-      value: fmtMoney(averageTransaction),
-      meta:
-        totalTransactions > 0
-          ? `Across ${totalTransactions} ${
-              totalTransactions === 1 ? "record" : "records"
-            }`
-          : "No transactions yet",
-      icon: Activity,
-      accent: "from-violet-500/25 via-violet-400/10 to-transparent",
-      iconAccent: "text-violet-500 dark:text-violet-400",
-      pillValue: highestExpense
-        ? fmtMoney(parseFloat(highestExpense.amount))
-        : "N/A",
-      pillTone: highestExpense
-        ? "text-violet-500 dark:text-violet-300"
-        : "text-muted-foreground",
-      pillDescription: highestExpense
-        ? "Largest purchase"
-        : "No large purchases yet",
-      footnote: highestExpense?.description
-        ? `For ${highestExpense.description}`
-        : undefined,
-    },
-    {
-      title: "Top Category",
-      value: topCategory ? fmtMoney(topCategory.amount) : fmtMoney(0),
-      meta: topCategory
-        ? `Top category: ${topCategory.category.name}`
-        : "No category insights yet",
-      icon: PieChart,
-      accent: "from-emerald-500/25 via-emerald-400/10 to-transparent",
-      iconAccent: "text-emerald-500 dark:text-emerald-400",
-      pillValue: topCategory ? `${topCategory.percentage.toFixed(1)}%` : "N/A",
-      pillTone: topCategory
-        ? "text-emerald-500 dark:text-emerald-300"
-        : "text-muted-foreground",
-      pillDescription: topCategory
-        ? "of total spend"
-        : "Track spending to compare",
-      categoryColor: topCategory?.category?.color,
-      categoryLabel: topCategory
-        ? `${topCategory.category.name} is leading`
-        : undefined,
-      footnote:
-        totalExpenses > 0
-          ? `${fmtMoney(totalExpenses)} total across categories`
-          : undefined,
-    },
-  ];
+  const largestPurchaseValue = highestExpense
+    ? toCurrency(toNumber(highestExpense.amount))
+    : toCurrency(0);
 
-  // ---- render ----------------------------------------------------------------
+  const largestPurchaseDescription = highestExpense
+    ? [highestExpense.description, highestExpense.category?.name]
+        .map((part) => part?.trim())
+        .filter((part): part is string => Boolean(part && part.length > 0))
+        .join(" • ") || "Largest purchase recorded"
+    : "No high-value expenses yet";
+
+  const monthOverMonthLabel =
+    monthOverMonthChange !== null
+      ? `${monthOverMonthChange > 0 ? "+" : ""}${Math.abs(
+          monthOverMonthChange
+        ).toFixed(1)}%`
+      : null;
+
+  // unique gradient ids (fix for empty id / fill)
+  const trendGradId = useMemo(
+    () => `grad-trend-${Math.random().toString(36).slice(2)}`,
+    []
+  );
+  const weekdayGradId = useMemo(
+    () => `grad-weekday-${Math.random().toString(36).slice(2)}`,
+    []
+  );
 
   return (
     <PageLayout
@@ -310,38 +373,39 @@ export default function Analytics() {
       breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: "Analytics" }]}
       headerContent={
         <div className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-white/60 bg-white/75 px-5 py-4 text-sm shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-900/65">
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
-                This month
-              </p>
-              <p className="mt-2 text-2xl font-semibold text-foreground">
-                {fmtMoney(monthlyExpenses)}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Averaging {fmtMoney(avgPerDayThisMonth)} per day
-              </p>
+          {hasExpenses ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <HighlightCard
+                label="This month"
+                value={toCurrency(monthlyExpenses)}
+                description={`Averaging ${toCurrency(
+                  avgPerDayThisMonth
+                )} per day`}
+              />
+              <HighlightCard
+                label="Largest purchase"
+                value={largestPurchaseValue}
+                description={largestPurchaseDescription}
+              />
             </div>
-            <div className="rounded-2xl border border-white/60 bg-white/75 px-5 py-4 text-sm shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-900/65">
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
-                Largest purchase
-              </p>
-              <p className="mt-2 text-2xl font-semibold text-foreground">
-                {highestExpense
-                  ? fmtMoney(parseFloat(highestExpense.amount))
-                  : fmtMoney(0)}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {highestExpense?.description || "No high-value expenses yet"}
-              </p>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <HighlightCard
+                label="No data yet"
+                value="Add your first expense"
+                description="Once you add transactions, insights will appear here."
+              />
+              <HighlightCard
+                label="Tips"
+                value="Categorize transactions"
+                description="Adding categories unlocks distribution and top-category stats."
+              />
             </div>
-          </div>
+          )}
 
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
-              Updated {format(new Date(), "MMM d, yyyy 'at' h:mma")}
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
+            <span>Updated {updatedAtLabel}</span>
+            <span>
               {totalTransactions}{" "}
               {totalTransactions === 1 ? "transaction" : "transactions"} tracked
             </span>
@@ -349,98 +413,21 @@ export default function Analytics() {
         </div>
       }
     >
-      {/* Stat cards */}
-      {isLoading ? (
+      {/* top stat skeletons */}
+      {isLoading && (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Card
-              key={i}
-              className="h-40 animate-pulse rounded-[2rem] border-transparent bg-gradient-to-br from-white/80 via-white/50 to-white/30 dark:from-slate-900/70 dark:via-slate-900/45 dark:to-slate-900/30"
-            />
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Card key={index} className="h-44 animate-pulse opacity-60" />
           ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {statsCards.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <Card
-                key={stat.title}
-                className={cn(
-                  "relative overflow-hidden border-transparent bg-gradient-to-br from-white/85 via-white/50 to-white/25 shadow-[0_28px_55px_rgba(14,116,144,0.12)] transition-all hover:-translate-y-0.5 hover:shadow-[0_32px_65px_rgba(14,116,144,0.16)] dark:from-slate-900/80 dark:via-slate-900/55 dark:to-slate-900/30",
-                  "card-hover"
-                )}
-              >
-                <span
-                  className={cn(
-                    "pointer-events-none absolute inset-0 bg-gradient-to-br opacity-80",
-                    stat.accent
-                  )}
-                />
-                <span className="pointer-events-none absolute inset-x-6 -top-6 h-24 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
-                <span className="pointer-events-none absolute inset-x-8 bottom-0 h-24 rounded-full bg-white/30 blur-3xl dark:bg-white/10" />
-                <CardContent className="relative z-10 space-y-6 px-6 py-6 sm:px-8">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
-                        {stat.title}
-                      </p>
-                      <p className="mt-3 text-4xl font-semibold text-foreground">
-                        {stat.value}
-                      </p>
-                      {stat.meta ? (
-                        <p className="mt-2 text-xs text-muted-foreground">
-                          {stat.meta}
-                        </p>
-                      ) : null}
-                    </div>
-                    <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/60 bg-white/80 shadow-inner shadow-primary/5 dark:border-white/10 dark:bg-slate-900/70">
-                      <span
-                        className={cn(
-                          "absolute inset-0 rounded-2xl bg-gradient-to-br opacity-80",
-                          stat.accent
-                        )}
-                      />
-                      <Icon
-                        className={cn("relative z-10 h-6 w-6", stat.iconAccent)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 text-sm">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/75 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
-                      <span className={cn("font-semibold", stat.pillTone)}>
-                        {stat.pillValue}
-                      </span>
-                      <span>{stat.pillDescription}</span>
-                    </div>
-                    {stat.footnote ? (
-                      <p className="text-xs text-muted-foreground">
-                        {stat.footnote}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  {stat.categoryColor ? (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span
-                        className="inline-flex h-2.5 w-2.5 rounded-full"
-                        style={{ backgroundColor: stat.categoryColor }}
-                      />
-                      <span>{stat.categoryLabel}</span>
-                    </div>
-                  ) : null}
-                </CardContent>
-              </Card>
-            );
-          })}
         </div>
       )}
 
-      {/* Trend + Snapshot */}
       <div className="grid grid-cols-1 gap-8 xl:grid-cols-[1.65fr,1fr]">
-        <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/88 via-white/60 to-white/35 shadow-[0_24px_60px_rgba(14,116,144,0.14)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
-          <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
+        <Card className="relative overflow-hidden shadow-[0_24px_60px_rgba(14,116,144,0.14)]">
+          <CardGlow
+            topClass="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10"
+            bottomClass="pointer-events-none absolute inset-x-10 bottom-0 h-28 rounded-full bg-white/25 blur-3xl dark:bg-white/10"
+          />
           <CardHeader className="relative z-10">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
@@ -449,20 +436,18 @@ export default function Analytics() {
                   Tracking the last 6 months of expenses
                 </p>
               </div>
-              {monthOverMonthChange !== null ? (
+              {monthOverMonthLabel && hasExpenses ? (
                 <div
                   className={cn(
                     "inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 text-xs font-medium backdrop-blur dark:border-white/10 dark:bg-slate-900/60",
-                    monthOverMonthChange > 0
+                    monthOverMonthChange && monthOverMonthChange > 0
                       ? "text-rose-500 dark:text-rose-400"
-                      : monthOverMonthChange < 0
+                      : monthOverMonthChange && monthOverMonthChange < 0
                       ? "text-emerald-500 dark:text-emerald-400"
                       : "text-muted-foreground"
                   )}
                 >
-                  <span>{`${monthOverMonthChange > 0 ? "+" : ""}${Math.abs(
-                    monthOverMonthChange
-                  ).toFixed(1)}%`}</span>
+                  <span>{monthOverMonthLabel}</span>
                   <span className="text-muted-foreground">
                     vs previous month
                   </span>
@@ -470,39 +455,66 @@ export default function Analytics() {
               ) : null}
             </div>
           </CardHeader>
-
           <CardContent className="relative z-10 h-[360px]">
-            {expenses?.length ? (
+            {hasExpenses ? (
               <ChartContainer
                 config={{
                   amount: {
                     label: "Spending",
-                    color: "hsl(var(--chart-2, var(--primary)))",
+                    color: "hsl(var(--primary))",
                   },
                 }}
-                className="h-full"
-                style={{
-                  ["--color-amount"]: "hsl(var(--chart-2, var(--primary)))",
-                }}
+                className="h-full w-full aspect-auto [&_.recharts-cartesian-grid_line]:stroke-[rgba(148,163,184,0.35)] [&_.recharts-cartesian-grid_line]:opacity-60 [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-axis-tick_text]:text-[13px]"
               >
                 <BarChart
                   data={monthlyTrendData}
-                  margin={{ top: 10, left: 12, right: 24 }}
+                  margin={{ top: 10, left: 12, right: 24, bottom: 0 }}
+                  barCategoryGap="28%"
                 >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} />
+                  <defs>
+                    <linearGradient
+                      id={trendGradId}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stopColor="#c084fc"
+                        stopOpacity={0.85}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor="#7c3aed"
+                        stopOpacity={0.25}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    stroke="rgba(148,163,184,0.35)"
+                    strokeDasharray="3 3"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tickMargin={10}
+                  />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    width={80}
-                    tickFormatter={(v) => `$${Math.round(v)}`}
+                    tickMargin={10}
+                    width={84}
+                    tickFormatter={fmtAxisMoney}
                     domain={[0, "auto"]}
                   />
                   <ChartTooltip
-                    cursor={{ fill: "rgba(148, 163, 184, 0.12)" }}
+                    cursor={{ fill: "rgba(148,163,184,0.08)" }}
                     content={
                       <ChartTooltipContent
-                        formatter={(v) => fmtMoney(Number(v))}
+                        formatter={(value) => toCurrency(Number(value))}
                         labelFormatter={(label) => `${label} total`}
                         indicator="dot"
                       />
@@ -511,8 +523,10 @@ export default function Analytics() {
                   <Bar
                     dataKey="amount"
                     name="Spending"
-                    fill="var(--color-amount)"
-                    radius={[8, 8, 0, 0]}
+                    fill={`url(#${trendGradId})`}
+                    radius={[12, 12, 0, 0]}
+                    maxBarSize={48}
+                    animationDuration={420}
                   />
                 </BarChart>
               </ChartContainer>
@@ -524,8 +538,8 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/88 via-white/60 to-white/35 shadow-[0_24px_60px_rgba(14,116,144,0.12)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
-          <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
+        <Card className="relative overflow-hidden shadow-[0_24px_60px_rgba(14,116,144,0.12)]">
+          <CardGlow />
           <CardHeader className="relative z-10 pb-3">
             <CardTitle>Performance Snapshot</CardTitle>
             <p className="text-sm text-muted-foreground">
@@ -539,26 +553,28 @@ export default function Analytics() {
                   Month to date
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-foreground">
-                  {fmtMoney(monthlyExpenses)}
+                  {toCurrency(monthlyExpenses)}
                 </p>
               </div>
               <TrendingDown className="h-5 w-5 text-primary" />
             </div>
+
             <div>
               <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
                 Daily average
               </p>
               <p className="mt-2 text-lg font-medium text-foreground">
-                {fmtMoney(avgPerDayThisMonth)}
+                {toCurrency(avgPerDayThisMonth)}
               </p>
             </div>
+
             <div>
               <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
                 Highest transaction
               </p>
               <p className="mt-2 text-lg font-medium text-foreground">
                 {highestExpense
-                  ? `${fmtMoney(parseFloat(highestExpense.amount))}${
+                  ? `${toCurrency(toNumber(highestExpense.amount))}${
                       highestExpense.category?.name
                         ? ` - ${highestExpense.category.name}`
                         : ""
@@ -566,22 +582,33 @@ export default function Analytics() {
                   : "No transactions yet"}
               </p>
             </div>
+
             <div>
               <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
                 Active categories
               </p>
               <p className="mt-2 text-lg font-medium text-foreground">
-                {categoryBreakdown?.length ?? 0}
+                {totalCategories}
               </p>
             </div>
+
+            {latestMonthlyAmount > 0 || previousMonthlyAmount > 0 ? (
+              <div className="text-xs text-muted-foreground">
+                {latestMonthlyAmount > 0 && (
+                  <div>Latest month: {toCurrency(latestMonthlyAmount)}</div>
+                )}
+                {previousMonthlyAmount > 0 && (
+                  <div>Previous month: {toCurrency(previousMonthlyAmount)}</div>
+                )}
+              </div>
+            ) : null}
           </CardContent>
         </Card>
       </div>
 
-      {/* Weekday + Categories */}
       <div className="grid grid-cols-1 gap-8 xl:grid-cols-[2fr,1fr]">
-        <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/88 via-white/60 to-white/35 shadow-[0_24px_60px_rgba(14,116,144,0.12)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
-          <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
+        <Card className="relative overflow-hidden shadow-[0_24px_60px_rgba(14,116,144,0.12)]">
+          <CardGlow />
           <CardHeader className="relative z-10">
             <CardTitle>Spending by Weekday</CardTitle>
             <p className="text-sm text-muted-foreground">
@@ -589,32 +616,62 @@ export default function Analytics() {
             </p>
           </CardHeader>
           <CardContent className="relative z-10 h-[320px]">
-            {expenses?.length ? (
+            {hasExpenses ? (
               <ChartContainer
                 config={{
                   amount: { label: "Spending", color: "hsl(var(--primary))" },
                 }}
-                className="h-full"
-                style={{ ["--color-amount"]: "hsl(var(--primary))" }}
+                className="h-full w-full aspect-auto [&_.recharts-cartesian-grid_line] [&_.recharts-cartesian-grid_line]:opacity-60 [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-axis-tick_text]:text-[13px]"
               >
                 <BarChart
                   data={weekdaySpendingData}
-                  margin={{ top: 10, left: 12, right: 24 }}
+                  margin={{ top: 10, left: 12, right: 24, bottom: 0 }}
+                  barCategoryGap="32%"
                 >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="day" axisLine={false} tickLine={false} />
+                  <defs>
+                    <linearGradient
+                      id={weekdayGradId}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stopColor="#38bdf8"
+                        stopOpacity={0.85}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor="#0ea5e9"
+                        stopOpacity={0.25}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    stroke="rgba(148,163,184,0.35)"
+                    strokeDasharray="3 3"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="day"
+                    axisLine={false}
+                    tickLine={false}
+                    tickMargin={10}
+                  />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    width={80}
-                    tickFormatter={(v) => `$${Math.round(v)}`}
+                    tickMargin={10}
+                    width={90}
+                    tickFormatter={fmtAxisMoney}
                     domain={[0, "auto"]}
                   />
                   <ChartTooltip
-                    cursor={{ fill: "rgba(148, 163, 184, 0.12)" }}
+                    cursor={{ fill: "rgba(148,163,184,0.08)" }}
                     content={
                       <ChartTooltipContent
-                        formatter={(v) => fmtMoney(Number(v))}
+                        formatter={(value) => toCurrency(Number(value))}
                         labelFormatter={(label) => `${label} spending`}
                         indicator="dot"
                       />
@@ -623,8 +680,10 @@ export default function Analytics() {
                   <Bar
                     dataKey="amount"
                     name="Spending"
-                    fill="var(--color-amount)"
-                    radius={[8, 8, 0, 0]}
+                    fill={`url(#${weekdayGradId})`}
+                    radius={[12, 12, 0, 0]}
+                    maxBarSize={48}
+                    animationDuration={420}
                   />
                 </BarChart>
               </ChartContainer>
@@ -636,8 +695,8 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/88 via-white/60 to-white/35 shadow-[0_24px_60px_rgba(14,116,144,0.12)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
-          <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
+        <Card className="relative overflow-hidden shadow-[0_24px_60px_rgba(14,116,144,0.12)]">
+          <CardGlow />
           <CardHeader className="relative z-10">
             <CardTitle>Category Distribution</CardTitle>
             <p className="text-sm text-muted-foreground">
@@ -645,26 +704,36 @@ export default function Analytics() {
             </p>
           </CardHeader>
           <CardContent className="relative z-10 space-y-4">
-            {categoryBreakdown?.length ? (
+            {categoryBreakdown.length ? (
               categoryBreakdown.slice(0, 5).map((item) => (
-                <div key={item.category.id} className="space-y-2">
+                <div
+                  key={`${item.category.id}-${item.category.name}`}
+                  className="space-y-2"
+                >
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                       <span
                         className="inline-block h-2.5 w-2.5 rounded-full"
-                        style={{ backgroundColor: item.category.color }}
+                        style={{
+                          backgroundColor: withFallbackColor(
+                            item.category.color
+                          ),
+                        }}
                       />
                       <span className="font-medium text-foreground">
                         {item.category.name}
                       </span>
                     </div>
                     <span className="text-muted-foreground">
-                      {item.percentage.toFixed(1)}%
+                      {Number(item.percentage).toFixed(1)}%
                     </span>
                   </div>
-                  <Progress value={item.percentage} className="h-2" />
+                  <CategoryProgress
+                    value={Number(item.percentage)}
+                    color={withFallbackColor(item.category.color)}
+                  />
                   <div className="text-xs text-muted-foreground">
-                    {fmtMoney(item.amount)} spent
+                    {toCurrency(item.amount)} spent
                   </div>
                 </div>
               ))
@@ -677,26 +746,27 @@ export default function Analytics() {
         </Card>
       </div>
 
-      {/* Insights list */}
-      <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/88 via-white/60 to-white/35 shadow-[0_24px_60px_rgba(14,116,144,0.12)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
-        <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
-        <CardHeader className="relative z-10">
-          <CardTitle>Insights</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Automatically generated tips based on your activity
-          </p>
-        </CardHeader>
-        <CardContent className="relative z-10">
-          <ul className="space-y-3">
-            {insights.map((t, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm">
-                <span className="mt-1 inline-flex h-2 w-2 rounded-full bg-primary" />
-                <span className="text-muted-foreground">{t}</span>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+      {insights.length > 0 && (
+        <Card className="relative overflow-hidden shadow-[0_24px_60px_rgba(14,116,144,0.12)]">
+          <CardGlow />
+          <CardHeader className="relative z-10">
+            <CardTitle>Insights</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Automatically generated tips based on your activity
+            </p>
+          </CardHeader>
+          <CardContent className="relative z-10">
+            <ul className="space-y-3">
+              {insights.map((insight, index) => (
+                <li key={index} className="flex items-start gap-3 text-sm">
+                  <span className="mt-1 inline-flex h-2 w-2 rounded-full bg-primary" />
+                  <span className="text-muted-foreground">{insight}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
     </PageLayout>
   );
 }
