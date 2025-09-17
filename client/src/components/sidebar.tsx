@@ -8,6 +8,7 @@ import {
   Settings,
   Sparkles,
   BarChart3,
+  AlbumIcon,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Expenses", href: "/expenses", icon: CreditCard },
   { name: "Analytics", href: "/analytics", icon: LineChart },
+  { name: "Categories", href: "/categories", icon: AlbumIcon },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -66,7 +68,9 @@ export function Sidebar() {
               <BarChart3 className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-foreground">DollarTrack</h1>
+              <h1 className="text-lg font-semibold text-foreground">
+                DollarTrack
+              </h1>
               <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
                 Smart finance
               </p>
@@ -97,7 +101,8 @@ export function Sidebar() {
                   <span
                     className={cn(
                       "flex h-10 w-10 items-center justify-center rounded-xl border border-white/60 bg-white/80 text-primary shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-900/70",
-                      isActive && "border-transparent bg-white/20 text-white shadow-none dark:bg-white/10"
+                      isActive &&
+                        "border-transparent bg-white/20 text-white shadow-none dark:bg-white/10"
                     )}
                   >
                     <Icon className="h-5 w-5" />
@@ -112,30 +117,6 @@ export function Sidebar() {
           })}
         </nav>
 
-        <div className="mt-10 space-y-6 text-sm">
-          <div className="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-lg backdrop-blur dark:border-white/10 dark:bg-slate-900/65">
-            <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                <Sparkles className="h-4 w-4" />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-foreground">
-                  Upgrade Mode
-                </h3>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Switch between light and dark experiences for a calmer focus.
-                </p>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center justify-between rounded-2xl border border-dashed border-primary/30 bg-primary/5 px-4 py-2 text-xs text-primary">
-              <span>Prefer a different vibe?</span>
-              <ThemeToggle className="h-9 w-9 border-none bg-white/90 text-primary shadow-sm hover:bg-white dark:bg-slate-900/80 dark:text-slate-100 md:hidden" />
-            </div>
-          </div>
-
-          <p className="text-xs text-muted-foreground">&copy; {currentYear} DollarTrack</p>
-        </div>
-
         {user ? (
           <div className="mt-auto rounded-3xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur dark:border-white/10 dark:bg-slate-900/70">
             <div className="flex items-center gap-3">
@@ -143,7 +124,9 @@ export function Sidebar() {
                 {userInitial.toUpperCase()}
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">{user.name}</p>
+                <p className="text-sm font-semibold text-foreground">
+                  {user.name}
+                </p>
                 <p className="text-xs text-muted-foreground">{user.email}</p>
               </div>
             </div>
@@ -162,7 +145,3 @@ export function Sidebar() {
     </aside>
   );
 }
-
-
-
-

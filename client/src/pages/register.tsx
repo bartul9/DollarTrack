@@ -24,6 +24,7 @@ import {
   supabaseUserToPublicUser,
 } from "@/hooks/use-current-user";
 import { registerUserSchema } from "@shared/schema";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const formSchema = registerUserSchema
   .extend({
