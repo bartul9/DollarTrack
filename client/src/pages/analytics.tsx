@@ -7,7 +7,15 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from "recharts";
 import {
   startOfMonth,
   endOfMonth,
@@ -88,18 +96,21 @@ export default function Analytics() {
 
   const monthlyTrendData = useMemo(() => {
     const now = new Date();
-    const months = Array.from({ length: 6 }, (_, index) => subMonths(now, 5 - index));
+    const months = Array.from({ length: 6 }, (_, index) =>
+      subMonths(now, 5 - index)
+    );
 
     return months.map((monthDate) => {
       const start = startOfMonth(monthDate);
       const end = endOfMonth(monthDate);
 
-      const totalForMonth = expenses
-        ?.filter((expense) => {
-          const expenseDate = new Date(expense.date);
-          return expenseDate >= start && expenseDate <= end;
-        })
-        .reduce((sum, expense) => sum + parseFloat(expense.amount), 0) ?? 0;
+      const totalForMonth =
+        expenses
+          ?.filter((expense) => {
+            const expenseDate = new Date(expense.date);
+            return expenseDate >= start && expenseDate <= end;
+          })
+          .reduce((sum, expense) => sum + parseFloat(expense.amount), 0) ?? 0;
 
       return {
         month: format(monthDate, "MMM"),
@@ -118,9 +129,10 @@ export default function Analytics() {
 
   const weekdaySpendingData = useMemo(() => {
     return weekdayLabels.map((label, index) => {
-      const totalForDay = expenses
-        ?.filter((expense) => new Date(expense.date).getDay() === index)
-        .reduce((sum, expense) => sum + parseFloat(expense.amount), 0) ?? 0;
+      const totalForDay =
+        expenses
+          ?.filter((expense) => new Date(expense.date).getDay() === index)
+          .reduce((sum, expense) => sum + parseFloat(expense.amount), 0) ?? 0;
 
       return {
         day: label,
@@ -144,7 +156,9 @@ export default function Analytics() {
 
     if (topCategory && topCategory.amount > 0) {
       items.push(
-        `${topCategory.category.name} accounts for ${topCategory.percentage.toFixed(
+        `${
+          topCategory.category.name
+        } accounts for ${topCategory.percentage.toFixed(
           1
         )}% of your total spending.`
       );
@@ -171,7 +185,9 @@ export default function Analytics() {
 
     if (monthlyExpenses > 0) {
       items.push(
-        `You're averaging ${formatCurrency(averagePerDayThisMonth)} per day this month.`
+        `You're averaging ${formatCurrency(
+          averagePerDayThisMonth
+        )} per day this month.`
       );
     }
 
@@ -205,9 +221,9 @@ export default function Analytics() {
       icon: Wallet,
       trend:
         monthOverMonthChange !== null && monthOverMonthChange !== 0
-          ? `${monthOverMonthChange > 0 ? "+" : ""}${monthOverMonthChange.toFixed(
-              1
-            )}% vs last month`
+          ? `${
+              monthOverMonthChange > 0 ? "+" : ""
+            }${monthOverMonthChange.toFixed(1)}% vs last month`
           : "Tracking overall spend",
       trendColor:
         monthOverMonthChange !== null
@@ -234,7 +250,8 @@ export default function Analytics() {
           ? `Across ${totalTransactions} records`
           : "No transactions yet",
       icon: Activity,
-      trend: totalTransactions > 0 ? "Healthy spending cadence" : "Waiting for data",
+      trend:
+        totalTransactions > 0 ? "Healthy spending cadence" : "Waiting for data",
       trendColor: "text-muted-foreground",
     },
     {
@@ -257,8 +274,8 @@ export default function Analytics() {
         <div>
           <h2 className="text-3xl font-bold text-foreground">Analytics</h2>
           <p className="text-muted-foreground mt-1">
-            Dive deeper into your spending patterns and identify opportunities to
-            save.
+            Dive deeper into your spending patterns and identify opportunities
+            to save.
           </p>
         </div>
         <div className="text-sm text-muted-foreground">
@@ -331,7 +348,8 @@ export default function Analytics() {
                 >
                   {monthOverMonthChange > 0 && "↑"}
                   {monthOverMonthChange < 0 && "↓"}
-                  {monthOverMonthChange === 0 && "→"} {monthOverMonthChange
+                  {monthOverMonthChange === 0 && "→"}{" "}
+                  {monthOverMonthChange
                     ? Math.abs(monthOverMonthChange).toFixed(1)
                     : 0}
                   % vs previous month
@@ -350,15 +368,37 @@ export default function Analytics() {
                 }}
                 className="h-full"
               >
-                <AreaChart data={monthlyTrendData} margin={{ top: 20, right: 24, left: 12, bottom: 0 }}>
+                <AreaChart
+                  data={monthlyTrendData}
+                  margin={{ top: 20, right: 24, left: 12, bottom: 0 }}
+                >
                   <defs>
-                    <linearGradient id="fillSpending" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-amount)" stopOpacity={0.28} />
-                      <stop offset="95%" stopColor="var(--color-amount)" stopOpacity={0} />
+                    <linearGradient
+                      id="fillSpending"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="var(--color-amount)"
+                        stopOpacity={0.28}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="var(--color-amount)"
+                        stopOpacity={0}
+                      />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="month" tickLine={false} axisLine={false} dy={8} />
+                  <XAxis
+                    dataKey="month"
+                    tickLine={false}
+                    axisLine={false}
+                    dy={8}
+                  />
                   <YAxis
                     tickLine={false}
                     axisLine={false}
@@ -423,7 +463,9 @@ export default function Analytics() {
               </p>
               <p className="text-lg font-medium text-foreground">
                 {highestExpense
-                  ? `${formatCurrency(parseFloat(highestExpense.amount))} · ${highestExpense.category.name}`
+                  ? `${formatCurrency(parseFloat(highestExpense.amount))} · ${
+                      highestExpense.category.name
+                    }`
                   : "No transactions yet"}
               </p>
             </div>
@@ -458,7 +500,10 @@ export default function Analytics() {
                 }}
                 className="h-full"
               >
-                <BarChart data={weekdaySpendingData} margin={{ top: 10, left: 12, right: 24 }}>
+                <BarChart
+                  data={weekdaySpendingData}
+                  margin={{ top: 10, left: 12, right: 24 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="day" axisLine={false} tickLine={false} />
                   <YAxis
