@@ -23,6 +23,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import clsx from "clsx";
 
 type SidebarProps = {
   collapsed: boolean;
@@ -84,22 +85,27 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           collapsed ? "px-4" : "px-6"
         )}
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className={clsx("flex items-center gap-3", !collapsed && "")}>
           <div className="flex items-center gap-3">
             {collapsed ? (
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/60 bg-white/80 text-primary shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-900/70">
-                <Sparkles className="h-5 w-5" />
-              </div>
+              <></>
             ) : (
               <div className="transition-all">
-                <h1 className="text-lg font-semibold text-foreground">DollarTrack</h1>
+                <h1 className="text-lg font-semibold text-foreground">
+                  DollarTrack
+                </h1>
                 <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
                   Smart finance
                 </p>
               </div>
             )}
           </div>
-          <div className="hidden items-center gap-2 md:flex">
+          <div
+            className={clsx(
+              "hidden items-center gap-2 md:flex",
+              collapsed && "flex-col"
+            )}
+          >
             <Tooltip disableHoverableContent>
               <TooltipTrigger asChild>
                 <ThemeToggle className="h-11 w-11 border-white/70 bg-white/80 text-foreground shadow-none hover:bg-white/90 dark:border-white/20 dark:bg-slate-900/70 dark:hover:bg-slate-900/60" />
@@ -148,7 +154,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     aria-current={isActive ? "page" : undefined}
                     className={cn(
                       "group flex items-center rounded-2xl text-sm font-medium transition-all",
-                      collapsed ? "justify-center gap-0 px-2 py-3" : "gap-3 px-4 py-3",
+                      collapsed
+                        ? "justify-center gap-0 px-2 py-3"
+                        : "gap-3 px-4 py-3",
                       isActive
                         ? "bg-gradient-to-r from-primary via-primary/80 to-primary/60 text-white shadow-lg shadow-primary/30"
                         : "text-muted-foreground hover:bg-white/70 hover:text-foreground dark:hover:bg-white/10"
