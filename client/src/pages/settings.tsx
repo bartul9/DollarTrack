@@ -304,7 +304,7 @@ export default function Settings() {
 
         <div className="space-y-6">
           <Card className="border-white/60 bg-white/80 shadow-lg backdrop-blur dark:border-white/10 dark:bg-slate-900/70">
-            <CardHeader className="flex flex-row items-start justify-between gap-3">
+            <CardHeader className="flex flex-row items-start justify-between gap-2">
               <div>
                 <CardTitle className="text-xl font-semibold text-foreground">
                   Account overview
