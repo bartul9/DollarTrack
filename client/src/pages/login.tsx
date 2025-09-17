@@ -73,15 +73,19 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-16">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>
-            Sign in to access your finance dashboard.
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-slate-100 to-purple-100 px-4 py-16 text-foreground transition-colors dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
+      <span className="pointer-events-none absolute -left-40 top-10 h-72 w-72 rounded-full bg-primary/20 blur-3xl dark:bg-primary/25" />
+      <span className="pointer-events-none absolute -right-32 bottom-10 h-72 w-72 rounded-full bg-indigo-300/20 blur-3xl dark:bg-indigo-500/20" />
+      <Card className="relative z-10 w-full max-w-md overflow-hidden border border-white/50 bg-gradient-to-br from-white/95 via-white/80 to-white/70 shadow-2xl shadow-primary/20 backdrop-blur-2xl dark:border-white/10 dark:from-slate-900/95 dark:via-slate-900/80 dark:to-slate-900/70">
+        <span className="pointer-events-none absolute inset-x-10 -top-16 h-32 rounded-full bg-primary/15 blur-3xl dark:bg-primary/25" />
+        <span className="pointer-events-none absolute inset-x-12 bottom-0 h-32 rounded-full bg-indigo-200/20 blur-3xl dark:bg-indigo-500/20" />
+        <CardHeader className="relative z-10 space-y-1 text-center">
+          <CardTitle className="text-2xl font-semibold">Welcome back</CardTitle>
+          <CardDescription className="text-sm text-muted-foreground">
+            Sign in to access your finance dashboard and stay on top of every transaction.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative z-10">
           <form
             className="space-y-4"
             onSubmit={form.handleSubmit(onSubmit)}
@@ -146,16 +150,18 @@ export default function Login() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full rounded-full"
               disabled={mutation.isLoading}
             >
               {mutation.isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col items-start gap-4 text-sm text-muted-foreground">
-          <div className="flex w-full items-center justify-between gap-2">
-            <span>New to DollarTrack?</span>
+        <CardFooter className="relative z-10 flex flex-col items-start gap-4 text-sm text-muted-foreground">
+          <div className="flex w-full items-center justify-between gap-2 text-left">
+            <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground/80">
+              New to DollarTrack?
+            </span>
             <Link href="/register">
               <a className="font-medium text-primary hover:underline">
                 Create an account

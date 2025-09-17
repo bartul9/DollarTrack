@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import {
@@ -6,9 +5,6 @@ import {
   CreditCard,
   BarChart3,
   LogOut,
-  Settings,
-  Sparkles,
-  KeyIcon,
   SettingsIcon,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -22,7 +18,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Expenses", href: "/expenses", icon: CreditCard },
-  { name: "Analytics", href: "/analytics", icon: KeyIcon },
+  { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Settings", href: "/settings", icon: SettingsIcon },
 ];
 
@@ -55,15 +51,15 @@ export function Sidebar() {
   });
 
   return (
-    <aside className="fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r border-border bg-white shadow-lg">
+    <aside className="fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-[0_18px_45px_rgba(15,23,42,0.1)] backdrop-blur-xl">
       <div className="flex-1 p-6">
         <div className="mb-8 flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-purple-700">
-            <BarChart3 className="h-6 w-6 text-white" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sidebar-primary to-primary shadow-inner">
+            <BarChart3 className="h-5 w-5 text-sidebar-primary-foreground" />
           </div>
-          <div>
-            <h1 className="text-xl font-bold">DollarTrack</h1>
-            <p className="text-sm text-muted-foreground">Smart Finance</p>
+          <div className="leading-tight">
+            <h1 className="text-lg font-semibold tracking-tight">DollarTrack</h1>
+            <p className="text-xs uppercase tracking-[0.35em] text-sidebar-foreground/70">Smart Finance</p>
           </div>
         </div>
 
@@ -80,7 +76,7 @@ export function Sidebar() {
                     "group flex items-center space-x-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all",
                     isActive
                       ? "bg-gradient-to-r from-primary to-purple-500 text-primary-foreground shadow-lg shadow-primary/20"
-                      : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                   )}
                 >
                   <Icon className="h-5 w-5" />
@@ -115,7 +111,7 @@ export function Sidebar() {
       </div>
 
       {user ? (
-        <div className="border-t border-border p-6">
+        <div className="border-t border-sidebar-border p-6">
           <div className="mb-3">
             <p className="text-sm font-semibold text-foreground">{user.name}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
