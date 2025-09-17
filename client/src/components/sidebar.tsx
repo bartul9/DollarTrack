@@ -44,7 +44,7 @@ export function Sidebar() {
       queryClient.setQueryData(currentUserQueryKey, null);
       queryClient.clear();
       toast({ title: "You have been logged out" });
-      setLocation("/login");
+      setLocation("/", { replace: true });
     },
     onError: (error: unknown) => {
       toast({
