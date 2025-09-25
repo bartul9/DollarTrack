@@ -34,7 +34,7 @@ export function PageLayout({
   const actionArray = actions ? Children.toArray(actions) : [];
 
   return (
-    <div className={cn("relative space-y-12 pb-20", className)}>
+    <div className={cn("relative space-y-12 pb-6 sm:pb-20", className)}>
       <div className="pointer-events-none absolute inset-x-0 -top-32 h-64 bg-gradient-to-b from-primary/12 via-transparent to-transparent dark:from-primary/20" />
       <div className="pointer-events-none absolute -bottom-24 left-1/2 h-60 w-[85%] -translate-x-1/2 rounded-[5rem] bg-gradient-to-r from-indigo-300/15 via-primary/10 to-purple-300/15 blur-3xl dark:from-indigo-500/20 dark:via-primary/15 dark:to-purple-500/20" />
 
@@ -117,7 +117,9 @@ export function PageLayout({
 
       <div className="relative space-y-10">
         {childrenArray.map((child, index) => (
-          <div key={(child as { key?: string })?.key ?? `page-section-${index}`}>
+          <div
+            key={(child as { key?: string })?.key ?? `page-section-${index}`}
+          >
             {child}
           </div>
         ))}

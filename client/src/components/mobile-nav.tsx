@@ -11,13 +11,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { AddExpenseModal } from "@/components/add-expense-modal";
 import { navigation } from "@/components/sidebar";
 import { cn } from "@/lib/utils";
-import {
-  Menu,
-  Sparkles,
-  LogOut,
-  ChevronRight,
-  Plus,
-} from "lucide-react";
+import { Menu, Sparkles, LogOut, ChevronRight, Plus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useCurrentUser, currentUserQueryKey } from "@/hooks/use-current-user";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -79,19 +73,12 @@ export function MobileNav() {
               <Sparkles className="h-4 w-4 text-primary" />
               DollarTrack
             </p>
-            <p className="text-sm text-muted-foreground/80">Budget smarter. Live better.</p>
+            <p className="text-sm text-muted-foreground/80">
+              Budget smarter. Live better.
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <AddExpenseModal>
-            <Button
-              size="icon"
-              className="h-11 w-11 rounded-full border border-primary/20 bg-primary text-white shadow-lg shadow-primary/30 transition hover:bg-primary/90"
-              aria-label="Add expense"
-            >
-              <Plus className="h-5 w-5" />
-            </Button>
-          </AddExpenseModal>
           <ThemeToggle className="h-11 w-11 rounded-full border border-white/60 bg-white/80 text-foreground shadow-sm hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/70 dark:hover:bg-slate-900/60" />
         </div>
       </div>

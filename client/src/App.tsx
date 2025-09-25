@@ -94,7 +94,7 @@ function ProtectedLayout() {
       />
       <main
         className={cn(
-          "relative z-10 ml-0 flex min-h-screen flex-col px-4 pb-24 pt-24 transition-[margin] duration-200 sm:px-6 md:px-8 md:pt-28 lg:px-16 lg:pb-16 lg:pt-12",
+          "relative z-10 ml-0 flex min-h-screen flex-col px-4 pb-0 pt-0 sm:pb-24 sm:pt-24 transition-[margin] duration-200 sm:px-6 md:px-8 md:pt-28 lg:px-16 lg:pb-16 lg:pt-12",
           isSidebarCollapsed ? "lg:ml-24" : "lg:ml-72"
         )}
       >
