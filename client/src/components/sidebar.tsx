@@ -81,23 +81,23 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <span className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-primary/10 via-transparent to-transparent blur-3xl dark:from-primary/20" />
       <div
         className={cn(
-          "relative flex h-full flex-col pb-6 pt-8 transition-all",
+          "relative flex h-full flex-col pb-6 pt-8",
           collapsed ? "px-4" : "px-6"
         )}
       >
-        <div className={clsx("flex items-center gap-3", !collapsed && "")}>
-          <div className="flex items-center gap-3">
+        <div
+          className={clsx(
+            "flex flex-col items-center gap-3 transition-all",
+            !collapsed && ""
+          )}
+        >
+          <div className="flex flex-col items-center gap-3 transition-all">
             {collapsed ? (
               <></>
             ) : (
-              <div className="transition-all">
-                <h1 className="text-lg font-semibold text-foreground">
-                  DollarTrack
-                </h1>
-                <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
-                  Smart finance
-                </p>
-              </div>
+              <h1 className="text-lg font-semibold text-foreground">
+                DollarTrack
+              </h1>
             )}
           </div>
           <div

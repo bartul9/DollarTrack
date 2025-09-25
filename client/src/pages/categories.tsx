@@ -458,63 +458,61 @@ export default function Categories() {
                 return (
                   <div
                     key={category.id}
-                    className="flex flex-col justify-between rounded-3xl border border-white/60 bg-white/80 p-6 shadow-md backdrop-blur-xl transition hover:border-primary/40 hover:shadow-lg dark:border-white/10 dark:bg-slate-900/60"
+                    className="group relative flex flex-col rounded-2xl border border-white/60 bg-white/80 p-4 shadow-md backdrop-blur-xl transition hover:border-primary/40 hover:shadow-lg dark:border-white/10 dark:bg-slate-900/60"
                     data-testid={`category-card-${category.id}`}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-4">
+                    {/* Header: icon + name + color pill */}
+                    <div className="flex items-start justify-between gap-3 min-w-0">
+                      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                         <div
-                          className="flex h-12 w-12 items-center justify-center rounded-2xl"
+                          className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl shrink-0"
                           style={{
                             backgroundColor: `${category.color}1a`,
                             color: category.color,
                           }}
                         >
-                          <Icon className="h-6 w-6" />
+                          <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                         </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-foreground">
+
+                        <div className="min-w-0">
+                          <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">
                             {category.name}
                           </h3>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs sm:text-sm text-muted-foreground">
                             {formatIconName(category.icon)} icon
                           </p>
                         </div>
                       </div>
+
                       <Badge
                         variant="outline"
-                        className="rounded-full border border-white/60 bg-white/70 px-3 py-1 text-xs font-medium backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
+                        className="rounded-full border border-white/60 bg-white/70 px-2.5 py-1 text-[10px] sm:text-xs font-medium whitespace-nowrap backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
                         style={{ color: category.color }}
                       >
                         {category.color}
                       </Badge>
                     </div>
-                    <div className="mt-6 flex items-center justify-between gap-3">
-                      <p className="text-xs text-muted-foreground">
-                        Used for expense tracking and analytics insights.
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-1"
-                          onClick={() => setEditingCategory(category)}
-                          data-testid={`button-edit-category-${category.id}`}
-                        >
-                          <Pencil className="h-4 w-4" />
-                          Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-1 text-destructive hover:text-destructive"
-                          onClick={() => setCategoryToDelete(category)}
-                          data-testid={`button-delete-category-${category.id}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Delete
-                        </Button>
-                      </div>
+
+                    {/* Footer: description + actions */}
+                    <div className="mt-4 sm:mt-6  flex items-center gap-1">
+                      {/* Desktop / tablet: text buttons */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingCategory(category)}
+                        data-testid={`button-edit-category-${category.id}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => setCategoryToDelete(category)}
+                        data-testid={`button-delete-category-${category.id}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 );
