@@ -35,7 +35,7 @@ export default function Landing() {
       <div className="pointer-events-none absolute -left-24 top-[18%] h-72 w-72 rounded-full bg-sky-200/50 blur-3xl dark:bg-sky-500/25" />
       <div className="pointer-events-none absolute -right-20 bottom-[-9rem] h-[24rem] w-[24rem] rounded-full bg-purple-200/40 blur-3xl dark:bg-purple-600/20" />
 
-      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-16 px-5 pb-24 pt-10 sm:px-6 md:gap-20 md:pt-12">
+      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-16 px-5 pb-6 sm:pb-24 pt-10 sm:px-6 md:gap-20 md:pt-12">
         <section className="relative grid gap-10 overflow-hidden rounded-[2.5rem] border border-white/70 bg-white/90 p-6 shadow-[0_32px_90px_rgba(124,58,237,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/75 md:grid-cols-[1.05fr,0.95fr] md:items-center md:p-10">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.16),_transparent_58%)] opacity-80 dark:bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.24),_transparent_60%)]" />
           <div className="pointer-events-none absolute -top-20 right-[-6rem] h-[16rem] w-[16rem] rounded-full bg-primary/20 blur-3xl opacity-80 dark:bg-primary/25" />
@@ -69,26 +69,9 @@ export default function Landing() {
                 Sign in to dashboard
               </Button>
             </div>
-            <div className="flex flex-col gap-2 text-center text-sm text-muted-foreground sm:flex-row sm:items-center sm:text-left">
-              <p className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                Try the demo account:{" "}
-                <span className="font-semibold text-foreground">
-                  demo@dollartrack.app
-                </span>{" "}
-                /
-                <span className="font-semibold text-foreground">
-                  {" "}
-                  Password123!
-                </span>
-              </p>
-              <span className="inline-flex items-center justify-center gap-2 text-xs uppercase tracking-[0.3em] text-primary/70">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary/60" /> No
-                credit card required
-              </span>
-            </div>
           </div>
 
-          <div className="relative z-10 overflow-hidden rounded-3xl border border-white/70 bg-white/90 p-6 shadow-[0_24px_60px_rgba(124,58,237,0.1)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
+          <div className="relative z-10 ">
             <div className="pointer-events-none absolute -top-16 right-[-3rem] h-32 w-32 rounded-full bg-primary/20 blur-3xl opacity-70 dark:bg-primary/25" />
             <div className="relative space-y-6 rounded-2xl border border-white/70 bg-white/85 p-6 shadow-inner shadow-primary/10 dark:border-white/10 dark:bg-slate-900/65">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
@@ -124,29 +107,6 @@ export default function Landing() {
               </div>
             </div>
           </div>
-        </section>
-
-        <section id="features" className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 md:auto-rows-[1fr]">
-          {features.map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <div
-                key={feature.title}
-                className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/70 bg-white/85 p-6 text-center shadow-[0_24px_70px_rgba(124,58,237,0.08)] backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-slate-900/70 sm:text-left"
-              >
-                <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-75" />
-                <div className="relative mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-primary transition group-hover:bg-primary/20 sm:mx-0">
-                  <Icon className="h-6 w-6" />
-                </div>
-                <h3 className="relative mt-6 text-xl font-semibold text-foreground">
-                  {feature.title}
-                </h3>
-                <p className="relative mt-3 text-sm text-muted-foreground">
-                  {feature.description}
-                </p>
-              </div>
-            );
-          })}
         </section>
       </main>
 

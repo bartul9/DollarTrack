@@ -336,7 +336,6 @@ export default function Categories() {
       eyebrow="Organize smarter"
       title="Categories"
       description="Create, update, and personalize spending categories to keep your transactions organized and insights meaningful."
-      breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: "Categories" }]}
       actions={
         <Button
           className="gap-2 rounded-full border-white/60 bg-white/70 px-5 text-foreground shadow-sm backdrop-blur hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"

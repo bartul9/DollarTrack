@@ -4,6 +4,7 @@
   Outlet,
   Link,
   useNavigate,
+  useLocation,
 } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -83,9 +84,7 @@ function ProtectedLayout() {
   useScrollToTop();
 
   return (
-    <div className="relative min-h-screen bg-transparent text-foreground transition-colors">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.12),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.08),_transparent_65%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.28),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.78),_transparent_70%)]" />
-
+    <div className="relative h-screen bg-transparent text-foreground transition-colors">
       <MobileNav />
 
       <Sidebar
@@ -94,7 +93,7 @@ function ProtectedLayout() {
       />
       <main
         className={cn(
-          "relative z-10 ml-0 flex min-h-screen flex-col px-4 pb-0 pt-0 sm:pb-24 sm:pt-24 transition-[margin] duration-200 sm:px-6 md:px-8 md:pt-28 lg:px-16 lg:pb-16 lg:pt-12",
+          "relative z-10 ml-0 flex h-screen flex-col px-4 pb-0 pt-0 sm:pb-24 sm:pt-24 transition-[margin] duration-200 sm:px-6 md:px-8 md:pt-28 lg:px-16 lg:pb-16 lg:pt-12",
           isSidebarCollapsed ? "lg:ml-24" : "lg:ml-72"
         )}
       >
@@ -108,12 +107,30 @@ function ProtectedLayout() {
 
 function PublicLayout() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   useScrollToTop();
+
+  const linkBase =
+    "rounded-full border border-primary/10 bg-white/70 px-4 py-2 text-foreground/80 shadow-sm backdrop-blur transition dark:border-white/10 dark:bg-slate-900/60";
+  const linkHover = "hover:border-primary/40 hover:text-foreground";
+  const linkActive =
+    "border-primary/50 text-foreground font-semibold shadow-md";
+
+  const navLink = (to: any, label: any) => (
+    <Link
+      to={to}
+      className={[linkBase, linkHover, pathname === to ? linkActive : ""].join(
+        " "
+      )}
+    >
+      {label}
+    </Link>
+  );
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-transparent text-foreground transition-colors">
-      <header className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-6 sm:py-8 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-3">
+      <header className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-6 items-center sm:py-8 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center w-full justify-between sm:w-auto gap-3">
           <Link to="/" className="no-underline">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
               DollarTrack
@@ -122,14 +139,12 @@ function PublicLayout() {
               Budget smarter. Live better.
             </p>
           </Link>
+          <ThemeToggle className="h-9 w-9 shrink-0 border border-primary/10 bg-white/70 text-foreground shadow-sm hover:bg-white/80 dark:border-white/10 dark:bg-slate-900/60" />
         </div>
+
         <nav className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-          <Link
-            to="/login"
-            className="rounded-full border border-primary/10 bg-white/70 px-4 py-2 text-foreground/80 shadow-sm backdrop-blur transition hover:border-primary/40 hover:text-foreground dark:border-white/10 dark:bg-slate-900/60"
-          >
-            Sign in
-          </Link>
+          {navLink("/", "Home")}
+          {navLink("/login", "Sign in")}
           <Button
             size="sm"
             className="gap-2 rounded-full shadow-lg shadow-primary/20"
@@ -137,8 +152,7 @@ function PublicLayout() {
           >
             Get started
             <ArrowRight className="h-4 w-4" />
-          </Button>{" "}
-          <ThemeToggle className="h-9 w-9 shrink-0 border border-primary/10 bg-white/70 text-foreground shadow-sm hover:bg-white/80 dark:border-white/10 dark:bg-slate-900/60" />
+          </Button>
         </nav>
       </header>
 
@@ -148,7 +162,6 @@ function PublicLayout() {
     </div>
   );
 }
-
 /* ----------------- Router ----------------- */
 const router = createBrowserRouter([
   {

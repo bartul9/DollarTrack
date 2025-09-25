@@ -133,14 +133,7 @@ export function MobileNav() {
                 );
               })}
             </nav>
-            <Separator className="mx-6 border-white/60 dark:border-white/10" />
             <div className="flex flex-col gap-3 px-6">
-              <AddExpenseModal>
-                <Button className="w-full gap-2 rounded-2xl bg-primary text-white shadow-lg shadow-primary/20 transition hover:bg-primary/90">
-                  <Plus className="h-4 w-4" />
-                  Add Expense
-                </Button>
-              </AddExpenseModal>
               <Button
                 variant="ghost"
                 className="w-full gap-2 rounded-2xl border border-white/60 bg-white/80 text-muted-foreground backdrop-blur transition hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/70 dark:text-foreground"
