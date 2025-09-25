@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Sidebar } from "@/components/sidebar";
 import { queryClient } from "./lib/queryClient";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 import Dashboard from "@/pages/dashboard";
 import Expenses from "@/pages/expenses";
@@ -79,11 +80,8 @@ function ProtectedLayout() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-transparent text-foreground transition-colors duration-500">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.16),_transparent_62%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.08),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.35),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.75),_transparent_70%)]" />
-      <div className="pointer-events-none absolute -left-36 top-24 h-[22rem] w-[22rem] rounded-full bg-primary/10 blur-3xl dark:bg-primary/25" />
-      <div className="pointer-events-none absolute right-[-18%] top-36 h-[26rem] w-[26rem] rounded-full bg-purple-200/40 blur-3xl dark:bg-purple-500/20" />
-      <div className="pointer-events-none absolute left-1/2 top-[70%] h-96 w-[36rem] -translate-x-1/2 rounded-[10rem] bg-gradient-to-r from-sky-200/30 via-primary/15 to-purple-200/30 blur-3xl dark:from-sky-500/20 dark:via-primary/20 dark:to-purple-500/25" />
+    <div className="relative min-h-screen bg-transparent text-foreground transition-colors">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.12),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.08),_transparent_65%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.28),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.78),_transparent_70%)]" />
 
       <Sidebar
         collapsed={isSidebarCollapsed}
@@ -91,7 +89,7 @@ function ProtectedLayout() {
       />
       <main
         className={cn(
-          "relative z-10 ml-0 flex min-h-screen flex-col px-6 pb-16 pt-5 transition-[margin] duration-300 md:px-10 lg:px-16",
+          "relative z-10 ml-0 flex min-h-screen flex-col px-4 pb-16 pt-5 transition-[margin] duration-200 sm:px-6 md:px-10 lg:px-16",
           isSidebarCollapsed ? "md:ml-24" : "md:ml-72"
         )}
       >
@@ -107,8 +105,8 @@ function PublicLayout() {
   const navigate = useNavigate();
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-transparent text-foreground transition-colors duration-500">
-      <header className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-8 md:flex-row md:items-center md:justify-between">
+    <div className="relative min-h-screen overflow-hidden bg-transparent text-foreground transition-colors">
+      <header className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-6 sm:py-8 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
           <Link to="/" className="no-underline">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
@@ -119,16 +117,17 @@ function PublicLayout() {
             </p>
           </Link>
         </div>
-        <nav className="flex items-center gap-3 text-sm text-muted-foreground">
+        <nav className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           <a
             className="hidden rounded-full border border-transparent px-4 py-2 text-foreground/70 backdrop-blur transition hover:border-primary/40 hover:text-foreground md:inline"
             href="#features"
           >
             Features
           </a>
+          <ThemeToggle className="h-9 w-9 shrink-0 border border-primary/10 bg-white/70 text-foreground shadow-sm hover:bg-white/80 dark:border-white/10 dark:bg-slate-900/60" />
           <Link
             to="/login"
-            className="rounded-full border border-primary/10 bg-white/60 px-4 py-2 text-foreground/75 shadow-sm backdrop-blur transition hover:border-primary/40 hover:text-foreground dark:border-white/10 dark:bg-slate-900/60"
+            className="rounded-full border border-primary/10 bg-white/70 px-4 py-2 text-foreground/80 shadow-sm backdrop-blur transition hover:border-primary/40 hover:text-foreground dark:border-white/10 dark:bg-slate-900/60"
           >
             Sign in
           </Link>

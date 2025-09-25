@@ -100,16 +100,16 @@ export default function Register() {
 
   return (
     <div className="mt-2">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.22),_transparent_58%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.12),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.45),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.85),_transparent_70%)]" />
-      <div className="pointer-events-none absolute -left-28 top-28 h-[22rem] w-[22rem] rounded-full bg-sky-200/55 blur-3xl animate-float-slow dark:bg-sky-500/25" />
-      <div className="pointer-events-none absolute right-[-14rem] bottom-[-8rem] h-[24rem] w-[24rem] rounded-full bg-purple-200/45 blur-3xl animate-float-slower dark:bg-purple-600/25" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.2),_transparent_58%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.1),_transparent_62%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.38),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.82),_transparent_72%)]" />
+      <div className="pointer-events-none absolute -left-24 top-28 h-[20rem] w-[20rem] rounded-full bg-sky-200/50 blur-3xl dark:bg-sky-500/25" />
+      <div className="pointer-events-none absolute right-[-12rem] bottom-[-7rem] h-[22rem] w-[22rem] rounded-full bg-purple-200/40 blur-3xl dark:bg-purple-600/20" />
 
-      <div className="relative z-10 mx-auto flex max-w-5xl flex-col px-6 py-6">
+      <div className="relative z-10 mx-auto flex max-w-5xl flex-col px-5 py-6 sm:px-6">
         <div className="relative flex flex-1 items-center justify-center">
-          <div className="pointer-events-none absolute -left-10 top-16 h-56 w-56 rounded-full bg-primary/10 blur-3xl dark:bg-primary/22" />
-          <div className="pointer-events-none absolute right-2 bottom-0 h-64 w-64 rounded-full bg-purple-300/25 blur-3xl dark:bg-purple-500/20" />
-          <Card className="relative w-full max-w-xl overflow-hidden border border-white/70 bg-white/85 shadow-[0_40px_125px_rgba(124,58,237,0.16)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/75">
-            <span className="pointer-events-none absolute -top-24 right-[-6rem] h-40 w-40 rounded-full bg-primary/20 blur-3xl dark:bg-primary/25" />
+          <div className="pointer-events-none absolute -left-10 top-16 h-52 w-52 rounded-full bg-primary/10 blur-3xl dark:bg-primary/22" />
+          <div className="pointer-events-none absolute right-2 bottom-2 h-56 w-56 rounded-full bg-purple-300/22 blur-3xl dark:bg-purple-500/20" />
+          <Card className="relative w-full max-w-xl overflow-hidden border border-white/70 bg-white/90 shadow-[0_32px_100px_rgba(124,58,237,0.14)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/75">
+            <span className="pointer-events-none absolute -top-20 right-[-5rem] h-36 w-36 rounded-full bg-primary/20 blur-3xl opacity-80 dark:bg-primary/25" />
             <CardHeader className="relative z-10 space-y-1">
               <CardTitle className="text-2xl font-bold">
                 Create your account
@@ -246,12 +246,13 @@ export default function Register() {
               </form>
             </CardContent>
             <CardFooter className="relative z-10 flex flex-col items-start gap-4 text-sm text-muted-foreground">
-              <div className="flex w-full items-center justify-between gap-2">
+              <div className="flex w-full flex-wrap items-center justify-between gap-2">
                 <span>Already have an account?</span>
-                <Link to="/login">
-                  <a className="font-medium text-primary hover:underline">
-                    Sign in
-                  </a>
+                <Link
+                  to="/login"
+                  className="font-medium text-primary hover:underline"
+                >
+                  Sign in
                 </Link>
               </div>
               <p className="text-xs text-muted-foreground">
