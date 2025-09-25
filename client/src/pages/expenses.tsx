@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Search, Plus, Filter } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Search, Plus, Filter, Edit2, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,17 +8,33 @@ import { Input } from "@/components/ui/input";
 import { AddExpenseModal } from "@/components/add-expense-modal";
 import { getCategoryIcon } from "@/lib/categories";
 import { type ExpenseWithCategory, type Category } from "@shared/schema";
-import { fetchExpenses, fetchCategories } from "@/lib/api";
+import {
+  fetchExpenses,
+  fetchCategories,
+  deleteExpense as deleteExpenseApi,
+} from "@/lib/api";
 import { ExpenseFiltersSheet } from "@/components/expense-filters";
 import { ActiveExpenseFilters } from "@/components/active-expense-filters";
 import { useExpenseFilters } from "@/hooks/use-expense-filters";
 import { PageLayout } from "@/components/page-layout";
 import { AnimatePresence, motion } from "framer-motion";
+import { EditExpenseModal } from "@/components/edit-expense-modal";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Modal,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "@/components/ui/modal";
 
 export default function Expenses() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
   const { filters } = useExpenseFilters();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: expenses, isLoading } = useQuery<ExpenseWithCategory[]>({
     queryKey: ["expenses"],
@@ -29,6 +45,9 @@ export default function Expenses() {
     queryKey: ["categories"],
     queryFn: fetchCategories,
   });
+
+  const [expenseToDelete, setExpenseToDelete] =
+    useState<ExpenseWithCategory | null>(null);
 
   const filteredExpenses = useMemo(() => {
     if (!expenses) return [];
@@ -103,14 +122,68 @@ export default function Expenses() {
     }).format(typeof amount === "number" ? amount : parseFloat(amount));
   };
 
+  const deleteExpenseMutation = useMutation({
+    mutationFn: async (expenseId: string) => {
+      await deleteExpenseApi(expenseId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics-categories"] });
+      setExpenseToDelete(null);
+      toast({
+        title: "Success",
+        description: "Expense deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete expense",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const DeleteCategoryIcon = expenseToDelete
+    ? getCategoryIcon(expenseToDelete.category.icon)
+    : null;
+
+  const handleConfirmDelete = () => {
+    if (!expenseToDelete) return;
+    deleteExpenseMutation.mutate(expenseToDelete.id);
+  };
+
   return (
-    <PageLayout
-      eyebrow="Manage and track"
-      title="All Expenses"
-      description="Monitor every transaction, filter by categories, and keep your spending aligned with your goals."
-      actions={<AddExpenseModal />}
-      headerContent={
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+    <>
+      <ExpenseFiltersSheet
+        open={isFilterSheetOpen}
+        onOpenChange={setIsFilterSheetOpen}
+      />
+      <PageLayout
+        eyebrow="Manage and track"
+        title="All Expenses"
+        description="Monitor every transaction, filter by categories, and keep your spending aligned with your goals."
+        actions={
+          <>
+            <Button
+              variant="outline"
+              className="gap-2 rounded-full border-white/60 bg-white/80 px-4 text-sm font-semibold backdrop-blur transition hover:border-primary/40 hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
+              onClick={() => setIsFilterSheetOpen(true)}
+            >
+              <Filter className="h-4 w-4" />
+              Filters
+            </Button>
+            <AddExpenseModal>
+              <Button className="gap-2 rounded-full border border-primary/10 bg-primary/90 px-5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition hover:bg-primary">
+                <Plus className="h-4 w-4" />
+                Add Expense
+              </Button>
+            </AddExpenseModal>
+          </>
+        }
+        headerContent={
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
           {/* Total card */}
           <div className="rounded-2xl border border-white/60 bg-white/75 p-4 sm:p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
             <p className="text-xs sm:text-sm font-semibold text-muted-foreground">
@@ -154,14 +227,16 @@ export default function Expenses() {
             </div>
           </div>
         </div>
-      }
-    >
-      <Card>
-        <CardHeader className="px-4 sm:px-6">
+        }
+      >
+      <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/90 via-white/55 to-white/35 shadow-[0_24px_60px_rgba(15,23,42,0.08)] backdrop-blur-3xl dark:from-slate-950/85 dark:via-slate-900/55 dark:to-slate-900/35">
+        <span className="pointer-events-none absolute inset-x-10 -top-14 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
+        <span className="pointer-events-none absolute inset-x-12 bottom-0 h-32 rounded-full bg-white/25 blur-3xl dark:bg-white/10" />
+        <CardHeader className="relative z-10 px-4 sm:px-6">
           <CardTitle className="text-lg sm:text-xl">Expenses</CardTitle>
         </CardHeader>
 
-        <CardContent className="px-2 sm:px-6">
+        <CardContent className="relative z-10 px-2 sm:px-6">
           {isLoading ? (
             <motion.div
               className="space-y-3 sm:space-y-4"
@@ -221,7 +296,7 @@ export default function Expenses() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 18 }}
                       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                      className="expense-card flex items-center gap-3 sm:gap-4 rounded-2xl border border-white/50 bg-white/75 p-4 sm:p-5 shadow-md backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60"
+                      className="expense-card group flex items-center gap-3 sm:gap-4 rounded-2xl border border-white/50 bg-white/75 p-4 sm:p-5 shadow-md backdrop-blur-xl transition dark:border-white/10 dark:bg-slate-900/60"
                       data-testid={`expense-row-${expense.id}`}
                     >
                       {/* Left: icon + text */}
@@ -246,18 +321,44 @@ export default function Expenses() {
                         </div>
                       </div>
 
-                      {/* Right: amount + chip */}
-                      <div className="ml-auto flex flex-col items-end gap-1 sm:gap-1.5 shrink-0">
-                        <Badge
-                          variant="secondary"
-                          className="rounded-full border border-white/50 bg-white/70 px-2.5 py-1 text-[10px] sm:text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
-                          style={{ color: expense.category.color }}
-                        >
-                          {expense.category.name}
-                        </Badge>
-                        <p className="text-lg sm:text-xl font-semibold text-foreground tabular-nums tracking-tight">
-                          -{formatCurrency(expense.amount)}
-                        </p>
+                      {/* Right: amount + actions */}
+                      <div className="ml-auto flex items-center gap-3 sm:gap-4">
+                        <div className="flex flex-col items-end gap-1 sm:gap-1.5 shrink-0">
+                          <Badge
+                            variant="secondary"
+                            className="rounded-full border border-white/50 bg-white/70 px-2.5 py-1 text-[10px] sm:text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
+                            style={{ color: expense.category.color }}
+                          >
+                            {expense.category.name}
+                          </Badge>
+                          <p className="text-lg sm:text-xl font-semibold text-foreground tabular-nums tracking-tight">
+                            -{formatCurrency(expense.amount)}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <EditExpenseModal expense={expense}>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-9 w-9 rounded-full border border-white/60 bg-white/70 text-muted-foreground shadow-sm backdrop-blur transition hover:border-primary/30 hover:text-primary hover:shadow-lg dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
+                              data-testid={`button-edit-expense-${expense.id}`}
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                          </EditExpenseModal>
+
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => setExpenseToDelete(expense)}
+                            disabled={deleteExpenseMutation.isPending}
+                            className="h-9 w-9 rounded-full border border-white/60 bg-white/70 text-muted-foreground shadow-sm backdrop-blur transition hover:border-destructive/40 hover:text-destructive hover:shadow-lg dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
+                            data-testid={`button-delete-expense-${expense.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </motion.div>
                   );
@@ -266,7 +367,81 @@ export default function Expenses() {
             </motion.div>
           )}
         </CardContent>
+        <Modal
+          open={Boolean(expenseToDelete)}
+          onOpenChange={(open) => {
+            if (!open && !deleteExpenseMutation.isPending) {
+              setExpenseToDelete(null);
+            }
+          }}
+        >
+          <ModalContent>
+            <ModalHeader>
+              <ModalTitle>Delete expense</ModalTitle>
+              <ModalDescription>
+                {expenseToDelete
+                  ? `Are you sure you want to remove "${expenseToDelete.description}"?`
+                  : "Are you sure you want to delete this expense?"}
+              </ModalDescription>
+            </ModalHeader>
+
+            {expenseToDelete ? (
+              <div className="rounded-2xl border border-white/50 bg-white/75 p-5 shadow-inner backdrop-blur dark:border-white/10 dark:bg-slate-900/60">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl"
+                      style={{
+                        backgroundColor: `${expenseToDelete.category.color}1a`,
+                        color: expenseToDelete.category.color,
+                      }}
+                    >
+                      {DeleteCategoryIcon ? (
+                        <DeleteCategoryIcon className="h-5 w-5" />
+                      ) : null}
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-base font-semibold text-foreground">
+                        {expenseToDelete.description}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDate(expenseToDelete.date)}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-lg font-semibold text-destructive">
+                    -{formatCurrency(expenseToDelete.amount)}
+                  </p>
+                </div>
+              </div>
+            ) : null}
+
+            <ModalFooter className="pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-full"
+                onClick={() => {
+                  if (deleteExpenseMutation.isPending) return;
+                  setExpenseToDelete(null);
+                }}
+                disabled={deleteExpenseMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmDelete}
+                disabled={deleteExpenseMutation.isPending}
+                variant="destructive"
+                className="rounded-full px-6 shadow-lg shadow-destructive/30"
+              >
+                {deleteExpenseMutation.isPending ? "Deleting..." : "Delete"}
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </Card>
     </PageLayout>
+    </>
   );
 }
