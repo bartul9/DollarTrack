@@ -147,19 +147,7 @@ export function StatsCards() {
   ];
 
   return (
-    <motion.div
-      className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4"
-      initial="hidden"
-      animate="visible"
-      variants={{
-        hidden: {},
-        visible: {
-          transition: {
-            staggerChildren: 0.08,
-          },
-        },
-      }}
-    >
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
       {stats.map(
         ({
           title,
@@ -192,59 +180,59 @@ export function StatsCards() {
                 "h-48"
               )}
             >
-            <span
-              className={cn(
-                "pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br opacity-80",
-                accent
-              )}
-            />
+              <span
+                className={cn(
+                  "pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br opacity-80",
+                  accent
+                )}
+              />
 
-            <CardContent className="relative z-10 h-full p-6">
-              {/* top row */}
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-5">
-                  <div className="flex gap-2 items-center justify-center">
-                    <Icon className={cn("h-6 w-6", iconTone)} />
+              <CardContent className="relative z-10 h-full p-6">
+                {/* top row */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-5">
+                    <div className="flex gap-2 items-center justify-center">
+                      <Icon className={cn("h-6 w-6", iconTone)} />
 
-                    <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
-                      {title}
+                      <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                        {title}
+                      </p>
+                    </div>
+                    <p
+                      className="text-3xl md:text-[2.2rem] md:leading-none font-semibold"
+                      data-testid={testId}
+                    >
+                      {value}
                     </p>
                   </div>
-                  <p
-                    className="text-3xl md:text-[2.2rem] md:leading-none font-semibold"
-                    data-testid={testId}
-                  >
-                    {value}
-                  </p>
                 </div>
-              </div>
 
-              {/* bottom block pinned to bottom for equal heights */}
-              <div className="absolute inset-x-6 bottom-4">
-                <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span
-                    className={cn(
-                      "rounded-full border bg-white/75 px-3 py-1 font-semibold backdrop-blur dark:bg-slate-900/55 dark:border-white/10",
-                      trendTone
-                    )}
-                  >
-                    {trend}
-                  </span>
-                  <span className="text-muted-foreground">{trendNote}</span>
+                {/* bottom block pinned to bottom for equal heights */}
+                <div className="absolute inset-x-6 bottom-4">
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span
+                      className={cn(
+                        "rounded-full border bg-white/75 px-3 py-1 font-semibold backdrop-blur dark:bg-slate-900/55 dark:border-white/10",
+                        trendTone
+                      )}
+                    >
+                      {trend}
+                    </span>
+                    <span className="text-muted-foreground">{trendNote}</span>
+                  </div>
+                  {meta ? (
+                    <p className="mt-2 w-full text-center text-xs text-muted-foreground/90">
+                      {meta}
+                    </p>
+                  ) : (
+                    <div className="mt-2 h-4" />
+                  )}
                 </div>
-                {meta ? (
-                  <p className="mt-2 w-full text-center text-xs text-muted-foreground/90">
-                    {meta}
-                  </p>
-                ) : (
-                  <div className="mt-2 h-4" />
-                )}
-              </div>
-            </CardContent>
+              </CardContent>
             </Card>
           </motion.div>
         )
       )}
-    </motion.div>
+    </div>
   );
 }

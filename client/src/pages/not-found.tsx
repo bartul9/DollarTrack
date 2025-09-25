@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 
 export default function NotFound() {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-transparent text-foreground transition-colors duration-500">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.2),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.1),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.45),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.85),_transparent_70%)]" />
-      <div className="pointer-events-none absolute -left-32 top-24 h-[22rem] w-[22rem] rounded-full bg-primary/10 blur-3xl animate-float-slow dark:bg-primary/20" />
-      <div className="pointer-events-none absolute right-[-18rem] bottom-[-12rem] h-[30rem] w-[30rem] rounded-full bg-purple-200/45 blur-3xl animate-float-slower dark:bg-purple-600/25" />
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-transparent text-foreground transition-colors">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.18),_transparent_56%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.1),_transparent_62%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.38),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.82),_transparent_72%)]" />
+      <div className="pointer-events-none absolute -left-32 top-24 h-[20rem] w-[20rem] rounded-full bg-primary/12 blur-3xl dark:bg-primary/22" />
+      <div className="pointer-events-none absolute right-[-16rem] bottom-[-10rem] h-[26rem] w-[26rem] rounded-full bg-purple-200/40 blur-3xl dark:bg-purple-600/20" />
 
       <header className="relative z-10 mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-8">
         <div>
@@ -39,27 +39,25 @@ export default function NotFound() {
               </p>
             </div>
             <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link to="/">
-                <a
-                  className={cn(
-                    buttonVariants({ size: "lg" }),
-                    "justify-center bg-gradient-to-r from-primary via-purple-500 to-indigo-500 shadow-lg shadow-primary/30 hover:brightness-105"
-                  )}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Go to homepage
-                </a>
+              <Link
+                to="/"
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "justify-center bg-gradient-to-r from-primary via-purple-500 to-indigo-500 shadow-lg shadow-primary/30 hover:brightness-105"
+                )}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Go to homepage
               </Link>
-              <Link to="/app">
-                <a
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "lg" }),
-                    "justify-center border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 dark:border-white/20 dark:text-slate-100"
-                  )}
-                >
-                  <Compass className="h-4 w-4" />
-                  Open dashboard
-                </a>
+              <Link
+                to="/app"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "lg" }),
+                  "justify-center border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 dark:border-white/20 dark:text-slate-100"
+                )}
+              >
+                <Compass className="h-4 w-4" />
+                Open dashboard
               </Link>
             </div>
           </div>

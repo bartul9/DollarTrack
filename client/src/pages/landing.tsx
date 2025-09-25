@@ -30,15 +30,15 @@ export default function Landing() {
 
   return (
     <div>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.2),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.12),_transparent_58%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.45),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.85),_transparent_70%)]" />
-      <div className="pointer-events-none absolute -top-44 left-1/2 h-[32rem] w-[32rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-primary/25 via-transparent to-transparent blur-3xl animate-shimmer-soft dark:from-primary/40" />
-      <div className="pointer-events-none absolute -left-28 top-[18%] h-80 w-80 rounded-full bg-sky-200/60 blur-3xl animate-float-slow dark:bg-sky-500/30" />
-      <div className="pointer-events-none absolute -right-24 bottom-[-10rem] h-[28rem] w-[28rem] rounded-full bg-purple-200/45 blur-3xl animate-float-slower dark:bg-purple-600/25" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.18),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.1),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.35),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.85),_transparent_72%)]" />
+      <div className="pointer-events-none absolute -top-48 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-primary/25 via-transparent to-transparent blur-3xl opacity-80 dark:from-primary/35" />
+      <div className="pointer-events-none absolute -left-24 top-[18%] h-72 w-72 rounded-full bg-sky-200/50 blur-3xl dark:bg-sky-500/25" />
+      <div className="pointer-events-none absolute -right-20 bottom-[-9rem] h-[24rem] w-[24rem] rounded-full bg-purple-200/40 blur-3xl dark:bg-purple-600/20" />
 
-      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-20 px-6 pb-24 pt-10 md:pt-12">
-        <section className="relative grid gap-10 overflow-hidden rounded-[2.75rem] border border-white/70 bg-white/85 p-8 shadow-[0_44px_120px_rgba(124,58,237,0.16)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/75 md:grid-cols-[1.05fr,0.95fr] md:items-center">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.18),_transparent_60%)] opacity-80 dark:bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.28),_transparent_60%)]" />
-          <div className="pointer-events-none absolute -top-24 right-[-8rem] h-[18rem] w-[18rem] rounded-full bg-primary/20 blur-3xl dark:bg-primary/25" />
+      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-16 px-5 pb-20 pt-10 sm:px-6 md:gap-20 md:pt-12">
+        <section className="relative grid gap-10 overflow-hidden rounded-[2.5rem] border border-white/70 bg-white/90 p-6 shadow-[0_32px_90px_rgba(124,58,237,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/75 md:grid-cols-[1.05fr,0.95fr] md:items-center md:p-8">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.16),_transparent_58%)] opacity-80 dark:bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.24),_transparent_60%)]" />
+          <div className="pointer-events-none absolute -top-20 right-[-6rem] h-[16rem] w-[16rem] rounded-full bg-primary/20 blur-3xl opacity-80 dark:bg-primary/25" />
 
           <div className="relative z-10 space-y-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-primary backdrop-blur dark:border-primary/30 dark:bg-primary/15">
@@ -88,8 +88,8 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="relative z-10 overflow-hidden rounded-3xl border border-white/70 bg-white/90 p-6 shadow-[0_28px_70px_rgba(124,58,237,0.12)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70">
-            <div className="pointer-events-none absolute -top-20 right-[-4rem] h-40 w-40 rounded-full bg-primary/20 blur-3xl dark:bg-primary/25" />
+          <div className="relative z-10 overflow-hidden rounded-3xl border border-white/70 bg-white/90 p-6 shadow-[0_24px_60px_rgba(124,58,237,0.1)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
+            <div className="pointer-events-none absolute -top-16 right-[-3rem] h-32 w-32 rounded-full bg-primary/20 blur-3xl opacity-70 dark:bg-primary/25" />
             <div className="relative space-y-6 rounded-2xl border border-white/70 bg-white/85 p-6 shadow-inner shadow-primary/10 dark:border-white/10 dark:bg-slate-900/65">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                 Weekly report
@@ -126,13 +126,13 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="features" className="grid gap-6 md:grid-cols-3">
+        <section id="features" className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
               <div
                 key={feature.title}
-                className="group relative overflow-hidden rounded-3xl border border-white/70 bg-white/80 p-6 shadow-[0_30px_80px_rgba(124,58,237,0.1)] backdrop-blur-xl transition hover:-translate-y-1 hover:shadow-[0_40px_110px_rgba(124,58,237,0.15)] dark:border-white/10 dark:bg-slate-900/70"
+                className="group relative overflow-hidden rounded-3xl border border-white/70 bg-white/85 p-6 shadow-[0_24px_70px_rgba(124,58,237,0.08)] backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-slate-900/70"
               >
                 <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-75" />
                 <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-primary group-hover:bg-primary/20">

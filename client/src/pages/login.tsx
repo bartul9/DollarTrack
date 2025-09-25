@@ -77,16 +77,16 @@ export default function Login() {
 
   return (
     <div className="mt-20">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.2),_transparent_58%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.1),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.4),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.85),_transparent_70%)]" />
-      <div className="pointer-events-none absolute -left-24 top-24 h-80 w-80 rounded-full bg-sky-200/55 blur-3xl animate-float-slow dark:bg-sky-500/25" />
-      <div className="pointer-events-none absolute right-[-12rem] bottom-[-8rem] h-[22rem] w-[22rem] rounded-full bg-purple-200/45 blur-3xl animate-float-slower dark:bg-purple-600/25" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.18),_transparent_58%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.08),_transparent_62%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.35),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.82),_transparent_72%)]" />
+      <div className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-sky-200/50 blur-3xl dark:bg-sky-500/25" />
+      <div className="pointer-events-none absolute right-[-10rem] bottom-[-7rem] h-[20rem] w-[20rem] rounded-full bg-purple-200/40 blur-3xl dark:bg-purple-600/20" />
 
-      <div className="relative z-10 mx-auto flex h-full max-w-5xl flex-col px-6 py-6">
+      <div className="relative z-10 mx-auto flex h-full max-w-5xl flex-col px-5 py-6 sm:px-6">
         <div className="relative flex flex-1 items-center justify-center">
-          <div className="pointer-events-none absolute -left-6 top-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl dark:bg-primary/20" />
-          <div className="pointer-events-none absolute right-0 bottom-4 h-60 w-60 rounded-full bg-purple-300/20 blur-3xl dark:bg-purple-500/20" />
-          <Card className="relative w-full max-w-md overflow-hidden border border-white/70 bg-white/85 shadow-[0_38px_120px_rgba(124,58,237,0.14)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/75">
-            <span className="pointer-events-none absolute -top-20 right-[-4rem] h-36 w-36 rounded-full bg-primary/20 blur-3xl dark:bg-primary/25" />
+          <div className="pointer-events-none absolute -left-6 top-10 h-44 w-44 rounded-full bg-primary/10 blur-3xl dark:bg-primary/20" />
+          <div className="pointer-events-none absolute right-0 bottom-6 h-52 w-52 rounded-full bg-purple-300/20 blur-3xl dark:bg-purple-500/20" />
+          <Card className="relative w-full max-w-md overflow-hidden border border-white/70 bg-white/90 shadow-[0_28px_90px_rgba(124,58,237,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/75">
+            <span className="pointer-events-none absolute -top-16 right-[-3rem] h-32 w-32 rounded-full bg-primary/20 blur-3xl opacity-70 dark:bg-primary/25" />
             <CardHeader className="relative z-10 space-y-1">
               <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
               <CardDescription>
@@ -166,12 +166,13 @@ export default function Login() {
               </form>
             </CardContent>
             <CardFooter className="relative z-10 flex flex-col items-start gap-4 text-sm text-muted-foreground">
-              <div className="flex w-full items-center justify-between gap-2">
+              <div className="flex w-full flex-wrap items-center justify-between gap-2">
                 <span>New to DollarTrack?</span>
-                <Link to="/register">
-                  <a className="font-medium text-primary hover:underline">
-                    Create an account
-                  </a>
+                <Link
+                  to="/register"
+                  className="font-medium text-primary hover:underline"
+                >
+                  Create an account
                 </Link>
               </div>
               <p className="text-xs text-muted-foreground">
