@@ -191,7 +191,7 @@ export function StatsCards() {
                 {/* top row */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-5">
-                    <div className="flex gap-2 items-center justify-center">
+                    <div className="flex items-center gap-2">
                       <Icon className={cn("h-6 w-6", iconTone)} />
 
                       <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
@@ -199,7 +199,7 @@ export function StatsCards() {
                       </p>
                     </div>
                     <p
-                      className="text-3xl md:text-[2.2rem] md:leading-none font-semibold"
+                      className="text-3xl font-semibold md:text-[2.2rem] md:leading-none"
                       data-testid={testId}
                     >
                       {value}
@@ -221,7 +221,7 @@ export function StatsCards() {
                     <span className="text-muted-foreground">{trendNote}</span>
                   </div>
                   {meta ? (
-                    <p className="mt-2 w-full text-center text-xs text-muted-foreground/90">
+                    <p className="mt-2 w-full text-left text-xs text-muted-foreground/90 sm:text-center">
                       {meta}
                     </p>
                   ) : (
