@@ -142,6 +142,7 @@ function PublicLayout() {
       </div>
       <header className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-6 items-center sm:py-8 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center w-full justify-between sm:w-auto gap-3">
+          <ThemeToggle className="h-9 w-9 shrink-0 border border-primary/10 bg-white/70 text-foreground shadow-sm hover:bg-white/80 dark:border-white/10 dark:bg-slate-900/60" />
           <Link to="/" className="no-underline">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
               DollarTrack
@@ -150,7 +151,6 @@ function PublicLayout() {
               Budget smarter. Live better.
             </p>
           </Link>
-          <ThemeToggle className="h-9 w-9 shrink-0 border border-primary/10 bg-white/70 text-foreground shadow-sm hover:bg-white/80 dark:border-white/10 dark:bg-slate-900/60" />
         </div>
 
         <nav className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
