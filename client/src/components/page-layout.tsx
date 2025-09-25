@@ -31,13 +31,14 @@ export function PageLayout({
   showThemeToggle = true,
 }: PageLayoutProps) {
   const childrenArray = Children.toArray(children);
+  const actionArray = actions ? Children.toArray(actions) : [];
 
   return (
-    <div className={cn("relative space-y-10 pb-16", className)}>
+    <div className={cn("relative space-y-12 pb-20", className)}>
       <div className="pointer-events-none absolute inset-x-0 -top-32 h-64 bg-gradient-to-b from-primary/12 via-transparent to-transparent dark:from-primary/20" />
       <div className="pointer-events-none absolute -bottom-24 left-1/2 h-60 w-[85%] -translate-x-1/2 rounded-[5rem] bg-gradient-to-r from-indigo-300/15 via-primary/10 to-purple-300/15 blur-3xl dark:from-indigo-500/20 dark:via-primary/15 dark:to-purple-500/20" />
 
-      <section className="relative overflow-hidden rounded-[2rem] border border-white/50 bg-gradient-to-br from-white/92 via-white/70 to-white/40 px-6 py-8 shadow-xl shadow-primary/10 backdrop-blur-2xl transition-colors dark:border-white/10 dark:from-slate-900/90 dark:via-slate-900/60 dark:to-slate-900/35">
+      <section className="relative overflow-hidden rounded-[2rem] border border-white/50 bg-gradient-to-br from-white/92 via-white/70 to-white/40 px-5 py-8 shadow-xl shadow-primary/10 backdrop-blur-2xl transition-colors sm:px-6 dark:border-white/10 dark:from-slate-900/90 dark:via-slate-900/60 dark:to-slate-900/35">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(124,58,237,0.16),_transparent_60%)] opacity-80 dark:bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.22),_transparent_65%)]" />
         <div className="pointer-events-none absolute -top-24 -left-12 h-56 w-56 rounded-full bg-primary/25 blur-3xl opacity-70 dark:bg-primary/35" />
         <div className="pointer-events-none absolute -bottom-28 right-0 h-64 w-64 rounded-full bg-purple-400/20 blur-3xl opacity-70 dark:bg-purple-500/25" />
@@ -95,10 +96,22 @@ export function PageLayout({
               </div>
             </div>
           </div>
+
+          {actionArray.length > 0 ? (
+            <div className="flex flex-wrap items-center justify-start gap-3 self-start sm:justify-end">
+              {actionArray.map((action, index) => (
+                <div key={`page-action-${index}`} className="flex-shrink-0">
+                  {action}
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         {headerContent ? (
-          <div className="relative mt-8">{headerContent}</div>
+          <div className="relative mt-8 space-y-6 sm:space-y-8">
+            {headerContent}
+          </div>
         ) : null}
       </section>
 

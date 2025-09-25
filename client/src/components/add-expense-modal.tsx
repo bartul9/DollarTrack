@@ -87,7 +87,10 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
     <Modal open={open} onOpenChange={setOpen}>
       <ModalTrigger asChild>
         {children || (
-          <Button className="gap-2" data-testid="button-add-expense">
+          <Button
+            className="w-full gap-2 sm:w-auto"
+            data-testid="button-add-expense"
+          >
             <Plus className="h-5 w-5" />
             <span>Add Expense</span>
           </Button>
