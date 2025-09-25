@@ -27,6 +27,7 @@ import Register from "@/pages/register";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { ExpenseFiltersProvider } from "@/hooks/use-expense-filters";
+import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 import { ArrowRight } from "lucide-react";
 import { Button } from "./components/ui/button";
 
@@ -78,6 +79,7 @@ function RedirectIfAuthed({ children }) {
 function ProtectedLayout() {
   // Shell for /app/*
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  useScrollToTop();
 
   return (
     <div className="relative min-h-screen bg-transparent text-foreground transition-colors">
@@ -103,6 +105,7 @@ function ProtectedLayout() {
 
 function PublicLayout() {
   const navigate = useNavigate();
+  useScrollToTop();
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-transparent text-foreground transition-colors">
@@ -118,13 +121,6 @@ function PublicLayout() {
           </Link>
         </div>
         <nav className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-          <a
-            className="hidden rounded-full border border-transparent px-4 py-2 text-foreground/70 backdrop-blur transition hover:border-primary/40 hover:text-foreground md:inline"
-            href="#features"
-          >
-            Features
-          </a>
-          <ThemeToggle className="h-9 w-9 shrink-0 border border-primary/10 bg-white/70 text-foreground shadow-sm hover:bg-white/80 dark:border-white/10 dark:bg-slate-900/60" />
           <Link
             to="/login"
             className="rounded-full border border-primary/10 bg-white/70 px-4 py-2 text-foreground/80 shadow-sm backdrop-blur transition hover:border-primary/40 hover:text-foreground dark:border-white/10 dark:bg-slate-900/60"
@@ -138,7 +134,8 @@ function PublicLayout() {
           >
             Get started
             <ArrowRight className="h-4 w-4" />
-          </Button>
+          </Button>{" "}
+          <ThemeToggle className="h-9 w-9 shrink-0 border border-primary/10 bg-white/70 text-foreground shadow-sm hover:bg-white/80 dark:border-white/10 dark:bg-slate-900/60" />
         </nav>
       </header>
 
