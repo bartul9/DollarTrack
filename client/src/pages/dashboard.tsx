@@ -9,6 +9,7 @@ import { RecentExpenses } from "@/components/recent-expenses";
 import { ExpenseFiltersSheet } from "@/components/expense-filters";
 import { ActiveExpenseFilters } from "@/components/active-expense-filters";
 import { PageLayout } from "@/components/page-layout";
+import { AddExpenseFab } from "@/components/add-expense-fab";
 
 export default function Dashboard() {
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
@@ -29,7 +30,7 @@ export default function Dashboard() {
         <>
           <Button
             variant="outline"
-            className="gap-2 rounded-full border-white/50 bg-white/70 px-5 text-foreground shadow-sm backdrop-blur hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
+            className="w-full gap-2 rounded-full border-white/50 bg-white/70 px-5 text-foreground shadow-sm backdrop-blur hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70 sm:w-auto"
             data-testid="button-filter"
             onClick={() => setIsFilterSheetOpen(true)}
           >
@@ -58,6 +59,8 @@ export default function Dashboard() {
       </div>
 
       <RecentExpenses />
+
+      <AddExpenseFab />
     </PageLayout>
   );
 }

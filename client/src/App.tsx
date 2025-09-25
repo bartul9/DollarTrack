@@ -14,6 +14,7 @@ import { Sidebar } from "@/components/sidebar";
 import { queryClient } from "./lib/queryClient";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { MobileNav } from "@/components/mobile-nav";
 
 import Dashboard from "@/pages/dashboard";
 import Expenses from "@/pages/expenses";
@@ -85,14 +86,16 @@ function ProtectedLayout() {
     <div className="relative min-h-screen bg-transparent text-foreground transition-colors">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.12),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.08),_transparent_65%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.28),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.78),_transparent_70%)]" />
 
+      <MobileNav />
+
       <Sidebar
         collapsed={isSidebarCollapsed}
         onToggle={() => setIsSidebarCollapsed((previous) => !previous)}
       />
       <main
         className={cn(
-          "relative z-10 ml-0 flex min-h-screen flex-col px-4 pb-16 pt-5 transition-[margin] duration-200 sm:px-6 md:px-10 lg:px-16",
-          isSidebarCollapsed ? "md:ml-24" : "md:ml-72"
+          "relative z-10 ml-0 flex min-h-screen flex-col px-4 pb-0 pt-0 sm:pb-24 sm:pt-24 transition-[margin] duration-200 sm:px-6 md:px-8 md:pt-28 lg:px-16 lg:pb-16 lg:pt-12",
+          isSidebarCollapsed ? "lg:ml-24" : "lg:ml-72"
         )}
       >
         <div className="mx-auto w-full max-w-7xl">

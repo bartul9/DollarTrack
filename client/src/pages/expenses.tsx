@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AddExpenseModal } from "@/components/add-expense-modal";
+import { AddExpenseFab } from "@/components/add-expense-fab";
 import { getCategoryIcon } from "@/lib/categories";
 import { type ExpenseWithCategory, type Category } from "@shared/schema";
 import { fetchExpenses, fetchCategories } from "@/lib/api";
@@ -116,7 +117,7 @@ export default function Expenses() {
         <>
           <Button
             variant="outline"
-            className="gap-2 rounded-full border-white/60 bg-white/70 px-5 text-foreground shadow-sm backdrop-blur hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
+            className="w-full gap-2 rounded-full border-white/60 bg-white/70 px-5 text-foreground shadow-sm backdrop-blur hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70 sm:w-auto"
             data-testid="button-filter-expenses"
             onClick={() => setIsFilterSheetOpen(true)}
           >
@@ -278,6 +279,8 @@ export default function Expenses() {
           )}
         </CardContent>
       </Card>
+
+      <AddExpenseFab />
     </PageLayout>
   );
 }

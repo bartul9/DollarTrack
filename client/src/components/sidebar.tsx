@@ -30,7 +30,7 @@ type SidebarProps = {
   onToggle: () => void;
 };
 
-const navigation = [
+export const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Expenses", href: "/expenses", icon: CreditCard },
   { name: "Analytics", href: "/analytics", icon: LineChart },
@@ -73,7 +73,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     <aside
       data-collapsed={collapsed ? "true" : undefined}
       className={cn(
-        "fixed left-0 top-0 z-40 flex h-full flex-col border-r border-white/60 bg-white/85 shadow-2xl backdrop-blur-2xl transition-all duration-300 dark:border-white/10 dark:bg-slate-950/70",
+        "fixed left-0 top-0 z-40 hidden h-full flex-col border-r border-white/60 bg-white/85 shadow-2xl backdrop-blur-2xl transition-all duration-300 dark:border-white/10 dark:bg-slate-950/70 lg:flex",
         collapsed ? "w-24" : "w-72"
       )}
     >
@@ -102,7 +102,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </div>
           <div
             className={clsx(
-              "hidden items-center gap-2 md:flex",
+              "hidden items-center gap-2 lg:flex",
               collapsed && "flex-col"
             )}
           >
