@@ -277,7 +277,7 @@ export default function Expenses() {
             </div>
           ) : (
             <motion.div
-              className="space-y-2.5 sm:space-y-3"
+              className="space-y-3 sm:space-y-4"
               initial="hidden"
               animate="visible"
               variants={{
@@ -296,11 +296,11 @@ export default function Expenses() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 18 }}
                       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                      className="expense-card group flex items-center gap-3 sm:gap-4 rounded-2xl border border-white/50 bg-white/75 p-4 sm:p-5 shadow-md backdrop-blur-xl transition dark:border-white/10 dark:bg-slate-900/60"
+                      className="expense-card group flex flex-col gap-3 rounded-2xl border border-white/50 bg-white/75 p-4 shadow-md backdrop-blur-xl transition sm:flex-row sm:items-center sm:gap-4 sm:p-5 dark:border-white/10 dark:bg-slate-900/60"
                       data-testid={`expense-row-${expense.id}`}
                     >
                       {/* Left: icon + text */}
-                      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                      <div className="flex min-w-0 items-start gap-3 sm:items-center sm:gap-4">
                         <div
                           className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl shrink-0"
                           style={{
@@ -322,26 +322,26 @@ export default function Expenses() {
                       </div>
 
                       {/* Right: amount + actions */}
-                      <div className="ml-auto flex items-center gap-3 sm:gap-4">
-                        <div className="flex flex-col items-end gap-1 sm:gap-1.5 shrink-0">
+                      <div className="flex w-full flex-wrap items-center justify-between gap-3 sm:ml-auto sm:w-auto sm:flex-nowrap sm:items-center sm:gap-4 sm:justify-end">
+                        <div className="flex flex-1 flex-col items-start gap-2 sm:flex-none sm:items-end sm:gap-1.5 sm:text-right">
                           <Badge
                             variant="secondary"
-                            className="rounded-full border border-white/50 bg-white/70 px-2.5 py-1 text-[10px] sm:text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
+                            className="self-start rounded-full border border-white/50 bg-white/70 px-2.5 py-1 text-[10px] sm:self-auto sm:text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
                             style={{ color: expense.category.color }}
                           >
                             {expense.category.name}
                           </Badge>
-                          <p className="text-lg sm:text-xl font-semibold text-foreground tabular-nums tracking-tight">
+                          <p className="text-base sm:text-xl font-semibold text-foreground tabular-nums tracking-tight">
                             -{formatCurrency(expense.amount)}
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="flex shrink-0 items-center gap-2 sm:gap-2">
                           <EditExpenseModal expense={expense}>
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="h-9 w-9 rounded-full border border-white/60 bg-white/70 text-muted-foreground shadow-sm backdrop-blur transition hover:border-primary/30 hover:text-primary hover:shadow-lg dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
+                              className="h-10 w-10 rounded-full border border-white/60 bg-white/70 text-muted-foreground shadow-sm backdrop-blur transition hover:border-primary/30 hover:text-primary hover:shadow-lg sm:h-9 sm:w-9 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
                               data-testid={`button-edit-expense-${expense.id}`}
                             >
                               <Edit2 className="h-4 w-4" />
@@ -353,7 +353,7 @@ export default function Expenses() {
                             variant="ghost"
                             onClick={() => setExpenseToDelete(expense)}
                             disabled={deleteExpenseMutation.isPending}
-                            className="h-9 w-9 rounded-full border border-white/60 bg-white/70 text-muted-foreground shadow-sm backdrop-blur transition hover:border-destructive/40 hover:text-destructive hover:shadow-lg dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
+                            className="h-10 w-10 rounded-full border border-white/60 bg-white/70 text-muted-foreground shadow-sm backdrop-blur transition hover:border-destructive/40 hover:text-destructive hover:shadow-lg sm:h-9 sm:w-9 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
                             data-testid={`button-delete-expense-${expense.id}`}
                           >
                             <Trash2 className="h-4 w-4" />
