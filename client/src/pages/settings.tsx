@@ -147,7 +147,6 @@ export default function Settings() {
       eyebrow="Personalize"
       title="Settings"
       description="Manage your account preferences and personalize your experience."
-      breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: "Settings" }]}
       headerContent={
         settingsSummary ? (
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">

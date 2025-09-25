@@ -11,7 +11,6 @@ interface PageLayoutProps {
   title: string;
   description?: string;
   eyebrow?: string;
-  breadcrumbs?: BreadcrumbItem[];
   actions?: ReactNode;
   headerContent?: ReactNode;
   children: ReactNode;
@@ -23,7 +22,6 @@ export function PageLayout({
   title,
   description,
   eyebrow,
-  breadcrumbs,
   actions,
   headerContent,
   children,
@@ -44,43 +42,10 @@ export function PageLayout({
         <div className="pointer-events-none absolute -bottom-28 right-0 h-64 w-64 rounded-full bg-purple-400/20 blur-3xl opacity-70 dark:bg-purple-500/25" />
 
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-4">
-            {breadcrumbs && breadcrumbs.length > 0 ? (
-              <nav className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-                {breadcrumbs.map((item, index) => {
-                  const isLast = index === breadcrumbs.length - 1;
-
-                  return (
-                    <div
-                      key={`${item.label}-${index}`}
-                      className="flex items-center gap-2"
-                    >
-                      {item.href && !isLast ? (
-                        <Link
-                          to={item.href}
-                          className="transition-colors hover:text-foreground"
-                        >
-                          {item.label}
-                        </Link>
-                      ) : (
-                        <span
-                          className={cn(
-                            "text-muted-foreground",
-                            isLast && "text-foreground"
-                          )}
-                        >
-                          {item.label}
-                        </span>
-                      )}
-                      {!isLast ? <span className="opacity-50">/</span> : null}
-                    </div>
-                  );
-                })}
-              </nav>
-            ) : null}
+          <div className="space-y-4 text-center sm:text-left">
             <div className="space-y-3">
               {eyebrow ? (
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/70">
+                <span className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/70 sm:mx-0">
                   {eyebrow}
                 </span>
               ) : null}
@@ -98,7 +63,7 @@ export function PageLayout({
           </div>
 
           {actionArray.length > 0 ? (
-            <div className="flex flex-wrap items-center justify-start gap-3 self-start sm:justify-end">
+            <div className="flex flex-wrap items-center justify-center gap-3 self-stretch sm:justify-end">
               {actionArray.map((action, index) => (
                 <div key={`page-action-${index}`} className="flex-shrink-0">
                   {action}
@@ -109,7 +74,7 @@ export function PageLayout({
         </div>
 
         {headerContent ? (
-          <div className="relative mt-8 space-y-6 sm:space-y-8">
+          <div className="relative mt-8 space-y-6 text-center sm:space-y-8 sm:text-left">
             {headerContent}
           </div>
         ) : null}

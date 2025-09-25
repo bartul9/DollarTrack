@@ -263,7 +263,7 @@ export function ExpenseChart() {
       <CardHeader className="relative z-10">
         <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
           <CardTitle>Spending Overview</CardTitle>
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-end">
             <Button
               size="sm"
               variant={chartRange === "month" ? "default" : "ghost"}

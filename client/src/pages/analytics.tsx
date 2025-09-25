@@ -370,7 +370,6 @@ export default function Analytics() {
       eyebrow="Insights overview"
       title="Analytics"
       description="Dive deeper into your spending patterns, compare periods, and uncover the habits shaping your budget."
-      breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: "Analytics" }]}
       headerContent={
         <div className="space-y-6">
           {hasExpenses ? (

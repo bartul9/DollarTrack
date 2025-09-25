@@ -27,9 +27,8 @@ export function RecentExpenses() {
   const { toast } = useToast();
   const { filters } = useExpenseFilters();
 
-  const [expenseToDelete, setExpenseToDelete] = useState<
-    ExpenseWithCategory | null
-  >(null);
+  const [expenseToDelete, setExpenseToDelete] =
+    useState<ExpenseWithCategory | null>(null);
 
   const { data: expenses, isLoading } = useQuery<ExpenseWithCategory[]>({
     queryKey: ["expenses"],
@@ -168,8 +167,8 @@ export function RecentExpenses() {
     <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/90 via-white/55 to-white/30 shadow-[0_28px_60px_rgba(15,23,42,0.08)] dark:from-slate-900/85 dark:via-slate-900/55 dark:to-slate-900/30">
       <span className="pointer-events-none absolute inset-x-8 -top-12 h-32 rounded-full bg-white/40 blur-3xl dark:bg-white/10" />
       <span className="pointer-events-none absolute inset-x-12 bottom-0 h-32 rounded-full bg-white/30 blur-3xl dark:bg-white/10" />
-      <CardHeader className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <div>
+      <CardHeader className="relative z-10 flex flex-col gap-6 text-center lg:flex-row lg:items-center lg:justify-between lg:text-left">
+        <div className="space-y-1">
           <CardTitle>Recent Expenses</CardTitle>
           <p className="mt-1 text-sm text-muted-foreground">
             Stay on top of your latest transactions
@@ -217,7 +216,9 @@ export function RecentExpenses() {
         ) : filteredExpenses.length === 0 ? (
           <div className="space-y-3 py-12 text-center">
             <p className="text-base font-semibold text-foreground">
-              {searchQuery ? "No expenses match your search" : "No expenses found"}
+              {searchQuery
+                ? "No expenses match your search"
+                : "No expenses found"}
             </p>
             <p className="text-sm text-muted-foreground">
               {searchQuery
@@ -238,80 +239,59 @@ export function RecentExpenses() {
             }}
           >
             <AnimatePresence initial={false}>
-              {filteredExpenses.slice(0, 10).map((expense: ExpenseWithCategory) => {
-              const Icon = getCategoryIcon(expense.category.icon);
-              return (
-                <motion.div
-                  key={expense.id}
-                  layout
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 16 }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  className="expense-card flex items-center justify-between rounded-2xl border border-white/60 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:-translate-y-1 hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
-                  data-testid={`expense-item-${expense.id}`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className="flex h-12 w-12 items-center justify-center rounded-2xl"
-                      style={{
-                        backgroundColor: `${expense.category.color}1a`,
-                        color: expense.category.color,
-                      }}
+              {filteredExpenses
+                .slice(0, 10)
+                .map((expense: ExpenseWithCategory) => {
+                  const Icon = getCategoryIcon(expense.category.icon);
+                  return (
+                    <motion.div
+                      key={expense.id}
+                      layout
+                      initial={{ opacity: 0, y: 18 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 18 }}
+                      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                      className="expense-card flex items-center gap-3 sm:gap-4 rounded-2xl border border-white/50 bg-white/75 p-2 sm:p-5 shadow-md backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60"
+                      data-testid={`expense-row-${expense.id}`}
                     >
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-base font-semibold text-foreground">
-                        {expense.description}
-                      </p>
-                      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                        {formatDate(expense.date)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Badge
-                      variant="secondary"
-                      className="rounded-full border border-white/60 bg-white/75 px-3 py-1 text-xs font-semibold text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
-                      style={{ color: expense.category.color }}
-                    >
-                      {expense.category.name}
-                    </Badge>
-                    <div className="text-right">
-                      <p className="text-lg font-semibold text-foreground">
-                        -{formatCurrency(expense.amount)}
-                      </p>
-                      <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-                        {expense.category.name}
-                      </p>
-                    </div>
-                    <div className="flex gap-1">
-                      <EditExpenseModal expense={expense}>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-9 w-9 rounded-full border border-transparent text-muted-foreground hover:border-white/60 hover:text-foreground dark:hover:border-white/20"
-                          data-testid={`button-edit-expense-${expense.id}`}
+                      {/* Left: icon + text */}
+                      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                        <div
+                          className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl shrink-0"
+                          style={{
+                            backgroundColor: `${expense.category.color}1a`,
+                            color: expense.category.color,
+                          }}
                         >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                      </EditExpenseModal>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-9 w-9 rounded-full border border-transparent text-muted-foreground transition hover:border-white/60 hover:text-destructive dark:hover:border-white/20"
-                        onClick={() => handleDeleteExpense(expense)}
-                        disabled={deleteExpenseMutation.isPending}
-                        data-testid={`button-delete-expense-${expense.id}`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+                          <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                        </div>
+
+                        <div className="min-w-0">
+                          <p className="text-sm sm:text-lg font-medium text-foreground leading-snug line-clamp-2">
+                            {expense.description}
+                          </p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            {formatDate(expense.date)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Right: amount + chip */}
+                      <div className="ml-auto flex flex-col items-end gap-1 sm:gap-1.5 shrink-0">
+                        <Badge
+                          variant="secondary"
+                          className="rounded-full border border-white/50 bg-white/70 px-2.5 py-1 text-[10px] sm:text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
+                          style={{ color: expense.category.color }}
+                        >
+                          {expense.category.name}
+                        </Badge>
+                        <p className="text-lg sm:text-xl font-semibold text-foreground tabular-nums tracking-tight">
+                          -{formatCurrency(expense.amount)}
+                        </p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
             </AnimatePresence>
           </motion.div>
         )}

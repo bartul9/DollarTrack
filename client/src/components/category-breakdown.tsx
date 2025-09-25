@@ -140,13 +140,12 @@ export function CategoryBreakdown() {
         )}
 
         <div className="mt-6 border-t border-border pt-4">
-          <Link to="/categories">
-            <a
-              className="block w-full rounded-full bg-white/70 py-2 text-center text-sm font-medium text-primary backdrop-blur transition hover:bg-white/90 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
-              data-testid="button-view-all-categories"
-            >
-              View All Categories
-            </a>
+          <Link
+            to="/categories"
+            className="block w-full rounded-full bg-white/70 py-2 text-center text-sm font-medium text-primary backdrop-blur transition hover:bg-white/90 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
+            data-testid="button-view-all-categories"
+          >
+            View All Categories
           </Link>
         </div>
       </CardContent>

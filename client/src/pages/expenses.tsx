@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AddExpenseModal } from "@/components/add-expense-modal";
-import { AddExpenseFab } from "@/components/add-expense-fab";
 import { getCategoryIcon } from "@/lib/categories";
 import { type ExpenseWithCategory, type Category } from "@shared/schema";
 import { fetchExpenses, fetchCategories } from "@/lib/api";
@@ -109,64 +108,45 @@ export default function Expenses() {
       eyebrow="Manage and track"
       title="All Expenses"
       description="Monitor every transaction, filter by categories, and keep your spending aligned with your goals."
-      breadcrumbs={[
-        { label: "Dashboard", href: "/" },
-        { label: "Expenses" },
-      ]}
-      actions={
-        <>
-          <Button
-            variant="outline"
-            className="w-full gap-2 rounded-full border-white/60 bg-white/70 px-5 text-foreground shadow-sm backdrop-blur hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70 sm:w-auto"
-            data-testid="button-filter-expenses"
-            onClick={() => setIsFilterSheetOpen(true)}
-          >
-            <Filter className="h-4 w-4" />
-            Filter
-          </Button>
-          <ExpenseFiltersSheet
-            open={isFilterSheetOpen}
-            onOpenChange={setIsFilterSheetOpen}
-          />
-          <AddExpenseModal />
-        </>
-      }
+      actions={<AddExpenseModal />}
       headerContent={
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-2xl border border-white/60 bg-white/75 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
-            <p className="text-sm font-semibold text-muted-foreground">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+          {/* Total card */}
+          <div className="rounded-2xl border border-white/60 bg-white/75 p-4 sm:p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
+            <p className="text-xs sm:text-sm font-semibold text-muted-foreground">
               Total Expenses
             </p>
-            <p className="mt-3 text-4xl font-semibold text-foreground">
+            <p className="mt-2 sm:mt-3 text-3xl sm:text-4xl font-semibold text-foreground tabular-nums">
               {formatCurrency(totalAmount)}
             </p>
-            <div className="mt-6 flex items-center justify-between rounded-2xl border border-white/60 bg-white/70 p-4 text-sm shadow-inner backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60">
+            <div className="mt-4 sm:mt-6 flex items-center justify-between rounded-2xl border border-white/60 bg-white/70 p-3 sm:p-4 text-sm shadow-inner backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60">
               <span className="text-muted-foreground">Total Records</span>
-              <span className="text-2xl font-semibold text-foreground">
+              <span className="text-xl sm:text-2xl font-semibold text-foreground tabular-nums">
                 {filteredExpenses.length}
               </span>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/60 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
+          {/* Search card */}
+          <div className="rounded-2xl border border-white/60 bg-white/80 p-4 sm:p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
             <div className="relative">
               <Input
                 type="text"
                 placeholder="Search expenses or categories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 text-base"
+                className="pl-10 pr-3 h-11 text-sm sm:text-base"
                 data-testid="input-search-all-expenses"
               />
-              <Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             </div>
-            <ActiveExpenseFilters className="mt-4" />
-            <div className="mt-4 flex flex-wrap gap-2">
+            <ActiveExpenseFilters className="mt-3 sm:mt-4" />
+            <div className="mt-3 sm:mt-4 flex flex-wrap gap-2">
               {categories?.slice(0, 6).map((category) => (
                 <Badge
                   key={category.id}
                   variant="secondary"
-                  className="rounded-full border border-white/40 bg-white/70 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
+                  className="rounded-full border border-white/40 bg-white/70 px-2.5 py-1 text-[11px] sm:text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
                 >
                   {category.name}
                 </Badge>
@@ -177,20 +157,21 @@ export default function Expenses() {
       }
     >
       <Card>
-        <CardHeader>
-          <CardTitle>Expenses</CardTitle>
+        <CardHeader className="px-4 sm:px-6">
+          <CardTitle className="text-lg sm:text-xl">Expenses</CardTitle>
         </CardHeader>
-        <CardContent>
+
+        <CardContent className="px-2 sm:px-6">
           {isLoading ? (
             <motion.div
-              className="space-y-4"
+              className="space-y-3 sm:space-y-4"
               initial={{ opacity: 0.6 }}
               animate={{ opacity: 1 }}
             >
               {Array.from({ length: 5 }).map((_, i) => (
                 <motion.div
                   key={i}
-                  className="h-20 rounded-2xl bg-white/40 backdrop-blur dark:bg-slate-900/50"
+                  className="h-16 sm:h-20 rounded-2xl bg-white/40 backdrop-blur dark:bg-slate-900/50"
                   initial={{ opacity: 0.4 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: i * 0.08 }}
@@ -198,13 +179,16 @@ export default function Expenses() {
               ))}
             </motion.div>
           ) : filteredExpenses.length === 0 ? (
-            <div className="flex flex-col items-center justify-center space-y-4 py-16 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-dashed border-muted bg-muted/50 text-muted-foreground">
-                <Plus className="h-7 w-7" />
+            // empty state unchanged
+            <div className="flex flex-col items-center justify-center space-y-4 py-14 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-dashed border-muted bg-muted/50 text-muted-foreground">
+                <Plus className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-lg font-semibold text-foreground">
-                  {searchQuery ? "No expenses match your search" : "No expenses yet"}
+                <p className="text-base sm:text-lg font-semibold text-foreground">
+                  {searchQuery
+                    ? "No expenses match your search"
+                    : "No expenses yet"}
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground">
                   {searchQuery
@@ -218,7 +202,7 @@ export default function Expenses() {
             </div>
           ) : (
             <motion.div
-              className="space-y-3"
+              className="space-y-2.5 sm:space-y-3"
               initial="hidden"
               animate="visible"
               variants={{
@@ -230,57 +214,59 @@ export default function Expenses() {
                 {filteredExpenses.map((expense) => {
                   const Icon = getCategoryIcon(expense.category.icon);
                   return (
-                  <motion.div
-                    key={expense.id}
-                    layout
-                    initial={{ opacity: 0, y: 18 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 18 }}
-                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                    className="expense-card flex items-center justify-between rounded-2xl border border-white/50 bg-white/75 p-5 shadow-md backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60"
-                    data-testid={`expense-row-${expense.id}`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className="flex h-12 w-12 items-center justify-center rounded-2xl"
-                        style={{
-                          backgroundColor: `${expense.category.color}1a`,
-                          color: expense.category.color,
-                        }}
-                      >
-                        <Icon className="h-6 w-6" />
+                    <motion.div
+                      key={expense.id}
+                      layout
+                      initial={{ opacity: 0, y: 18 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 18 }}
+                      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                      className="expense-card flex items-center gap-3 sm:gap-4 rounded-2xl border border-white/50 bg-white/75 p-4 sm:p-5 shadow-md backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60"
+                      data-testid={`expense-row-${expense.id}`}
+                    >
+                      {/* Left: icon + text */}
+                      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                        <div
+                          className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl shrink-0"
+                          style={{
+                            backgroundColor: `${expense.category.color}1a`,
+                            color: expense.category.color,
+                          }}
+                        >
+                          <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                        </div>
+
+                        <div className="min-w-0">
+                          <p className="text-sm sm:text-lg font-medium text-foreground leading-snug line-clamp-2">
+                            {expense.description}
+                          </p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            {formatDate(expense.date)}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-lg font-medium text-foreground">
-                          {expense.description}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {formatDate(expense.date)}
+
+                      {/* Right: amount + chip */}
+                      <div className="ml-auto flex flex-col items-end gap-1 sm:gap-1.5 shrink-0">
+                        <Badge
+                          variant="secondary"
+                          className="rounded-full border border-white/50 bg-white/70 px-2.5 py-1 text-[10px] sm:text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
+                          style={{ color: expense.category.color }}
+                        >
+                          {expense.category.name}
+                        </Badge>
+                        <p className="text-lg sm:text-xl font-semibold text-foreground tabular-nums tracking-tight">
+                          -{formatCurrency(expense.amount)}
                         </p>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Badge
-                        variant="secondary"
-                        className="rounded-full border border-white/50 bg-white/70 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
-                        style={{ color: expense.category.color }}
-                      >
-                        {expense.category.name}
-                      </Badge>
-                      <p className="text-xl font-semibold text-foreground">
-                        -{formatCurrency(expense.amount)}
-                      </p>
-                    </div>
-                  </motion.div>
-                );
+                    </motion.div>
+                  );
                 })}
               </AnimatePresence>
             </motion.div>
           )}
         </CardContent>
       </Card>
-
-      <AddExpenseFab />
     </PageLayout>
   );
 }
