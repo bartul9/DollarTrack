@@ -221,7 +221,7 @@ export function StatsCards() {
                     <span className="text-muted-foreground">{trendNote}</span>
                   </div>
                   {meta ? (
-                    <p className="mt-2 w-full text-left text-xs text-muted-foreground/90 sm:text-center">
+                    <p className="mt-2 w-full text-left text-xs text-muted-foreground/90">
                       {meta}
                     </p>
                   ) : (
