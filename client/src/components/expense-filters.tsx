@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { fetchCategories } from "@/lib/api";
 import { useExpenseFilters } from "@/hooks/use-expense-filters";
+import { cn } from "@/lib/utils";
 import type { Category } from "@shared/schema";
 
 type ExpenseFiltersSheetProps = {
@@ -94,7 +95,9 @@ export function ExpenseFiltersSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col gap-6 sm:max-w-md">
+      <SheetContent
+        className="flex w-full flex-col gap-6 rounded-none border border-white/70 bg-gradient-to-b from-white/95 via-white/90 to-white/80 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.12)] backdrop-blur-2xl dark:border-white/10 dark:from-slate-950/90 dark:via-slate-950/80 dark:to-slate-950/70 dark:shadow-[0_24px_80px_rgba(15,23,42,0.45)] sm:rounded-l-[32px]"
+      >
         <SheetHeader>
           <SheetTitle>Filter expenses</SheetTitle>
           <SheetDescription>{selectedSummary}</SheetDescription>
@@ -108,7 +111,7 @@ export function ExpenseFiltersSheet({
                 Choose one or multiple categories to narrow down results.
               </p>
             </div>
-            <ScrollArea className="h-48 rounded-xl border border-dashed border-muted-foreground/20 p-3">
+            <ScrollArea className="h-48 rounded-2xl border border-white/60 bg-white/70 p-3 shadow-inner backdrop-blur dark:border-white/10 dark:bg-slate-950/60">
               <div className="space-y-3">
                 {isLoading ? (
                   <div className="space-y-3">
@@ -126,7 +129,11 @@ export function ExpenseFiltersSheet({
                       <Label
                         key={category.id}
                         htmlFor={`filter-category-${category.id}`}
-                        className="flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-2 text-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
+                        className={cn(
+                          "flex cursor-pointer items-center gap-3 rounded-xl border border-transparent px-3 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary",
+                          isChecked &&
+                            "border-primary/40 bg-primary/10 text-primary shadow-sm dark:border-primary/30 dark:bg-primary/15 dark:text-primary-foreground"
+                        )}
                       >
                         <Checkbox
                           id={`filter-category-${category.id}`}
@@ -169,7 +176,7 @@ export function ExpenseFiltersSheet({
                 </Button>
               )}
             </div>
-            <div className="rounded-xl border border-muted-foreground/20 p-3">
+            <div className="rounded-2xl border border-white/60 bg-white/70 p-3 shadow-inner backdrop-blur dark:border-white/10 dark:bg-slate-950/60">
               <Calendar
                 mode="range"
                 numberOfMonths={1}
