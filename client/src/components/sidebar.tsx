@@ -176,7 +176,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       className={cn(
                         "flex h-11 w-11 items-center justify-center rounded-2xl border border-white/60 bg-white/80 text-primary shadow-sm backdrop-blur transition-all dark:border-white/10 dark:bg-slate-900/70",
                         isActive &&
-                          "border-primary/40 bg-primary/15 text-primary shadow-md dark:border-primary/50 dark:bg-primary/20 dark:text-white"
+                          "border-primary/40 bg-primary/15 text-primary shadow-md dark:border-primary/50 dark:bg-primary/20"
                       )}
                     >
                       <Icon className="h-5 w-5" />
