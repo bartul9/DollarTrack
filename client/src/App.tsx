@@ -134,15 +134,13 @@ function PublicLayout() {
   );
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-transparent text-foreground transition-colors">
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_15%,rgba(129,140,248,0.25),transparent_55%),radial-gradient(circle_at_82%_-10%,rgba(236,72,153,0.2),transparent_60%),radial-gradient(circle_at_18%_82%,rgba(56,189,248,0.16),transparent_55%),linear-gradient(180deg,rgba(255,255,255,0.96),rgba(242,247,255,0.98))] opacity-95 dark:bg-[radial-gradient(circle_at_15%_-10%,rgba(99,102,241,0.32),transparent_60%),radial-gradient(circle_at_80%_8%,rgba(168,85,247,0.24),transparent_60%),radial-gradient(circle_at_18%_80%,rgba(15,118,110,0.2),transparent_65%),linear-gradient(180deg,rgba(10,12,28,0.94),rgba(2,6,23,0.98))]" />
-        <div className="absolute -left-24 top-32 h-72 w-72 rounded-full bg-primary/18 blur-3xl dark:bg-primary/30" />
-        <div className="absolute right-[-20%] bottom-10 h-[22rem] w-[22rem] rounded-full bg-purple-200/45 blur-3xl dark:bg-purple-500/25" />
-      </div>
+    <div className="relative min-h-screen overflow-hidden text-foreground transition-colors">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.2),_transparent_58%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.1),_transparent_62%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.38),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.82),_transparent_72%)]" />
+      <div className="pointer-events-none absolute -left-24 top-28 h-[20rem] w-[20rem] rounded-full bg-sky-200/50 blur-3xl dark:bg-sky-500/25" />
+      <div className="pointer-events-none absolute right-[-12rem] bottom-[-7rem] h-[22rem] w-[22rem] rounded-full bg-purple-200/40 blur-3xl dark:bg-purple-600/20" />
+
       <header className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-6 items-center sm:py-8 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center w-full justify-between sm:w-auto gap-3">
-          <ThemeToggle className="h-9 w-9 shrink-0 border border-primary/10 bg-white/70 text-foreground shadow-sm hover:bg-white/80 dark:border-white/10 dark:bg-slate-900/60" />
           <Link to="/" className="no-underline">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
               DollarTrack
@@ -150,7 +148,8 @@ function PublicLayout() {
             <p className="text-sm text-muted-foreground/80">
               Budget smarter. Live better.
             </p>
-          </Link>
+          </Link>{" "}
+          <ThemeToggle className="h-9 w-9 shrink-0 border border-primary/10 bg-white/70 text-foreground shadow-sm hover:bg-white/80 dark:border-white/10 dark:bg-slate-900/60" />
         </div>
 
         <nav className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
