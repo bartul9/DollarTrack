@@ -161,7 +161,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                         ? "justify-center gap-0 px-2 py-3"
                         : "gap-3 px-4 py-3",
                       isActive
-                        ? "border-primary/40 bg-white/90 text-primary shadow-[0_18px_40px_rgba(99,102,241,0.18)] dark:border-primary/30 dark:bg-gradient-to-r dark:from-primary/90 dark:via-primary/80 dark:to-primary/60 dark:text-white dark:shadow-[0_18px_40px_rgba(99,102,241,0.45)]"
+                        ? "border-primary/40 bg-white/90 text-primary shadow-[0_18px_40px_rgba(99,102,241,0.18)] dark:border-primary/40 dark:bg-slate-900/75 dark:text-white dark:shadow-[0_18px_40px_rgba(15,23,42,0.55)]"
                         : "text-muted-foreground hover:border-white/60 hover:bg-white/70 hover:text-foreground dark:hover:border-white/15 dark:hover:bg-white/10"
                     )}
                   >
@@ -176,7 +176,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       className={cn(
                         "flex h-11 w-11 items-center justify-center rounded-2xl border border-white/60 bg-white/80 text-primary shadow-sm backdrop-blur transition-all dark:border-white/10 dark:bg-slate-900/70",
                         isActive &&
-                          "border-primary/40 bg-primary/15 text-primary shadow-md dark:border-transparent dark:bg-white/10 dark:text-white dark:shadow-none"
+                          "border-primary/40 bg-primary/15 text-primary shadow-md dark:border-primary/50 dark:bg-primary/20 dark:text-white"
                       )}
                     >
                       <Icon className="h-5 w-5" />
@@ -192,7 +192,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       {item.name}
                     </span>
                     {isActive && !collapsed ? (
-                      <span className="ml-auto h-2 w-2 rounded-full bg-primary shadow dark:bg-white/80" />
+                      <span className="ml-auto h-2 w-2 rounded-full bg-primary shadow dark:bg-primary/60" />
                     ) : null}
                   </Link>
                 </TooltipTrigger>
