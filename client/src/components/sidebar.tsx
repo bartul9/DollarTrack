@@ -73,7 +73,10 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     <aside
       data-collapsed={collapsed ? "true" : undefined}
       className={cn(
-        "fixed left-0 top-0 z-40 hidden h-full flex-col border-r border-white/60 bg-white/85 shadow-2xl backdrop-blur-2xl transition-all duration-300 dark:border-white/10 dark:bg-slate-950/70 lg:flex",
+        "relative fixed left-0 top-0 z-40 hidden h-full flex-col overflow-hidden border-r border-white/60 bg-white/80 shadow-2xl backdrop-blur-2xl transition-all duration-300 dark:border-white/10 dark:bg-slate-950/70 lg:flex",
+        "before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-br before:from-primary/5 before:via-white/60 before:to-white/20 before:opacity-80 before:blur-xl",
+        "after:pointer-events-none after:absolute after:-left-24 after:top-24 after:-z-10 after:h-64 after:w-64 after:rounded-full after:bg-primary/30 after:opacity-30 after:blur-3xl",
+        "dark:before:from-primary/10 dark:before:via-slate-950/70 dark:before:to-slate-900/40 dark:after:bg-primary/20",
         collapsed ? "w-24" : "w-72"
       )}
     >
@@ -153,15 +156,22 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     data-testid={`nav-link-${item.name.toLowerCase()}`}
                     aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "group flex items-center rounded-2xl text-sm font-medium transition-all",
+                      "group relative flex items-center overflow-hidden rounded-2xl border border-transparent text-sm font-medium transition-all",
                       collapsed
                         ? "justify-center gap-0 px-2 py-3"
                         : "gap-3 px-4 py-3",
                       isActive
-                        ? "bg-gradient-to-r from-primary via-primary/80 to-primary/60 text-white shadow-lg shadow-primary/30"
-                        : "text-muted-foreground hover:bg-white/70 hover:text-foreground dark:hover:bg-white/10"
+                        ? "border-primary/30 bg-gradient-to-r from-primary/90 via-primary/80 to-primary/60 text-white shadow-lg shadow-primary/30"
+                        : "text-muted-foreground hover:border-white/60 hover:bg-white/70 hover:text-foreground dark:hover:border-white/15 dark:hover:bg-white/10"
                     )}
                   >
+                    <span
+                      className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      style={{
+                        background:
+                          "radial-gradient(circle at 20% 20%, rgba(99,102,241,0.12), transparent 55%)",
+                      }}
+                    />
                     <span
                       className={cn(
                         "flex h-11 w-11 items-center justify-center rounded-2xl border border-white/60 bg-white/80 text-primary shadow-sm backdrop-blur transition-all dark:border-white/10 dark:bg-slate-900/70",

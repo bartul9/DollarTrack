@@ -20,6 +20,7 @@ import { PageLayout } from "@/components/page-layout";
 import { AnimatePresence, motion } from "framer-motion";
 import { EditExpenseModal } from "@/components/edit-expense-modal";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 import {
   Modal,
   ModalContent,
@@ -32,7 +33,7 @@ import {
 export default function Expenses() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
-  const { filters } = useExpenseFilters();
+  const { filters, setFilters } = useExpenseFilters();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -48,6 +49,22 @@ export default function Expenses() {
 
   const [expenseToDelete, setExpenseToDelete] =
     useState<ExpenseWithCategory | null>(null);
+
+  const toggleQuickCategory = (categoryId: string) => {
+    setFilters((previous) => {
+      const alreadySelected = previous.categories.includes(categoryId);
+      if (alreadySelected) {
+        return {
+          ...previous,
+          categories: previous.categories.filter((id) => id !== categoryId),
+        };
+      }
+      return {
+        ...previous,
+        categories: [...previous.categories, categoryId],
+      };
+    });
+  };
 
   const filteredExpenses = useMemo(() => {
     if (!expenses) return [];
@@ -193,29 +210,58 @@ export default function Expenses() {
             </div>
 
             {/* Search card */}
-            <div className="rounded-2xl border border-white/60 bg-white/80 p-4 sm:p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search expenses or categories..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-3 h-11 text-sm sm:text-base"
-                  data-testid="input-search-all-expenses"
-                />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className="rounded-3xl border border-white/60 bg-white/80 p-4 sm:p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                <div className="relative flex-1">
+                  <Input
+                    type="text"
+                    placeholder="Search expenses or categories..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="h-11 pl-10 pr-3 text-sm sm:text-base"
+                    data-testid="input-search-all-expenses"
+                  />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-11 gap-2 rounded-full border-white/70 bg-white/70 text-sm font-medium text-foreground shadow-sm backdrop-blur transition hover:bg-white/90 dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
+                  onClick={() => setIsFilterSheetOpen(true)}
+                >
+                  <Filter className="h-4 w-4" />
+                  Advanced filters
+                </Button>
               </div>
               <ActiveExpenseFilters className="mt-3 sm:mt-4" />
               <div className="mt-3 sm:mt-4 flex flex-wrap gap-2">
-                {categories?.slice(0, 6).map((category) => (
-                  <Badge
-                    key={category.id}
-                    variant="secondary"
-                    className="rounded-full border border-white/40 bg-white/70 px-2.5 py-1 text-[11px] sm:text-xs font-medium text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
-                  >
-                    {category.name}
-                  </Badge>
-                ))}
+                {categories?.slice(0, 8).map((category) => {
+                  const isSelected = filters.categories.includes(category.id);
+                  return (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => toggleQuickCategory(category.id)}
+                      className={cn(
+                        "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 sm:text-xs",
+                        "backdrop-blur",
+                        isSelected
+                          ? "border-primary/40 bg-primary/10 text-primary shadow-sm"
+                          : "border-white/60 bg-white/70 text-muted-foreground hover:border-primary/30 hover:text-primary dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
+                      )}
+                      aria-pressed={isSelected}
+                    >
+                      <span className="block max-w-[8rem] truncate sm:max-w-none">
+                        {category.name}
+                      </span>
+                      {isSelected ? (
+                        <span className="hidden text-[10px] uppercase tracking-wide sm:inline">
+                          Active
+                        </span>
+                      ) : null}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>

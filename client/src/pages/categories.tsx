@@ -397,8 +397,10 @@ export default function Categories() {
         </div>
       }
     >
-      <Card>
-        <CardHeader className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+      <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-white/85 via-white/55 to-white/35 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur-3xl dark:from-slate-950/85 dark:via-slate-900/55 dark:to-slate-900/35">
+        <div className="pointer-events-none absolute inset-x-12 -top-24 h-40 rounded-full bg-primary/15 blur-3xl dark:bg-primary/25" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-primary/10 via-transparent to-transparent blur-3xl dark:from-primary/20" />
+        <CardHeader className="relative z-10 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="text-2xl">Manage Categories</CardTitle>
             <p className="text-sm text-muted-foreground">
@@ -407,31 +409,43 @@ export default function Categories() {
             </p>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="relative max-w-md">
-            <Input
-              type="text"
-              placeholder="Search by name or icon..."
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              className="rounded-2xl border border-border pl-11 pr-4 text-base"
-              data-testid="input-search-categories"
-            />
-            <Search className="pointer-events-none absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
+        <CardContent className="relative z-10 space-y-7">
+          <div className="rounded-3xl border border-white/60 bg-white/75 p-4 shadow-inner backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70 sm:p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="relative w-full sm:max-w-md">
+                <Input
+                  type="text"
+                  placeholder="Search by name or icon..."
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  className="h-11 rounded-full border-white/50 bg-white/90 pl-11 pr-4 text-sm shadow-sm focus-visible:ring-2 focus-visible:ring-primary/60 dark:border-white/10 dark:bg-slate-900/70 dark:text-foreground"
+                  data-testid="input-search-categories"
+                />
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              </div>
+              <div className="flex gap-2">
+                <Badge className="rounded-full border border-white/60 bg-white/80 px-3 py-1 text-[11px] font-medium text-muted-foreground shadow-sm dark:border-white/10 dark:bg-slate-900/60">
+                  {filteredCategories.length} showing
+                </Badge>
+                <Badge className="rounded-full border border-white/60 bg-white/80 px-3 py-1 text-[11px] font-medium text-muted-foreground shadow-sm dark:border-white/10 dark:bg-slate-900/60">
+                  {categories?.length ?? 0} total
+                </Badge>
+              </div>
+            </div>
           </div>
 
           {isLoading ? (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {Array.from({ length: 6 }).map((_, index) => (
                 <div
                   key={index}
-                  className="h-32 animate-pulse rounded-3xl border border-white/60 bg-white/70 backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
+                  className="h-36 animate-pulse rounded-3xl border border-white/40 bg-white/55 shadow-inner dark:border-white/10 dark:bg-slate-900/60"
                 />
               ))}
             </div>
           ) : filteredCategories.length === 0 ? (
-            <div className="flex flex-col items-center justify-center space-y-4 rounded-3xl border border-dashed border-border bg-white/50 py-16 text-center dark:border-white/10 dark:bg-slate-900/40">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-dashed border-border text-muted-foreground dark:border-white/20">
+            <div className="flex flex-col items-center justify-center space-y-4 rounded-3xl border border-dashed border-white/60 bg-white/60 py-16 text-center shadow-inner dark:border-white/10 dark:bg-slate-900/50">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-dashed border-white/70 text-muted-foreground dark:border-white/20">
                 <Plus className="h-7 w-7" />
               </div>
               <div>
@@ -446,73 +460,94 @@ export default function Categories() {
                     : "Create categories to organize your expenses."}
                 </p>
               </div>
-              <Button className="gap-2" onClick={() => setIsCreateOpen(true)}>
+              <Button
+                className="gap-2 rounded-full px-5"
+                onClick={() => setIsCreateOpen(true)}
+              >
                 <Plus className="h-5 w-5" />
                 Add your first category
               </Button>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {filteredCategories.map((category) => {
                 const Icon = getCategoryIcon(category.icon);
                 return (
                   <div
                     key={category.id}
-                    className="group relative flex flex-col rounded-2xl border border-white/60 bg-white/80 p-4 shadow-md backdrop-blur-xl transition hover:border-primary/40 hover:shadow-lg dark:border-white/10 dark:bg-slate-900/60"
+                    className="group relative flex flex-col overflow-hidden rounded-3xl border bg-white/85 p-5 shadow-[0_25px_45px_-24px_rgba(15,23,42,0.25)] backdrop-blur-xl transition hover:-translate-y-1 hover:shadow-[0_35px_55px_-20px_rgba(79,70,229,0.3)] dark:border-white/10 dark:bg-slate-900/65"
+                    style={{
+                      borderColor: `${category.color}33`,
+                    }}
                     data-testid={`category-card-${category.id}`}
                   >
-                    {/* Header: icon + name + color pill */}
-                    <div className="flex items-start justify-between gap-3 min-w-0">
-                      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <span
+                      className="pointer-events-none absolute -right-16 top-0 h-40 w-40 rounded-full opacity-20 blur-3xl"
+                      style={{ backgroundColor: category.color }}
+                    />
+                    <span
+                      className="pointer-events-none absolute -bottom-12 left-1/4 h-36 w-36 rounded-full opacity-15 blur-3xl"
+                      style={{ backgroundColor: category.color }}
+                    />
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex min-w-0 items-center gap-4">
                         <div
-                          className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl shrink-0"
+                          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/60 text-lg font-semibold shadow-sm backdrop-blur dark:border-white/10"
                           style={{
                             backgroundColor: `${category.color}1a`,
                             color: category.color,
                           }}
                         >
-                          <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                          <Icon className="h-5 w-5" />
                         </div>
-
                         <div className="min-w-0">
-                          <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">
+                          <h3 className="truncate text-lg font-semibold text-foreground">
                             {category.name}
                           </h3>
-                          <p className="text-xs sm:text-sm text-muted-foreground">
+                          <p className="text-xs text-muted-foreground">
                             {formatIconName(category.icon)} icon
                           </p>
                         </div>
                       </div>
-
                       <Badge
                         variant="outline"
-                        className="rounded-full border border-white/60 bg-white/70 px-2.5 py-1 text-[10px] sm:text-xs font-medium whitespace-nowrap backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
+                        className="rounded-full border border-white/60 bg-white/80 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
                         style={{ color: category.color }}
                       >
                         {category.color}
                       </Badge>
                     </div>
 
-                    {/* Footer: description + actions */}
-                    <div className="mt-4 sm:mt-6  flex items-center gap-1">
-                      {/* Desktop / tablet: text buttons */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditingCategory(category)}
-                        data-testid={`button-edit-category-${category.id}`}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => setCategoryToDelete(category)}
-                        data-testid={`button-delete-category-${category.id}`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <div className="mt-5 flex items-center justify-between gap-3">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        <Badge
+                          variant="secondary"
+                          className="rounded-full border border-white/50 bg-white/80 px-2.5 py-1 text-[11px] font-medium backdrop-blur dark:border-white/10 dark:bg-slate-900/60"
+                          style={{ color: category.color }}
+                        >
+                          {formatIconName(category.icon)}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 w-9 rounded-full border border-white/60 bg-white/75 text-muted-foreground shadow-sm backdrop-blur transition hover:border-primary/40 hover:text-primary dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
+                          onClick={() => setEditingCategory(category)}
+                          data-testid={`button-edit-category-${category.id}`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 w-9 rounded-full border border-white/60 bg-white/75 text-muted-foreground shadow-sm backdrop-blur transition hover:border-destructive/40 hover:text-destructive dark:border-white/10 dark:bg-slate-900/60 dark:hover:bg-slate-900/70"
+                          onClick={() => setCategoryToDelete(category)}
+                          data-testid={`button-delete-category-${category.id}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 );
