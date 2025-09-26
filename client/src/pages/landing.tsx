@@ -30,11 +30,6 @@ export default function Landing() {
 
   return (
     <div>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.18),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.1),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.35),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.85),_transparent_72%)]" />
-      <div className="pointer-events-none absolute -top-48 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-primary/25 via-transparent to-transparent blur-3xl opacity-80 dark:from-primary/35" />
-      <div className="pointer-events-none absolute -left-24 top-[18%] h-72 w-72 rounded-full bg-sky-200/50 blur-3xl dark:bg-sky-500/25" />
-      <div className="pointer-events-none absolute -right-20 bottom-[-9rem] h-[24rem] w-[24rem] rounded-full bg-purple-200/40 blur-3xl dark:bg-purple-600/20" />
-
       <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-16 px-5 pb-6 sm:pb-24 pt-10 sm:px-6 md:gap-20 md:pt-12">
         <section className="relative grid gap-10 overflow-hidden rounded-[2.5rem] border border-white/70 bg-white/90 p-6 shadow-[0_32px_90px_rgba(124,58,237,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/75 md:grid-cols-[1.05fr,0.95fr] md:items-center md:p-10">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.16),_transparent_58%)] opacity-80 dark:bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.24),_transparent_60%)]" />
