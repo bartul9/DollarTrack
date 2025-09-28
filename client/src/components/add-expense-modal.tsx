@@ -120,7 +120,7 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
                         type="number"
                         step="0.01"
                         placeholder="0.00"
-                        className="rounded-2xl border border-white/60 bg-white/85 pl-9 pr-4 dark:border-white/10 dark:bg-slate-900/70"
+                        className="rounded-2xl border border-slate-200 bg-white/95 pl-9 pr-4 text-slate-900 shadow-sm transition focus-visible:border-primary/40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/10 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-100 dark:focus-visible:ring-primary/20"
                         data-testid="input-amount"
                         {...field}
                       />
@@ -139,7 +139,7 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
                   <FormLabel>Category</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="rounded-2xl border-white/60 bg-white/85 dark:border-white/10 dark:bg-slate-900/70" data-testid="select-category">
+                      <SelectTrigger className="rounded-2xl border border-slate-200 bg-white/95 text-slate-900 shadow-sm transition focus-visible:border-primary/40 focus-visible:ring-4 focus-visible:ring-primary/10 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-100" data-testid="select-category">
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                     </FormControl>
@@ -171,7 +171,7 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
                   <FormControl>
                     <Input
                       placeholder="Enter expense description"
-                      className="rounded-2xl border border-white/60 bg-white/85 dark:border-white/10 dark:bg-slate-900/70"
+                      className="rounded-2xl border border-slate-200 bg-white/95 text-slate-900 shadow-sm transition focus-visible:border-primary/40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/10 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-100"
                       data-testid="input-description"
                       {...field}
                     />
@@ -190,7 +190,7 @@ export function AddExpenseModal({ children }: AddExpenseModalProps) {
                   <FormControl>
                     <Input
                       type="date"
-                      className="rounded-2xl border border-white/60 bg-white/85 dark:border-white/10 dark:bg-slate-900/70"
+                      className="rounded-2xl border border-slate-200 bg-white/95 text-slate-900 shadow-sm transition focus-visible:border-primary/40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/10 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-100"
                       data-testid="input-date"
                       {...field}
                       value={

@@ -70,7 +70,6 @@ export function MobileNav() {
           </Button>
           <div>
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-              <Sparkles className="h-4 w-4 text-primary" />
               DollarTrack
             </p>
             <p className="text-sm text-muted-foreground/80">
