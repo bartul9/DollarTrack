@@ -18,7 +18,7 @@ const ModalOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xl transition-all data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
+      "fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-xl transition-all data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 dark:bg-slate-950/70",
       className
     )}
     {...props}
@@ -35,18 +35,23 @@ const ModalContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "group fixed left-1/2 top-1/2 z-50 w-[min(95vw,560px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[32px] border border-white/25 bg-gradient-to-br from-white/98 via-white/90 to-white/80 p-0 text-foreground shadow-[0_32px_90px_-30px_rgba(15,23,42,0.6)] ring-1 ring-white/40 backdrop-blur-2xl transition-all data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-90 dark:border-white/10 dark:from-slate-950/95 dark:via-slate-950/85 dark:to-slate-950/80 dark:ring-white/10",
-        "before:pointer-events-none before:absolute before:-inset-px before:-z-10 before:rounded-[inherit] before:bg-gradient-to-br before:from-white/70 before:via-white/20 before:to-white/10 before:opacity-80 before:blur-3xl before:content-[''] dark:before:from-slate-900/70 dark:before:via-slate-900/40 dark:before:to-slate-900/20",
+        "group fixed left-1/2 top-1/2 z-50 w-[min(95vw,560px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/95 p-0 text-slate-900 shadow-[0_32px_80px_-28px_rgba(15,23,42,0.35)] ring-1 ring-black/5 backdrop-blur-2xl transition-all data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-90 dark:border-white/10 dark:bg-slate-950/90 dark:text-slate-100 dark:ring-white/10",
+        "before:pointer-events-none before:absolute before:-inset-px before:-z-10 before:rounded-[inherit] before:bg-gradient-to-br before:from-white/90 before:via-white/40 before:to-white/20 before:opacity-70 before:blur-3xl before:content-[''] dark:before:from-slate-900/70 dark:before:via-slate-900/40 dark:before:to-slate-900/20",
         className
       )}
       {...props}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.45),transparent_65%)] opacity-80 dark:bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.3),transparent_70%)]" />
-      <div className="relative z-10 flex flex-col gap-6 p-8">{children}</div>
-      <DialogPrimitive.Close className="absolute right-5 top-5 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/80 text-slate-600 shadow-sm transition hover:-translate-y-[1px] hover:bg-white dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-900">
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </DialogPrimitive.Close>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.25),transparent_65%)] opacity-70 dark:bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.3),transparent_70%)]" />
+      <div className="relative z-10 flex flex-col gap-6 p-8 pr-12 sm:pr-14">
+        <DialogPrimitive.Close
+          className="absolute right-6 top-6 inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/90 bg-white/90 text-slate-500 shadow-sm transition hover:-translate-y-[1px] hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-900 dark:focus-visible:ring-offset-slate-950"
+          type="button"
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </DialogPrimitive.Close>
+        {children}
+      </div>
     </DialogPrimitive.Content>
   </ModalPortal>
 ));
